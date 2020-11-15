@@ -1,0 +1,21 @@
+## Docker compose setup file
+## This file will have setup for all the three environments plus a postgres database
+
+db:
+  image: postgres:13
+
+api:
+  build: ./docker
+  ports:
+    - 5000:80
+  links:
+    - db
+
+bot:
+  build: #bot's docker file
+  links:
+    - db
+
+#network:
+# - frontend
+# - backend
