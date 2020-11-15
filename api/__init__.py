@@ -15,6 +15,11 @@ logging.basicConfig(
 )  # TODO: Someone setup a better logging config, thanks.
 log = logging.getLogger('ROOT')
 
+for logger in ('asyncio', 'quart'):
+    logging.getLogger(logger).setLevel(
+        logging.CRITICAL
+    )
+
 
 def setup_app() -> Quart:
     """Separate function to setup the Quart app so that we can implement logging before loading the complete app."""
@@ -58,19 +63,29 @@ async def index():
     })
 
 
-@app.route('/test', methods=["GET"])
-async def testing():
-    """List all endpoints."""
+@app.route('/endpoints', methods=["GET"])
+async def testing_endpoints():
+    """Automatically generated list of endpoints."""
+    from utils import dedent
 
-    func_list = {}
+    response = {}
 
     for rule in app.url_map.iter_rules():
         if rule.endpoint != "static":
-            func_list[f"{rule.methods} @ {rule.rule}"] = app.view_functions[rule.endpoint].__doc__.strip()
+            if rule.rule in response:
+                print("WARNING: {} already in response -> skipping".format(rule.rule))
+
+            response[rule.rule] = {
+                "methods": list(rule.methods)
+            }
+            if (doc := app.view_functions[rule.endpoint].__doc__) is not None:
+                response[rule.rule]["docstring"] = dedent(doc)
+            else:
+                response[rule.rule]["docstring"] = None
 
     return jsonify({
         "status": "Success!",
-        "endpoints": func_list
+        "endpoints": response
     })
 
 

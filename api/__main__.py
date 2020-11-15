@@ -2,6 +2,7 @@ from api import app
 
 from typing import Any, Coroutine
 from quart import Quart
+import logging
 import asyncpg
 import asyncio
 import click
@@ -14,6 +15,10 @@ env = {
     "SECRET_KEY": None,
     "DB_URI": None
 }
+
+
+loop = asyncio.get_event_loop()
+
 
 for key in env.keys():
     try:
@@ -31,24 +36,29 @@ app.config.from_mapping(mapping=env)
 
 def run_async(func: Coroutine) -> Any:
     """Run a coroutine in a function."""
-    return asyncio.get_event_loop(
-    ).run_until_complete(
-        func
-    )
+    return loop.run_until_complete(func)
 
 
 async def setup_db(quart_app: Quart) -> asyncpg.pool.Pool:
+    log = logging.getLogger('DB')
+
     async def init(con: asyncpg.connection.Connection) -> None:
         await con.set_type_codec(
             "json", schema="pg_catalog", encoder=json.dumps, decoder=json.loads
         )
 
+    log.debug("Attempting to initialize database connection.")
+
     pool = await asyncpg.create_pool(
         dsn=env["DB_URI"],
-        init=init
+        min_size=1,
+        init=init,
+        loop=loop
     )
 
-    app.db = pool
+    log.debug("Connected to database `{}`".format(env["DB_URI"].split('/')[-1]))
+
+    quart_app.db = pool
 
     return pool
 
@@ -64,7 +74,7 @@ def initdb():
         from db import models
 
         for model in models.__all__:
-            await model.create_table()
+            await model.create_table(db=app.db)
             click.echo(f"Creating table {model.__name__}")
 
     run_async(init_db())
@@ -73,7 +83,8 @@ def initdb():
 @app.cli.command()
 def runserver():
     app.run(
-        debug=True,
+        loop=loop,
+        debug=False,
         use_reloader=False
     )
 

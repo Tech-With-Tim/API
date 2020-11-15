@@ -66,11 +66,8 @@ class User(Model):
         self.verified = verified
 
     @classmethod
-    async def create_table(cls, db: Pool = None):
+    async def create_table(cls, db: Pool):
         """Create this table."""
-        if not hasattr(current_app, 'db') and db is None:
-            raise RuntimeWarning("Could not find a db Connection/Pool to create the table with.")
-
         create_query = """
 CREATE TABLE IF NOT EXISTS public.users
 (
@@ -107,7 +104,10 @@ CREATE TABLE IF NOT EXISTS public.users
         return []
 
     def as_dict(self, fields: List[str] = __slots__) -> dict:
-        """Return only specific fields of the class."""
+        """
+        Return only specific fields of the class.
+        Defaults to returning all fields.
+        """
         response = {}
 
         for field in fields:
