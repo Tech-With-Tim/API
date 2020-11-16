@@ -1,6 +1,5 @@
-from quart import current_app
-
 import jwt
+import os
 
 from logging import getLogger
 from pprint import pprint
@@ -30,8 +29,8 @@ class UserMiddleware:
         token = None
 
         for name, value in scope["headers"]:
-            if name == "Authorization":
-                token = value
+            if name == b"authorization":
+                token = value.decode()
 
         if token is None:
             log.debug("No Authorization headers provided.")
@@ -40,12 +39,15 @@ class UserMiddleware:
         try:
             payload = jwt.decode(
                 jwt=token,
-                key=current_app.config["SECRET_KEY"],
+                key=os.environ["SECRET_KEY"],
             )
         except (
             jwt.ExpiredSignatureError,
             jwt.InvalidTokenError
-        ):
+        ) as e:
+            log.exception(f"Caught exception in jwt decoding", exc_info=(
+                type(e), e, e.__traceback__
+            ))
             return await self.asgi_app(scope, recieve, send)
         else:
             pprint(payload)
