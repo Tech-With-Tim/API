@@ -64,10 +64,22 @@ def initdb():
         from db import models
 
         for model in models.__all__:
-            await model.create_table(db=app.db)
+            print(await model.create_table(pool=app.db))
             click.echo(f"Creating table {model.__name__}")
 
     run_async(init_db())
+
+
+@app.cli.command()
+def dropdb():
+    async def drop_db():
+        from db import models
+
+        for model in models.__all__:
+            print(await model.drop_table(pool=app.db))
+            click.echo(f"Dropping table {model.__name__}")
+
+    run_async(drop_db())
 
 
 @app.cli.command()
