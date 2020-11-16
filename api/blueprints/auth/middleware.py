@@ -8,7 +8,7 @@ from pprint import pprint
 from db.models import User
 
 
-log = getLogger('UserMiddleware')
+log = getLogger("UserMiddleware")
 
 
 class UserMiddleware:
@@ -41,13 +41,11 @@ class UserMiddleware:
                 jwt=token,
                 key=os.environ["SECRET_KEY"],
             )
-        except (
-            jwt.ExpiredSignatureError,
-            jwt.InvalidTokenError
-        ) as e:
-            log.exception(f"Caught exception in jwt decoding", exc_info=(
-                type(e), e, e.__traceback__
-            ))
+        except (jwt.ExpiredSignatureError, jwt.InvalidTokenError) as e:
+            log.exception(
+                f"Caught exception in jwt decoding",
+                exc_info=(type(e), e, e.__traceback__),
+            )
             return await self.asgi_app(scope, recieve, send)
         else:
             pprint(payload)

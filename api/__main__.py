@@ -11,10 +11,7 @@ import sys
 import os
 
 
-env = {
-    "SECRET_KEY": None,
-    "DB_URI": None
-}
+env = {"SECRET_KEY": None, "DB_URI": None}
 
 
 loop = asyncio.get_event_loop()
@@ -24,9 +21,7 @@ for key in env.keys():
     try:
         env[key] = os.environ[key]
     except KeyError:
-        sys.stderr.write(
-            f"Found no `{key}` var in env, exiting..."
-        ), exit(1)
+        sys.stderr.write(f"Found no `{key}` var in env, exiting..."), exit(1)
 
 app.config.from_mapping(mapping=env)
 
@@ -40,7 +35,7 @@ def run_async(func: Coroutine) -> Any:
 
 
 async def setup_db(quart_app: Quart) -> asyncpg.pool.Pool:
-    log = logging.getLogger('DB')
+    log = logging.getLogger("DB")
 
     async def init(con: asyncpg.connection.Connection) -> None:
         await con.set_type_codec(
@@ -50,22 +45,17 @@ async def setup_db(quart_app: Quart) -> asyncpg.pool.Pool:
     log.debug("Attempting to initialize database connection.")
 
     pool = await asyncpg.create_pool(
-        dsn=env["DB_URI"],
-        min_size=1,
-        init=init,
-        loop=loop
+        dsn=env["DB_URI"], min_size=1, init=init, loop=loop
     )
 
-    log.debug("Connected to database `{}`".format(env["DB_URI"].split('/')[-1]))
+    log.debug("Connected to database `{}`".format(env["DB_URI"].split("/")[-1]))
 
     quart_app.db = pool
 
     return pool
 
 
-run_async(
-    setup_db(quart_app=app)
-)
+run_async(setup_db(quart_app=app))
 
 
 @app.cli.command()
@@ -82,12 +72,8 @@ def initdb():
 
 @app.cli.command()
 def runserver():
-    app.run(
-        loop=loop,
-        debug=False,
-        use_reloader=False
-    )
+    app.run(loop=loop, debug=False, use_reloader=False)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.cli()

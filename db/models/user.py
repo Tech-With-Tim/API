@@ -14,8 +14,6 @@ Ban = object
 
 
 class User(Model):
-    TYPES = Enum("UserTypes", "USER BOT APP")
-
     """
     User class based of some discord user data then extended with more data relevant to our application.
 
@@ -25,7 +23,7 @@ class User(Model):
         :param int id: The users Discord ID.
         :param str username: The users discord username.
         :param str discriminator: The users discord discriminator.
-        :param Optional[str] avatar: The users avatar hash, could be None.
+        :param str avatar: The users avatar hash, could be None.
 
         :param int xp: The users Experience points.
         :param float coins: The amount of coins the user has.
@@ -42,9 +40,17 @@ class User(Model):
     """
 
     __slots__ = (
-        "id", "username", "discriminator",
-        "avatar", "xp", "type", "coins", "verified"
+        "id",
+        "username",
+        "discriminator",
+        "avatar",
+        "xp",
+        "type",
+        "coins",
+        "verified",
     )
+
+    TYPES = Enum("UserTypes", "USER BOT APP")
 
     def __init__(
         self,
@@ -52,12 +58,10 @@ class User(Model):
         username: str,
         discriminator: str,
         avatar: Optional[str],
-
         xp: int = 0,
         type: str = "user",
         coins: float = 0.0,
-        verified: bool = False
-
+        verified: bool = False,
     ):
         self.id = id
         self.username = username
@@ -70,7 +74,7 @@ class User(Model):
         self.verified = verified
 
     @classmethod
-    async def create_table(cls, db: Pool):
+    async def create_table(cls, pool: Pool):
         """Create this table."""
         create_query = """
 CREATE TABLE IF NOT EXISTS public.users
@@ -87,12 +91,12 @@ CREATE TABLE IF NOT EXISTS public.users
 );
         """
 
-        return await db.execute(query=create_query)
+        return await pool.execute(query=create_query)
 
     @classmethod
-    async def drop_table(cls, db: Pool):
+    async def drop_table(cls, pool: Pool):
         """Drop / Delete this table."""
-        return await db.execute("DROP TABLE IF EXISTS users CASCADE;")
+        return await pool.execute("DROP TABLE IF EXISTS users CASCADE;")
 
     @property
     def created_at(self):
@@ -111,8 +115,15 @@ CREATE TABLE IF NOT EXISTS public.users
         """
 
         response = await current_app.db.execute(
-            query, self.id, self.username, self.discriminator,
-            self.avatar, self.xp, self.type, self.coins, self.verified
+            query,
+            self.id,
+            self.username,
+            self.discriminator,
+            self.avatar,
+            self.xp,
+            self.type,
+            self.coins,
+            self.verified,
         )
 
         return response.split()[-1] == "1"
@@ -124,20 +135,3 @@ CREATE TABLE IF NOT EXISTS public.users
     @property
     async def bans(self) -> List[Ban]:
         return []
-
-    def as_dict(self, fields: List[str] = __slots__) -> dict:
-        """
-        Return only specific fields of the class.
-        Defaults to returning all fields.
-        """
-        response = {}
-
-        for field in fields:
-            if field not in self.__slots__:
-                raise RuntimeWarning(
-                    "Trying to access unavailable attribute for model {} -> {}"
-                    .format(self.__name__, field)
-                )
-            response[field] = getattr(self, field)
-
-        return response
