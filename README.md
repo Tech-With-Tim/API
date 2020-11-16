@@ -16,4 +16,9 @@ To install require dependencies run **`pipenv install`**
  * **`python api initdb`** \
    Create all tables. 
  * **`python api runserver`** \
-   Run the project. 
+   Run the project.
+   
+> More CLI commands:
+ * **`python api dropdb`** \
+   Drop all tables.
+  
