@@ -2,9 +2,11 @@ from quart import current_app
 
 from typing import List, Optional
 from asyncpg.pool import Pool
-
+from enum import Enum
 
 from db import Model
+import utils
+
 
 Badge = object
 Ban = object
@@ -12,6 +14,8 @@ Ban = object
 
 
 class User(Model):
+    TYPES = Enum("UserTypes", "USER BOT APP")
+
     """
     User class based of some discord user data then extended with more data relevant to our application.
 
@@ -43,16 +47,16 @@ class User(Model):
     )
 
     def __init__(
-            self,
-            id: int,
-            username: str,
-            discriminator: str,
-            avatar: Optional[str],
+        self,
+        id: int,
+        username: str,
+        discriminator: str,
+        avatar: Optional[str],
 
-            xp: int = 0,
-            type: str = "user",
-            coins: float = 0.0,
-            verified: bool = False
+        xp: int = 0,
+        type: str = "user",
+        coins: float = 0.0,
+        verified: bool = False
 
     ):
         self.id = id
@@ -83,17 +87,35 @@ CREATE TABLE IF NOT EXISTS public.users
 );
         """
 
-        await db.execute(query=create_query)
+        return await db.execute(query=create_query)
 
     @classmethod
-    async def drop_table(cls, db: Pool = None):
+    async def drop_table(cls, db: Pool):
         """Drop / Delete this table."""
-        if not hasattr(current_app, 'db') and db is None:
-            raise RuntimeWarning("Could not find a db Connection/Pool to create the table with.")
+        return await db.execute("DROP TABLE IF EXISTS users CASCADE;")
 
-        await db.execute(
-            query="DROP TABLE IF EXISTS users CASCADE;"
+    @property
+    def created_at(self):
+        return utils.snowflake_time(self.id)
+
+    async def create(self) -> bool:
+        """
+        Post a new User instance.
+
+        Returns a bool informing you if a new User was inserted or not.
+        """
+        query = """
+        INSERT INTO users (id, username, discriminator, avatar, xp, type, coins, verified)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        ON CONFLICT (id) DO NOTHING;
+        """
+
+        response = await current_app.db.execute(
+            query, self.id, self.username, self.discriminator,
+            self.avatar, self.xp, self.type, self.coins, self.verified
         )
+
+        return response.split()[-1] == "1"
 
     @property
     async def badges(self) -> List[Badge]:

@@ -1,8 +1,9 @@
 from quart import current_app, Response, request, jsonify
 
+from typing import Union, Optional
 import time
 
-from utils import Request, auth_required
+from utils import Request, auth_required, expects_data
 from .. import blueprint
 
 from db.models import User
@@ -37,6 +38,58 @@ async def bulk_get_users() -> Response:
         "time_taken": time.perf_counter() - start,
         "users": [dict(record) for record in records]
     })
+
+
+@blueprint.route('/users', methods=["POST"])
+@expects_data(
+    id=int,
+    username=str,
+    discriminator=(str, int),
+    avatar=(str, type(None)),
+    xp=int,
+    type=str,
+    coins=(float, int),
+    verified=bool
+)
+# @auth_required - Disabled for testing reasons.
+async def create_user(data: dict):
+    """
+    Create a User object.
+
+    Returns status 202 if a new user was not created, 201 if a new user was created.
+
+    TODO: Restrict access.
+    """
+
+    type = data["type"].upper()
+
+    if type not in (
+        User.TYPES.__members__
+    ):
+        return jsonify({
+            "error": "400 Bad Request",
+            "data": {
+                "type": "Bad User type -> Expected one of `USER, BOT, APP`, got {}".format(
+                    type
+                )
+            }
+        }), 400
+
+    user = User(
+        id=data["id"],
+        username=data["username"],
+        discriminator=str(data["discriminator"]),
+        avatar=data["avatar"],
+        xp=max(0, data["xp"]),
+        type=type,
+        coins=float(max(0, data["coins"])),
+        verified=data["verified"]
+    )
+    created = await user.create()
+
+    print(created)
+
+    return Response("", status=202 - int(created))
 
 
 @blueprint.route('/users/<int:id>')
