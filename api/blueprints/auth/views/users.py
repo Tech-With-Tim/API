@@ -1,6 +1,5 @@
 from quart import current_app, Response, request, jsonify
 
-from typing import Union, Optional
 import time
 
 from utils import Request, auth_required, expects_data
