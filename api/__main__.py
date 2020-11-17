@@ -1,6 +1,7 @@
 from api import app
 
 from typing import Any, Coroutine
+from aiohttp import ClientSession
 from quart import Quart
 import logging
 import asyncpg
@@ -11,7 +12,12 @@ import sys
 import os
 
 
-env = {"SECRET_KEY": None, "DB_URI": None}
+env = {
+    "SECRET_KEY": None,
+    "DB_URI": None,
+    "DISCORD_CLIENT_ID": None,
+    "DISCORD_CLIENT_SECRET": None,
+}
 
 
 loop = asyncio.get_event_loop()
@@ -55,7 +61,18 @@ async def setup_db(quart_app: Quart) -> asyncpg.pool.Pool:
     return pool
 
 
+async def setup_session(quart_app: Quart) -> ClientSession:
+    log = logging.getLogger("Session")
+
+    log.debug("Initializing http ClientSession")
+
+    quart_app.session = ClientSession(loop=loop)
+
+    return quart_app.session
+
+
 run_async(setup_db(quart_app=app))
+run_async(setup_session(quart_app=app))
 
 
 @app.cli.command()
