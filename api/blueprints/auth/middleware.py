@@ -1,11 +1,6 @@
+from logging import getLogger
 import jwt
 import os
-
-from logging import getLogger
-from pprint import pprint
-
-
-from db.models import User
 
 
 log = getLogger("UserMiddleware")
@@ -48,6 +43,15 @@ class UserMiddleware:
             )
             return await self.asgi_app(scope, recieve, send)
         else:
-            pprint(payload)
+            user = await self.app.db.get_user(id=payload["uid"])
+            if user is None:
+                # TODO: Do this through `signals` to reduce response time.
+                token = await self.app.db.get_token(
+                    user_id=payload["uid"], type="OAuth2"
+                )
+                await token.delete()
+                return await self.asgi_app(scope, recieve, send)
+
+            scope["user"] = user
 
         return await self.asgi_app(scope, recieve, send)

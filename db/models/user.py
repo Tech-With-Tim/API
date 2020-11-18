@@ -50,7 +50,7 @@ class User(Model):
         "verified",
     )
 
-    TYPES = Enum("UserTypes", "USER BOT APP")
+    TYPES = Enum("UserTypes", "USER APP")
 
     def __init__(
         self,

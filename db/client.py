@@ -1,10 +1,12 @@
 
-from typing import List, Union, Any
+from typing import Optional, List, Union, Any
 from logging import getLogger
 import textwrap
 import asyncio
 import asyncpg
 import json
+
+from db import models
 
 
 log = getLogger('DB')
@@ -25,15 +27,17 @@ class Client(object):
         self.semaphore = asyncio.Semaphore(value=max_cons)
 
     @classmethod
-    async def create_pool(cls, uri: str, max_cons: int, timeout: float = 10.0, **kwargs) -> "Client":
+    async def create_pool(cls, uri: str, max_cons: int, timeout: float = 10.0, loop=None, **kwargs) -> "Client":
         """
         Create a pool of
-        :param str uri: The dsn we want to connect to.
-        :param int max_cons: The max connections we can establish in our Pool.
-        :param float timeout: The max time we can allow queries to run.
-        :param dict kwargs: Other kwargs we want to pass to the Pool instance.
+        :param str uri:         The dsn we want to connect to.
+        :param int max_cons:    The max connections we can establish in our Pool.
+        :param float timeout:   The max time we can allow queries to run.
+        :param loop:           asyncio event loop
+        :param dict kwargs:     Other kwargs we want to pass to the Pool instance.
         :return:
         """
+        loop = loop or asyncio.get_event_loop()
 
         async def init(con: asyncpg.connection.Connection) -> None:
             await con.set_type_codec(
@@ -43,6 +47,7 @@ class Client(object):
         pool = await asyncpg.create_pool(
             dsn=uri,
             init=init,
+            loop=loop,
             min_size=1,
             max_size=max_cons,
             **kwargs,
@@ -98,4 +103,35 @@ class Client(object):
                 )
                 return await con.execute(query, *args, timeout=self.timeout)
 
-    async def get_user(self, ):
+    async def get_user(self, id: int) -> Optional[models.User]:
+        """
+        Tries to fetch a `User` instance from the database.
+
+        :param int id:      The users Discord ID.
+        :returns            Optional[models.User]
+        """
+        record = await self.fetchrow(
+            "SELECT * FROM users WHERE id = $1;", id
+        )
+        if record is None:
+            return None
+
+        return models.User(**record)
+
+    async def get_token(self, user_id: int, type: str) -> Optional[models.Token]:
+        """
+        Get the token object matching provided arguments.
+        :param user_id:     Discord ID of the token user.
+        :param type:    Which type of token you are requesting.
+        :return:        Optional[models.Token]
+        """
+        query = """
+        SELECT * FROM tokens
+        WHERE user_id = $1
+        AND type = $2;
+        """
+        record = await self.fetchrow(query, user_id, type)
+        if record is None:
+            return None
+
+        return models.Token(**record)

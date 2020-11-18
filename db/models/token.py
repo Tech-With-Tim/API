@@ -5,10 +5,10 @@ from asyncpg.pool import Pool
 from enum import Enum
 import datetime
 
-import db
+from db import Model
 
 
-class Token(db.Model):
+class Token(Model):
     """
     Token class to store jwt and discord OAuth tokens.
 
@@ -38,6 +38,10 @@ class Token(db.Model):
         expires_at: datetime.datetime,
         data: dict,
     ):
+
+        if type not in self.TYPES.__members__:
+            raise RuntimeWarning("Invalid Token Type.")
+
         self.user_id = user_id
         self.token = token
         self.type = type
@@ -54,7 +58,7 @@ class Token(db.Model):
         CREATE TABLE IF NOT EXISTS public.tokens
         (
             user_id bigint NOT NULL,
-            type character varying(5) NOT NULL,
+            type character varying(6) NOT NULL,
             token text NOT NULL,
             expires_at timestamp without time zone NOT NULL,
             data json NOT NULL,
@@ -99,7 +103,7 @@ class Token(db.Model):
     def __setattr__(self, key: str, value: Any):
         """Change the __setattr__ function so we can only """
         if key not in ("token", "expires_at", "data"):
-            if not self.__initialized:
+            if self.__initialized:
                 raise RuntimeWarning("Cannot set this attribute.")
 
         super().__setattr__(key, value)

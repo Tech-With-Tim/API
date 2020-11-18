@@ -1,5 +1,6 @@
 from quart import current_app, Response, request, jsonify
 
+from logging import getLogger
 import time
 
 from utils import Request, auth_required, expects_data
@@ -8,11 +9,12 @@ from .. import blueprint
 from db.models import User
 
 request: Request
+log = getLogger('/auth/users')
 
 
 @blueprint.route("/users", methods=["GET"])
 # @auth_required - Disabled for testing reasons.
-async def bulk_get_users() -> Response:
+async def bulk_get_users():
     """
     GET `User` objects by bulk.
 
@@ -27,18 +29,22 @@ async def bulk_get_users() -> Response:
             - Selecting page `x`
             - Selecting users from index `x -> y` depending on ordering.
     """
-    start = time.perf_counter()
+    return jsonify({
+        "error": "501 Not Implemented - Server does not support this operation"
+    }), 501
 
-    query = "SELECT * FROM users;"
-    records = await current_app.db.fetch(query)
+    # start = time.perf_counter()
 
-    return jsonify(
-        {
-            "count": len(records),
-            "time_taken": time.perf_counter() - start,
-            "users": [dict(record) for record in records],
-        }
-    )
+    # query = "SELECT * FROM users;"
+    # records = await current_app.db.fetch(query)
+
+    # return jsonify(
+    #     {
+    #         "count": len(records),
+    #         "time_taken": time.perf_counter() - start,
+    #         "users": [dict(record) for record in records],
+    #     }
+    # )
 
 
 @blueprint.route("/users", methods=["POST"])
@@ -53,6 +59,7 @@ async def bulk_get_users() -> Response:
     verified=bool,
 )
 # @auth_required - Disabled for testing reasons.
+# TODO: Enable this and restrict it to APP/BOT only.
 async def create_user(data: dict):
     """
     Create a User object.
@@ -97,17 +104,16 @@ async def create_user(data: dict):
 
 
 @blueprint.route("/users/<int:id>")
-# @auth_required - Disabled for testing reasons.
-async def get_specific_user(id):
+@auth_required
+async def get_specific_user(id: int):
     """
     Returns a User object for a given user ID.
 
     TODO: Restrict access.
     """
-    query = "SELECT * FROM users WHERE id = $1"
-    record = await current_app.db.fetchrow(query, id)
+    user = await current_app.db.fetch_user(id=id)
 
-    if record is None:
+    if user is None:
         return (
             jsonify(
                 {
@@ -117,7 +123,6 @@ async def get_specific_user(id):
             404,
         )
 
-    user = User(**record)
     return jsonify(user.as_dict())
 
 

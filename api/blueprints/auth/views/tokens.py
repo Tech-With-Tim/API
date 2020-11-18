@@ -1,8 +1,10 @@
-from quart import current_app, Response, request, jsonify, redirect
+from quart import current_app, request, jsonify, redirect
 
 from urllib.parse import quote_plus, parse_qs
 from aiohttp import ClientSession
 from typing import List
+import datetime
+import jwt
 import os
 
 import utils
@@ -11,9 +13,6 @@ from .. import blueprint
 from db.models import Token, User
 
 request: utils.Request
-
-
-from pprint import pprint
 
 
 DISCORD_ENDPOINT = "https://discord.com/api"
@@ -96,11 +95,16 @@ async def redirect_to_discord_oauth():
 @blueprint.route("/discord/code", methods=["GET"])
 async def display_code():
     """Parse url and return code."""
-    return jsonify(parse_qs(request.query_string)[b"code"][0].decode())
+
+    data = dict(code=parse_qs(request.query_string)[b"code"][0].decode())
+
+    return await get_my_token(data)
 
 
 @blueprint.route("/discord/callback", methods=["POST"])
-@utils.expects_data(code=str)
+# @utils.expects_data(code=str) TODO: Add this back and remove the `/code/` endpoint.
+#                                     Right now it's only like this for testing purposes.
+#                                     We'll undo it when we can test with frontend.
 async def get_my_token(data: dict):
     """
     Callback endpoint for finished discord authentication.
@@ -115,14 +119,52 @@ async def get_my_token(data: dict):
         redirect_uri=request.host_url + "/auth/discord/code",
     )
 
+    expires_at = datetime.datetime.utcnow() + \
+        datetime.timedelta(seconds=access_data["expires_in"])
+    expires_at = expires_at - datetime.timedelta(microseconds=expires_at.microsecond)
+
     discord_data: dict = await get_user(
         session=current_app.session,
         access_token=access_data["access_token"]
     )
 
-    user =
+    discord_data["id"] = int(discord_data["id"])
 
-    return jsonify({
-        "access_data": access_data,
-        "discord_data": discord_data
-    })
+    user = await current_app.db.get_user(id=discord_data["id"])
+
+    if user is None:
+        # Create new user.
+        user = User(
+            id=discord_data["id"],
+            username=discord_data["username"],
+            discriminator=discord_data["discriminator"],
+            avatar=discord_data["avatar"]
+        )
+        await user.create()
+
+    jwt_token = jwt.encode({
+        "uid": user.id,
+        "exp": expires_at,
+        "iat": datetime.datetime.utcnow(),
+    }, key=os.environ["SECRET_KEY"]).decode()
+
+    await Token(  # Insert or update OAuth2 token in database.
+        user_id=user.id,
+        token=access_data["access_token"],
+        type="OAuth2",
+        expires_at=expires_at,
+        data=access_data
+    ).update()
+
+    await Token(  # Insert or update jwt token in database.
+        user_id=user.id,
+        token=jwt_token,
+        type="JWT",
+        expires_at=expires_at,
+        data={}
+    ).update()
+
+    return jsonify(dict(
+        token=jwt_token,
+        exp=expires_at.isoformat()
+    ))

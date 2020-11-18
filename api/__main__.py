@@ -1,3 +1,4 @@
+from db.client import Client
 from api import app
 
 from typing import Any, Coroutine
@@ -40,25 +41,20 @@ def run_async(func: Coroutine) -> Any:
     return loop.run_until_complete(func)
 
 
-async def setup_db(quart_app: Quart) -> asyncpg.pool.Pool:
+async def setup_db(quart_app: Quart) -> Client:
     log = logging.getLogger("DB")
-
-    async def init(con: asyncpg.connection.Connection) -> None:
-        await con.set_type_codec(
-            "json", schema="pg_catalog", encoder=json.dumps, decoder=json.loads
-        )
 
     log.debug("Attempting to initialize database connection.")
 
-    pool = await asyncpg.create_pool(
-        dsn=env["DB_URI"], min_size=1, init=init, loop=loop
+    client = await Client.create_pool(
+        uri=env["DB_URI"], max_cons=10, loop=loop
     )
 
     log.debug("Connected to database `{}`".format(env["DB_URI"].split("/")[-1]))
 
-    quart_app.db = pool
+    quart_app.db = client
 
-    return pool
+    return client
 
 
 async def setup_session(quart_app: Quart) -> ClientSession:
@@ -101,7 +97,7 @@ def dropdb():
 
 @app.cli.command()
 def runserver():
-    app.run(loop=loop, debug=False, use_reloader=False)
+    app.run(loop=loop, debug=True, use_reloader=False)
 
 
 if __name__ == "__main__":

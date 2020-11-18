@@ -5,6 +5,7 @@ Main app file where we (in order):
     - Load blueprints
 """
 
+from quart.exceptions import HTTPStatus
 from traceback import print_exception
 from quart import Quart, jsonify
 import logging
