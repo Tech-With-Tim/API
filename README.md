@@ -21,4 +21,4 @@ To install require dependencies run **`pipenv install`**
 > More CLI commands:
  * **`python api dropdb`** \
    Drop all tables.
-  
+      .
