@@ -16,18 +16,27 @@ services:
       - /var/lib/postgresql/data
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
 
-  api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "8000:8000"
+  backend:
+    image: spongeboi/twt_api
+    expose:
+      - 8000
     links:
       - db
     environment:
       SECRET_KEY: "${SECRET_KEY}"
       DB_URI: "${DB_URI}"
 
+  nginx:
+    image: spongeboi/api_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    links:
+      - backend
+      - db
+    volumes:
+    - /home/python/API/ssl:/etc/nginx/certs
 #network:
 # - frontend
 # - backend
+
