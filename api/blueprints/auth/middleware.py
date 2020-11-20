@@ -29,6 +29,7 @@ class UserMiddleware:
 
         if token is None:
             log.debug("No Authorization headers provided.")
+            scope["no_auth_reason"] = "No Authorization header provided."
             return await self.asgi_app(scope, recieve, send)
 
         try:
@@ -41,6 +42,7 @@ class UserMiddleware:
                 f"Caught exception in jwt decoding",
                 exc_info=(type(e), e, e.__traceback__),
             )
+            scope["no_auth_reason"] = "Token invalid."
             return await self.asgi_app(scope, recieve, send)
         else:
             user = await self.app.db.get_user(id=payload["uid"])

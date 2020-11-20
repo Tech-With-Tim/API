@@ -1,19 +1,19 @@
 from quart import current_app, Response, request, jsonify
+from quart.exceptions import HTTPStatusException, HTTPStatus
 
 from logging import getLogger
-import time
 
-from utils import Request, auth_required, expects_data
 from .. import blueprint
 
 from db.models import User
+import utils
 
-request: Request
+request: utils.Request
 log = getLogger('/auth/users')
 
 
 @blueprint.route("/users", methods=["GET"])
-# @auth_required - Disabled for testing reasons.
+@utils.auth_required
 async def bulk_get_users():
     """
     GET `User` objects by bulk.
@@ -48,7 +48,7 @@ async def bulk_get_users():
 
 
 @blueprint.route("/users", methods=["POST"])
-@expects_data(
+@utils.expects_data(
     id=int,
     username=str,
     discriminator=(str, int),
@@ -58,8 +58,7 @@ async def bulk_get_users():
     coins=(float, int),
     verified=bool,
 )
-# @auth_required - Disabled for testing reasons.
-# TODO: Enable this and restrict it to APP/BOT only.
+@utils.auth_required
 async def create_user(data: dict):
     """
     Create a User object.
@@ -98,19 +97,16 @@ async def create_user(data: dict):
     )
     created = await user.create()
 
-    print(created)
-
-    return Response("", status=202 - int(created))
+    return Response("", status=202 - created)
 
 
 @blueprint.route("/users/<int:id>")
-@auth_required
+@utils.app_only
 async def get_specific_user(id: int):
     """
     Returns a User object for a given user ID.
-
-    TODO: Restrict access.
     """
+
     user = await current_app.db.fetch_user(id=id)
 
     if user is None:
@@ -127,7 +123,7 @@ async def get_specific_user(id: int):
 
 
 @blueprint.route("/users/@me", methods=["GET"])
-@auth_required
+@utils.auth_required
 async def get_user() -> Response:
     """
     Returns the `User` object of the requesters account.

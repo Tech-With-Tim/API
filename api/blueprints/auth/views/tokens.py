@@ -95,16 +95,14 @@ async def redirect_to_discord_oauth():
 @blueprint.route("/discord/code", methods=["GET"])
 async def display_code():
     """Parse url and return code."""
-
+    # TODO: Remove this once frontend will be implemented.
     data = dict(code=parse_qs(request.query_string)[b"code"][0].decode())
 
     return await get_my_token(data)
 
 
 @blueprint.route("/discord/callback", methods=["POST"])
-# @utils.expects_data(code=str) TODO: Add this back and remove the `/code/` endpoint.
-#                                     Right now it's only like this for testing purposes.
-#                                     We'll undo it when we can test with frontend.
+@utils.expects_data(code=str)
 async def get_my_token(data: dict):
     """
     Callback endpoint for finished discord authentication.

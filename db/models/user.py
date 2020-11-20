@@ -20,14 +20,15 @@ class User(Model):
     Database Attributes:
         Attributes stored in the `users` table.
 
-        :param int id: The users Discord ID.
-        :param str username: The users discord username.
-        :param str discriminator: The users discord discriminator.
-        :param str avatar: The users avatar hash, could be None.
+        :param int id:              The users Discord ID.
+        :param str username:        The users discord username.
+        :param str discriminator:   The users discord discriminator.
+        :param str avatar:          The users avatar hash, could be None.
 
-        :param int xp: The users Experience points.
-        :param float coins: The amount of coins the user has.
-        :param bool verified: Has the user completed captcha verification in discord?
+        :param str type:            The type of User this is. USER|APP
+        :param int xp:              The users Experience points.
+        :param float coins:         The amount of coins the user has.
+        :param bool verified:       Has the user completed captcha verification in discord?
 
     Discord Attributes:
         These should all be fetched through the BOT api and cached
@@ -35,8 +36,8 @@ class User(Model):
     Additional Database properties:
         These properties are stored in the database, but not in the same table as user data.
 
-        :prop List[Badge] badges: A list of Badges this user has received.
-        :prop List[Ban] bans: A list of bans the user currently has.
+        :prop List[Badge] badges:   A list of Badges this user has received.
+        :prop List[Ban] bans:       A list of bans the user currently has.
     """
 
     __slots__ = (
@@ -59,7 +60,7 @@ class User(Model):
         discriminator: str,
         avatar: Optional[str],
         xp: int = 0,
-        type: str = "user",
+        type: str = "USER",
         coins: float = 0.0,
         verified: bool = False,
     ):
