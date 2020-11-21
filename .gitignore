@@ -110,7 +110,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-
+.env.local
 # Spyder project settings
 .spyderproject
 .spyproject
@@ -133,3 +133,4 @@ dmypy.json
 .pyre/
 
 postgres/
+asgi.py
