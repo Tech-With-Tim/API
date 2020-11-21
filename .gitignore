@@ -133,4 +133,3 @@ dmypy.json
 .pyre/
 
 postgres/
-asgi.py
