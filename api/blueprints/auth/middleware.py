@@ -1,11 +1,6 @@
+from logging import getLogger
 import jwt
 import os
-
-from logging import getLogger
-from pprint import pprint
-
-
-from db.models import User
 
 
 log = getLogger("UserMiddleware")
@@ -13,9 +8,9 @@ log = getLogger("UserMiddleware")
 
 class UserMiddleware:
     """
-    Class used to determine the user making the request
+    Class used to determine the user making the request.
 
-    Authentication headers are used to determine the user.
+    Authorization headers are used to determine the user.
     """
 
     def __init__(self, asgi_app, app):
@@ -34,6 +29,7 @@ class UserMiddleware:
 
         if token is None:
             log.debug("No Authorization headers provided.")
+            scope["no_auth_reason"] = "No Authorization header provided."
             return await self.asgi_app(scope, recieve, send)
 
         try:
@@ -41,13 +37,27 @@ class UserMiddleware:
                 jwt=token,
                 key=os.environ["SECRET_KEY"],
             )
-        except (jwt.ExpiredSignatureError, jwt.InvalidTokenError) as e:
+        except (
+            jwt.ExpiredSignatureError,
+            jwt.InvalidTokenError,
+            jwt.InvalidSignatureError,
+        ) as e:
             log.exception(
                 f"Caught exception in jwt decoding",
                 exc_info=(type(e), e, e.__traceback__),
             )
+            scope["no_auth_reason"] = "Invalid token."
             return await self.asgi_app(scope, recieve, send)
         else:
-            pprint(payload)
+            user = await self.app.db.get_user(id=payload["uid"])
+            if user is None:
+                # TODO: Do this through `signals` to reduce response time.
+                token = await self.app.db.get_token(
+                    user_id=payload["uid"], type="OAuth2"
+                )
+                await token.delete()
+                return await self.asgi_app(scope, recieve, send)
+
+            scope["user"] = user
 
         return await self.asgi_app(scope, recieve, send)

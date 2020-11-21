@@ -5,8 +5,9 @@ Main app file where we (in order):
     - Load blueprints
 """
 
-from quart import Quart, jsonify
+from quart.exceptions import HTTPStatus
 from traceback import print_exception
+from quart import Quart, jsonify
 import logging
 
 
@@ -80,6 +81,21 @@ async def not_found(_):
     TODO: Log this ?
     """
     return jsonify({"error": "NotFound - Nothing matches the given URI"}), 404
+
+
+@app.errorhandler(405)
+async def method_not_allowed(_):
+    """
+    Return a json formatted error instead of default text based reply.
+
+    TODO: Log this.
+    """
+
+    return jsonify(
+        {
+            "error": "405 Method Not Allowed - Specified method is invalid for this resource"
+        }
+    )
 
 
 @app.errorhandler(500)

@@ -1,18 +1,20 @@
 from quart import current_app, Response, request, jsonify
+from quart.exceptions import HTTPStatusException, HTTPStatus
 
-import time
+from logging import getLogger
 
-from utils import Request, auth_required, expects_data
 from .. import blueprint
 
 from db.models import User
+import utils
 
-request: Request
+request: utils.Request
+log = getLogger("/auth/users")
 
 
 @blueprint.route("/users", methods=["GET"])
-# @auth_required - Disabled for testing reasons.
-async def bulk_get_users() -> Response:
+@utils.auth_required
+async def bulk_get_users():
     """
     GET `User` objects by bulk.
 
@@ -27,22 +29,29 @@ async def bulk_get_users() -> Response:
             - Selecting page `x`
             - Selecting users from index `x -> y` depending on ordering.
     """
-    start = time.perf_counter()
-
-    query = "SELECT * FROM users;"
-    records = await current_app.db.fetch(query)
-
-    return jsonify(
-        {
-            "count": len(records),
-            "time_taken": time.perf_counter() - start,
-            "users": [dict(record) for record in records],
-        }
+    return (
+        jsonify(
+            {"error": "501 Not Implemented - Server does not support this operation"}
+        ),
+        501,
     )
+
+    # start = time.perf_counter()
+
+    # query = "SELECT * FROM users;"
+    # records = await current_app.db.fetch(query)
+
+    # return jsonify(
+    #     {
+    #         "count": len(records),
+    #         "time_taken": time.perf_counter() - start,
+    #         "users": [dict(record) for record in records],
+    #     }
+    # )
 
 
 @blueprint.route("/users", methods=["POST"])
-@expects_data(
+@utils.expects_data(
     id=int,
     username=str,
     discriminator=(str, int),
@@ -52,7 +61,7 @@ async def bulk_get_users() -> Response:
     coins=(float, int),
     verified=bool,
 )
-# @auth_required - Disabled for testing reasons.
+@utils.auth_required
 async def create_user(data: dict):
     """
     Create a User object.
@@ -91,23 +100,19 @@ async def create_user(data: dict):
     )
     created = await user.create()
 
-    print(created)
-
-    return Response("", status=202 - int(created))
+    return Response("", status=202 - created)
 
 
 @blueprint.route("/users/<int:id>")
-# @auth_required - Disabled for testing reasons.
-async def get_specific_user(id):
+@utils.app_only
+async def get_specific_user(id: int):
     """
     Returns a User object for a given user ID.
-
-    TODO: Restrict access.
     """
-    query = "SELECT * FROM users WHERE id = $1"
-    record = await current_app.db.fetchrow(query, id)
 
-    if record is None:
+    user = await current_app.db.fetch_user(id=id)
+
+    if user is None:
         return (
             jsonify(
                 {
@@ -117,12 +122,11 @@ async def get_specific_user(id):
             404,
         )
 
-    user = User(**record)
     return jsonify(user.as_dict())
 
 
 @blueprint.route("/users/@me", methods=["GET"])
-@auth_required
+@utils.auth_required
 async def get_user() -> Response:
     """
     Returns the `User` object of the requesters account.
