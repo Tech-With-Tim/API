@@ -8,9 +8,9 @@ log = getLogger("UserMiddleware")
 
 class UserMiddleware:
     """
-    Class used to determine the user making the request
+    Class used to determine the user making the request.
 
-    Authentication headers are used to determine the user.
+    Authorization headers are used to determine the user.
     """
 
     def __init__(self, asgi_app, app):
@@ -37,12 +37,16 @@ class UserMiddleware:
                 jwt=token,
                 key=os.environ["SECRET_KEY"],
             )
-        except (jwt.ExpiredSignatureError, jwt.InvalidTokenError) as e:
+        except (
+            jwt.ExpiredSignatureError,
+            jwt.InvalidTokenError,
+            jwt.InvalidSignatureError,
+        ) as e:
             log.exception(
                 f"Caught exception in jwt decoding",
                 exc_info=(type(e), e, e.__traceback__),
             )
-            scope["no_auth_reason"] = "Token invalid."
+            scope["no_auth_reason"] = "Invalid token."
             return await self.asgi_app(scope, recieve, send)
         else:
             user = await self.app.db.get_user(id=payload["uid"])

@@ -46,9 +46,7 @@ async def setup_db(quart_app: Quart) -> Client:
 
     log.debug("Attempting to initialize database connection.")
 
-    client = await Client.create_pool(
-        uri=env["DB_URI"], max_cons=10, loop=loop
-    )
+    client = await Client.create_pool(uri=env["DB_URI"], max_cons=10, loop=loop)
 
     log.debug("Connected to database `{}`".format(env["DB_URI"].split("/")[-1]))
 

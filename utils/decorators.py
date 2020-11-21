@@ -12,10 +12,18 @@ def app_only(func: Callable) -> Callable:
     @wraps(func)
     async def wrapper(*args: Any, **kwargs: Any) -> Any:
         if request.user is None:
-            return jsonify({"error": "401 Unauthorized - %s" % request.scope["no_auth_reason"]}), 401
+            return (
+                jsonify(
+                    {"error": "401 Unauthorized - %s" % request.scope["no_auth_reason"]}
+                ),
+                401,
+            )
 
         if request.user.type != "APP":
-            return jsonify({"error": "403 Forbidden - Authorization will not help."}), 403
+            return (
+                jsonify({"error": "403 Forbidden - Authorization will not help."}),
+                403,
+            )
 
         return await func(*args, **kwargs)
 
@@ -28,7 +36,12 @@ def auth_required(func: Callable) -> Callable:
     @wraps(func)
     async def wrapper(*args: Any, **kwargs: Any) -> Any:
         if request.user is None:
-            return jsonify({"error": "401 Unauthorized - %s" % request.scope["no_auth_reason"]}), 401
+            return (
+                jsonify(
+                    {"error": "401 Unauthorized - %s" % request.scope["no_auth_reason"]}
+                ),
+                401,
+            )
         else:
             return await func(*args, **kwargs)
 

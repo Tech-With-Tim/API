@@ -1,4 +1,3 @@
-
 from typing import Optional, List, Union, Any
 from logging import getLogger
 import textwrap
@@ -9,7 +8,7 @@ import json
 from db import models
 
 
-log = getLogger('DB')
+log = getLogger("DB")
 
 
 class Client(object):
@@ -27,7 +26,9 @@ class Client(object):
         self.semaphore = asyncio.Semaphore(value=max_cons)
 
     @classmethod
-    async def create_pool(cls, uri: str, max_cons: int, timeout: float = 10.0, loop=None, **kwargs) -> "Client":
+    async def create_pool(
+        cls, uri: str, max_cons: int, timeout: float = 10.0, loop=None, **kwargs
+    ) -> "Client":
         """
         Create a pool of
         :param str uri:         The dsn we want to connect to.
@@ -61,7 +62,7 @@ class Client(object):
             async with self.pool.acquire() as con:
                 log.debug(
                     textwrap.dedent(
-                        f'FETCH\nQUERY={textwrap.dedent(query)}'
+                        f"FETCH\nQUERY={textwrap.dedent(query)}"
                         f'\nARGS=[{", ".join(str(arg) for arg in args)}]'
                     )
                 )
@@ -73,7 +74,7 @@ class Client(object):
             async with self.pool.acquire() as con:
                 log.debug(
                     textwrap.dedent(
-                        f'FETCHROW\nQUERY={textwrap.dedent(query)}'
+                        f"FETCHROW\nQUERY={textwrap.dedent(query)}"
                         f'\nARGS=[{", ".join(str(arg) for arg in args)}]'
                     )
                 )
@@ -85,7 +86,7 @@ class Client(object):
             async with self.pool.acquire() as con:
                 log.debug(
                     textwrap.dedent(
-                        f'FETCHVAL\nQUERY={textwrap.dedent(query)}'
+                        f"FETCHVAL\nQUERY={textwrap.dedent(query)}"
                         f'\nARGS=[{", ".join(str(arg) for arg in args)}]'
                     )
                 )
@@ -97,7 +98,7 @@ class Client(object):
             async with self.pool.acquire() as con:
                 log.debug(
                     textwrap.dedent(
-                        f'EXECUTE\nQUERY={textwrap.dedent(query)}'
+                        f"EXECUTE\nQUERY={textwrap.dedent(query)}"
                         f'\nARGS=[{", ".join(str(arg) for arg in args)}]'
                     )
                 )
@@ -110,9 +111,7 @@ class Client(object):
         :param int id:      The users Discord ID.
         :returns            Optional[models.User]
         """
-        record = await self.fetchrow(
-            "SELECT * FROM users WHERE id = $1;", id
-        )
+        record = await self.fetchrow("SELECT * FROM users WHERE id = $1;", id)
         if record is None:
             return None
 
@@ -121,9 +120,10 @@ class Client(object):
     async def get_token(self, user_id: int, type: str) -> Optional[models.Token]:
         """
         Get the token object matching provided arguments.
+
         :param user_id:     Discord ID of the token user.
-        :param type:    Which type of token you are requesting.
-        :return:        Optional[models.Token]
+        :param type:        Which type of token you are requesting.
+        :return:            Optional[models.Token]
         """
         query = """
         SELECT * FROM tokens

@@ -36,8 +36,7 @@ async def exchange_code(
 ):
     """Exchange discord oauth code for access and refresh tokens."""
     async with session.post(
-        "%s/v6/oauth2/token"
-        % DISCORD_ENDPOINT,
+        "%s/v6/oauth2/token" % DISCORD_ENDPOINT,
         data=dict(
             code=code,
             scope=scope,
@@ -55,9 +54,7 @@ async def get_user(session: ClientSession, access_token: str) -> dict:
     """Coroutine to fetch User data from discord using the users `access_token`"""
     async with session.get(
         "%s/v6/users/@me" % DISCORD_ENDPOINT,
-        headers={
-            "Authorization": "Bearer %s" % access_token
-        }
+        headers={"Authorization": "Bearer %s" % access_token},
     ) as response:
         return await response.json()
 
@@ -117,13 +114,13 @@ async def get_my_token(data: dict):
         redirect_uri=request.host_url + "/auth/discord/code",
     )
 
-    expires_at = datetime.datetime.utcnow() + \
-        datetime.timedelta(seconds=access_data["expires_in"])
+    expires_at = datetime.datetime.utcnow() + datetime.timedelta(
+        seconds=access_data["expires_in"]
+    )
     expires_at = expires_at - datetime.timedelta(microseconds=expires_at.microsecond)
 
     discord_data: dict = await get_user(
-        session=current_app.session,
-        access_token=access_data["access_token"]
+        session=current_app.session, access_token=access_data["access_token"]
     )
 
     discord_data["id"] = int(discord_data["id"])
@@ -136,33 +133,29 @@ async def get_my_token(data: dict):
             id=discord_data["id"],
             username=discord_data["username"],
             discriminator=discord_data["discriminator"],
-            avatar=discord_data["avatar"]
+            avatar=discord_data["avatar"],
         )
         await user.create()
 
-    jwt_token = jwt.encode({
-        "uid": user.id,
-        "exp": expires_at,
-        "iat": datetime.datetime.utcnow(),
-    }, key=os.environ["SECRET_KEY"]).decode()
+    jwt_token = jwt.encode(
+        {
+            "uid": user.id,
+            "exp": expires_at,
+            "iat": datetime.datetime.utcnow(),
+        },
+        key=os.environ["SECRET_KEY"],
+    ).decode()
 
     await Token(  # Insert or update OAuth2 token in database.
         user_id=user.id,
         token=access_data["access_token"],
         type="OAuth2",
         expires_at=expires_at,
-        data=access_data
+        data=access_data,
     ).update()
 
     await Token(  # Insert or update jwt token in database.
-        user_id=user.id,
-        token=jwt_token,
-        type="JWT",
-        expires_at=expires_at,
-        data={}
+        user_id=user.id, token=jwt_token, type="JWT", expires_at=expires_at, data={}
     ).update()
 
-    return jsonify(dict(
-        token=jwt_token,
-        exp=expires_at.isoformat()
-    ))
+    return jsonify(dict(token=jwt_token, exp=expires_at.isoformat()))

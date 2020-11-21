@@ -9,7 +9,7 @@ from db.models import User
 import utils
 
 request: utils.Request
-log = getLogger('/auth/users')
+log = getLogger("/auth/users")
 
 
 @blueprint.route("/users", methods=["GET"])
@@ -29,9 +29,12 @@ async def bulk_get_users():
             - Selecting page `x`
             - Selecting users from index `x -> y` depending on ordering.
     """
-    return jsonify({
-        "error": "501 Not Implemented - Server does not support this operation"
-    }), 501
+    return (
+        jsonify(
+            {"error": "501 Not Implemented - Server does not support this operation"}
+        ),
+        501,
+    )
 
     # start = time.perf_counter()
 
