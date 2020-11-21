@@ -6,7 +6,7 @@ services:
   db:
     image: postgres:13
     ports:
-      - "127.0.0.1:7777:5432"
+      - "0.0.0.0:7777:5432"
     restart: always
     environment:
       POSTGRES_USER: "${POSTGRES_USER}"
@@ -25,6 +25,8 @@ services:
     environment:
       SECRET_KEY: "${SECRET_KEY}"
       DB_URI: "${DB_URI}"
+      DISCORD_CLIENT_ID: "${DISCORD_CLIENT_ID}"
+      DISCORD_CLIENT_SECRET: "${DISCORD_CLIENT_SECRET}"
 
   nginx:
     image: techwithtim/api_nginx
@@ -39,4 +41,3 @@ services:
 #network:
 # - frontend
 # - backend
-
