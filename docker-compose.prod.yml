@@ -17,7 +17,7 @@ services:
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   backend:
-    image: spongeboi/twt_api
+    image: techwithtim/twt_api
     expose:
       - 8000
     links:
@@ -27,7 +27,7 @@ services:
       DB_URI: "${DB_URI}"
 
   nginx:
-    image: spongeboi/api_nginx
+    image: techwithtim/api_nginx
     ports:
       - "80:80"
       - "443:443"
