@@ -9,6 +9,7 @@ verify_ssl = true
 quart = "*"
 asyncpg = "*"
 pyjwt = "*"
+aiohttp = "*"
 
 [requires]
 python_version = "3.8"
