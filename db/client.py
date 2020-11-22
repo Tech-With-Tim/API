@@ -11,7 +11,7 @@ from db import models
 log = getLogger("DB")
 
 
-class Client(object):
+class Client:
     """
     Client class so we dont have to keep on writing queries over and over.
     """
@@ -111,6 +111,7 @@ class Client(object):
         :param int id:      The users Discord ID.
         :returns            Optional[models.User]
         """
+
         record = await self.fetchrow("SELECT * FROM users WHERE id = $1;", id)
         if record is None:
             return None
@@ -130,6 +131,7 @@ class Client(object):
         WHERE user_id = $1
         AND type = $2;
         """
+
         record = await self.fetchrow(query, user_id, type)
         if record is None:
             return None

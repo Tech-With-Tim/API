@@ -21,7 +21,10 @@ for logger in ("asyncio", "quart"):
 
 
 def setup_app() -> Quart:
-    """Separate function to setup the Quart app so that we can implement logging before loading the complete app."""
+    """Separate function to setup the Quart app so that we can implement logging
+    before loading the complete app.
+    """
+
     from api.blueprints import auth
     import utils
 
