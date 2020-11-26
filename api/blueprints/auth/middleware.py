@@ -43,7 +43,7 @@ class UserMiddleware:
             jwt.InvalidSignatureError,
         ) as e:
             log.exception(
-                f"Caught exception in jwt decoding",
+                "Caught exception in jwt decoding",
                 exc_info=(type(e), e, e.__traceback__),
             )
             scope["no_auth_reason"] = "Invalid token."
