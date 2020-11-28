@@ -12,6 +12,7 @@ quart = "*"
 asyncpg = "*"
 pyjwt = "*"
 aiohttp = "*"
+typing-extensions = "*"
 
 [requires]
 python_version = "3.8"
