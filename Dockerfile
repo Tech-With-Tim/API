@@ -11,4 +11,4 @@ RUN pipenv install
 RUN echo from api.__main__ import app >> asgi.py
 #RUN pipenv run pip freeze >> requirements.txt
 #RUN pip install -r requirements.txt
-CMD sh /app/launch.sh
+CMD sh /app/runfile.sh
