@@ -12,10 +12,10 @@ class ModLog(Model):
         :param int timer_id:                            The Optional timer connected to this modlog.
         :param dict data:                               The data connected to this log.
     """
-    id = Column(types.Serial)
+    id = Column(types.Serial, primary_key=True)
     type = Column(types.String(length=16))
     created_at = Column(types.DateTime)
     timer_id = Column(
-        types.ForeignKey("timers", "id")
+        types.ForeignKey("timers", "id"),
     )
     data = Column(types.JSON)

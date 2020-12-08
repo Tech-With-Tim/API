@@ -12,7 +12,7 @@ class Timer(Model):
         :param :class:`datetime.datetime` expires_at:   When the timer expires.
         :param :class:`datetime.datetime` created_at:   When the timer was created.
     """
-    id = Column(types.Serial)
+    id = Column(types.Serial, primary_key=True)
     data = Column(types.JSON)
     event = Column(types.String)
     expires_at = Column(types.DateTime)
