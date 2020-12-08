@@ -281,11 +281,11 @@
         },
         "postdb": {
             "hashes": [
-                "sha256:0101343812542a0278097d5a0da35296f8f6f3b571855c6372ade42be9e19c7c",
-                "sha256:c2e7f805bd0d7a289a58cfe2e9d0cd9cb9b154512e1b5716e394ebab887a0b60"
+                "sha256:a5b4196237f45b495827206c4406448079363f1130e9e37373b61d5b6cfaecc3",
+                "sha256:ccf9311dbaf06e8da8a782b4a09daebb133b771403d2ff565f690b4c14c9afab"
             ],
             "index": "pypi",
-            "version": "==0.1.1"
+            "version": "==0.1.2"
         },
         "priority": {
             "hashes": [
