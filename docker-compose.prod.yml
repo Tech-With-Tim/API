@@ -19,7 +19,7 @@ services:
   backend:
     image: techwithtim/twt_api
     expose:
-      - 8000
+      - 5000
     links:
       - db
     environment:
@@ -38,6 +38,7 @@ services:
       - db
     volumes:
     - /home/python/API/ssl:/etc/nginx/certs
+
 #network:
 # - frontend
 # - backend

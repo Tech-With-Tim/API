@@ -78,7 +78,5 @@ def expects_data(**arguments: Dict[str, Union[Tuple[Type], Type]]) -> Callable:
                 return jsonify({"error": "400 Bad Request", "data": error}), 400
 
             return await func(*args, data=data, **kwargs)
-
         return inner
-
     return outer

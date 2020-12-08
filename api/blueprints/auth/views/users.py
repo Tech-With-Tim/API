@@ -1,11 +1,10 @@
 from quart import current_app, Response, request, jsonify
-from quart.exceptions import HTTPStatusException, HTTPStatus
 
 from logging import getLogger
 
 from .. import blueprint
 
-from db.models import User
+from api.models import User
 import utils
 
 request: utils.Request
@@ -36,30 +35,13 @@ async def bulk_get_users():
         501,
     )
 
-    # start = time.perf_counter()
-
-    # query = "SELECT * FROM users;"
-    # records = await current_app.db.fetch(query)
-
-    # return jsonify(
-    #     {
-    #         "count": len(records),
-    #         "time_taken": time.perf_counter() - start,
-    #         "users": [dict(record) for record in records],
-    #     }
-    # )
-
 
 @blueprint.route("/users", methods=["POST"])
 @utils.expects_data(
     id=int,
     username=str,
     discriminator=(str, int),
-    avatar=(str, type(None)),
-    xp=int,
-    type=str,
-    coins=(float, int),
-    verified=bool,
+    avatar=(str, type(None))
 )
 @utils.auth_required
 async def create_user(data: dict):
@@ -71,7 +53,7 @@ async def create_user(data: dict):
     TODO: Restrict access.
     """
 
-    type = data["type"].upper()
+    type = data["type"]
 
     if type not in User.TYPES.__members__:
         return (
@@ -93,10 +75,6 @@ async def create_user(data: dict):
         username=data["username"],
         discriminator=str(data["discriminator"]),
         avatar=data["avatar"],
-        xp=max(0, data["xp"]),
-        type=type,
-        coins=float(max(0, data["coins"])),
-        verified=data["verified"],
     )
     created = await user.create()
 
@@ -122,7 +100,7 @@ async def get_specific_user(id: int):
             404,
         )
 
-    return jsonify(user.as_dict())
+    return jsonify(user.as_dict(user))
 
 
 @blueprint.route("/users/@me", methods=["GET"])

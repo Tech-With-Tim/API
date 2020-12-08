@@ -13,6 +13,7 @@ asyncpg = "*"
 pyjwt = "*"
 aiohttp = "*"
 typing-extensions = "*"
+postdb = "*"
 
 [requires]
 python_version = "3.8"

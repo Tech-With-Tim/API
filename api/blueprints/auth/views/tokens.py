@@ -10,7 +10,11 @@ import os
 import utils
 from .. import blueprint
 
-from db.models import Token, User
+from api.models import Token, User
+
+
+from pprint import pprint
+
 
 request: utils.Request
 
@@ -22,7 +26,7 @@ CLIENT_SECRET = os.environ["DISCORD_CLIENT_SECRET"]
 
 # TODO: Get these variables from database instead of hard-coded
 #       So we can change the config from the website.
-FRONTEND_REDIRECT = "http://localhost:5000"
+# FRONTEND_REDIRECT = "http://localhost:5000"
 SCOPES = ["identify"]
 
 
@@ -82,7 +86,7 @@ async def redirect_to_discord_oauth():
     and wanted scopes.
     """
     redirect_url = await get_redirect(
-        frontend_redirect=quote_plus(request.host_url + "/auth/discord/code"),
+        frontend_redirect=quote_plus(request.host_url + "/auth/discord/callback"),
         scopes=SCOPES,
     )
 
@@ -98,21 +102,35 @@ async def display_code():
     return await get_my_token(data)
 
 
-@blueprint.route("/discord/callback", methods=["POST"])
-@utils.expects_data(code=str)
-async def get_my_token(data: dict):
+@blueprint.route("/discord/callback", methods=["GET"])
+async def get_my_token():
     """
     Callback endpoint for finished discord authentication.
     Initial authentication is handled by frontend then they call our endpoint.
 
     Get or Create a JWT token for the authenticated user.
     """
+    try:
+        code = parse_qs(request.query_string)[b"code"][0].decode()
+    except (KeyError, UnicodeDecodeError) as e:
+        return jsonify(
+            {
+                "error": "Internal Server Error - Server got itself in trouble",
+                "data": str(e)
+             }
+        ), 500
+
+    # TODO: Move back to POST endpoint when we implement frontend.
+
     access_data: dict = await exchange_code(
         session=current_app.session,
-        code=data["code"],
+        code=code,
         scope=format_scope(SCOPES),
-        redirect_uri=request.host_url + "/auth/discord/code",
+        redirect_uri=request.host_url + "/auth/discord/callback",
     )
+
+    pprint(request.host_url + "/auth/discord/callback")
+    pprint(access_data)
 
     expires_at = datetime.datetime.utcnow() + datetime.timedelta(
         seconds=access_data["expires_in"]
