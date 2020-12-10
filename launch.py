@@ -26,7 +26,7 @@ try:
     with open("local.env", "r") as f:
         env_file = {
             key.strip(): arg.strip()
-            for (key, arg) in [line.strip().split("=") for line in f.readlines()]
+            for (key, arg) in [line.strip().split("=") for line in f.readlines() if line.strip()]
         }
 except FileNotFoundError:
     env_file = {}
