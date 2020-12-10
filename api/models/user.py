@@ -1,4 +1,5 @@
 from postDB import Model, Column, types
+from typing import Optional
 from enum import Enum
 
 
@@ -58,3 +59,14 @@ class User(Model):
         )
 
         return response.split()[-1] == "1"
+
+    @classmethod
+    async def fetch(cls, id: int) -> Optional["User"]:
+        """Fetch a user with the given ID."""
+        query = "SELECT * FROM {} WHERE id = $1".format(cls.__tablename__)
+        user = await cls.pool.fetchrow(query, id)
+
+        if user is not None:
+            user = cls(**user)
+
+        return user

@@ -16,7 +16,7 @@ class Token(Model):
         :param str token: The token itself.
         :param str type: The token type (JWT / OAUTH2)
         :param :class:`datetime.datetime` expires_at: The time this token expires.
-        :param dict extra: Additional data related to the token.
+        :param dict data: Additional data related to the token.
 
     """
 
@@ -30,12 +30,12 @@ class Token(Model):
     )
     token = Column(types.String)
     expires_at = Column(types.DateTime)
-    extra = Column(types.JSON)
+    data = Column(types.JSON)
 
     async def update(self):
         """Update the database with currently saved data."""
         query = """
-            INSERT INTO tokens ( user_id, type, token, expires_at, extra )
+            INSERT INTO tokens ( user_id, type, token, expires_at, data )
                 VALUES ( $1, $2, $3, $4, $5 )
                 ON CONFLICT (user_id, type) DO UPDATE SET
                     expires_at = $4,
@@ -46,10 +46,11 @@ class Token(Model):
         con = await self.ensure_con()
 
         return await con.execute(
-            query, self.user_id, self.type, self.type, self.expires_at, self.extra
+            query, self.user_id, self.type, self.type, self.expires_at, self.data
         )
 
-    async def delete(self) -> str:
+    @classmethod
+    async def delete(cls, user_id: int, type: str) -> str:
         """Delete the token from the database."""
         query = """
             DELETE FROM tokens 
@@ -59,6 +60,6 @@ class Token(Model):
                 type = $2
         """
 
-        con = await self.ensure_con()
+        con = await cls.ensure_con()
 
-        return await con.execute(query, self.user_id, self.type)
+        return await con.execute(query, user_id, type)

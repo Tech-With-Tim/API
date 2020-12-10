@@ -3,6 +3,9 @@ import jwt
 import os
 
 
+from api.models import User, Token
+
+
 log = getLogger("UserMiddleware")
 
 
@@ -49,13 +52,12 @@ class UserMiddleware:
             scope["no_auth_reason"] = "Invalid token."
             return await self.asgi_app(scope, recieve, send)
         else:
-            user = await self.app.db.get_user(id=payload["uid"])
+            user = await User.fetch(id=payload["uid"])
+
             if user is None:
                 # TODO: Do this through `signals` to reduce response time.
-                token = await self.app.db.get_token(
-                    user_id=payload["uid"], type="OAuth2"
-                )
-                await token.delete()
+                await Token.delete(user_id=payload["uid"], type="JWT")
+                scope["no_auth_reason"] = "No user found for that JWT token?"
                 return await self.asgi_app(scope, recieve, send)
 
             scope["user"] = user

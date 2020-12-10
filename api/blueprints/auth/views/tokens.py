@@ -129,8 +129,11 @@ async def get_my_token():
         redirect_uri=request.host_url + "/auth/discord/callback",
     )
 
-    pprint(request.host_url + "/auth/discord/callback")
-    pprint(access_data)
+    if access_data.get("error"):
+        return jsonify(dict(
+            error="Bad request - Bad request syntax or unsupported method",
+            discord_error=access_data
+        )), 400
 
     expires_at = datetime.datetime.utcnow() + datetime.timedelta(
         seconds=access_data["expires_in"]
@@ -143,7 +146,7 @@ async def get_my_token():
 
     discord_data["id"] = int(discord_data["id"])
 
-    user = await current_app.db.get_user(id=discord_data["id"])
+    user = await User.fetch(id=discord_data["id"])
 
     if user is None:
         # Create new user.

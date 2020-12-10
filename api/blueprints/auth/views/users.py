@@ -43,7 +43,7 @@ async def bulk_get_users():
     discriminator=(str, int),
     avatar=(str, type(None))
 )
-@utils.auth_required
+@utils.app_only
 async def create_user(data: dict):
     """
     Create a User object.
@@ -88,7 +88,7 @@ async def get_specific_user(id: int):
     Returns a User object for a given user ID.
     """
 
-    user = await current_app.db.fetch_user(id=id)
+    user = await User.fetch(id=id)
 
     if user is None:
         return (

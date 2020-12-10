@@ -23,9 +23,9 @@ loop = asyncio.get_event_loop()
 
 
 try:
-    with open(".env", "r") as f:
+    with open("local.env", "r") as f:
         env_file = {
-            key: arg
+            key.strip(): arg.strip()
             for (key, arg) in [line.strip().split("=") for line in f.readlines()]
         }
 except FileNotFoundError:
