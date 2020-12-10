@@ -20,3 +20,23 @@ class Asset(Model):
     url_path = Column(types.String, primary_key=True)
     type = Column(types.String, primary_key=True)
     base64 = Column(types.String)
+
+    async def create(self):
+        query = """
+                  INSERT INTO asset (name, url_path, type, base64)
+                  VALUES ($1, $2, $3, $4, $5)
+                  ON CONFLICT DO NOTHING;
+                  """
+        con = await self.ensure_con()
+
+        response = await con.execute(
+            query,
+            self.id,
+            self.name,
+            self.url_path,
+            self.type,
+            self.base64
+        )
+
+        return response.split()[-1] == "1"
+

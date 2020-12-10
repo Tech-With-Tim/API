@@ -7,8 +7,8 @@ from .. import blueprint
 @blueprint.route("/cdn", methods=["POST"])
 @utils.expects_data(
     name=str,
-    type=(str),
-    base64=(str)
+    type=str,
+    base64=str
 )
 async def create_asset(data: dict):
     name = data["name"]
@@ -31,7 +31,7 @@ async def create_asset(data: dict):
         ), 400)
 
 
-@blueprint.route("/cdn/<str:url_path>", methods=["GET"])
+@blueprint.route("/cdn/<url_path>", methods=["GET"])
 async def load_asset(url_path: str):
     load = await current_app.db.fetch_user(url_path=url_path)
 
