@@ -52,24 +52,6 @@ async def create_user(data: dict):
 
     TODO: Restrict access.
     """
-
-    type = data["type"]
-
-    if type not in User.TYPES.__members__:
-        return (
-            jsonify(
-                {
-                    "error": "400 Bad Request",
-                    "data": {
-                        "type": "Bad User type -> Expected one of `USER, BOT, APP`, got {}".format(
-                            type
-                        )
-                    },
-                }
-            ),
-            400,
-        )
-
     user = User(
         id=data["id"],
         username=data["username"],
