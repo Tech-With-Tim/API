@@ -10,7 +10,6 @@ from traceback import print_exception
 from quart import Quart, jsonify
 import logging
 
-
 logging.basicConfig(
     level=logging.DEBUG
 )  # TODO: Someone setup a better logging config, thanks.
@@ -25,7 +24,7 @@ def setup_app() -> Quart:
     before loading the complete app.
     """
 
-    from api.blueprints import auth
+    from api.blueprints import auth, assets
     import utils
 
     _app = Quart(__name__)
@@ -38,6 +37,7 @@ def setup_app() -> Quart:
 
     # setup Blueprints:
     auth.setup(app=_app, url_prefix="/auth")
+    assets.setup(app=_app, url_prefix='/asset')
 
     return _app
 
