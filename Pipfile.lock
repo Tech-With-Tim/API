@@ -162,7 +162,7 @@
                 "sha256:81c69dd84a87b8e8b3ebf06ef5dd92836a8238f0ac65ded3d86befb8ba9acfeb",
                 "sha256:e3f317d6d64d15ce589f49e4f5057947259fa35332d169e62cb060e9997189e4"
             ],
-            "markers": "python_full_version >= '3.7.0'",
+            "markers": "python_version >= '3.7'",
             "version": "==0.11.1"
         },
         "hyperframe": {
@@ -281,11 +281,11 @@
         },
         "postdb": {
             "hashes": [
-                "sha256:a5b4196237f45b495827206c4406448079363f1130e9e37373b61d5b6cfaecc3",
-                "sha256:ccf9311dbaf06e8da8a782b4a09daebb133b771403d2ff565f690b4c14c9afab"
+                "sha256:40123331657b1850955983c6eadb0b2ec6ae3b88e8cfea829449208f5f96a47d",
+                "sha256:dc41990ce8e09482e4c839bcb20bc3eccd708714e5ddb50656d6c5853b949096"
             ],
             "index": "pypi",
-            "version": "==0.1.2"
+            "version": "==0.1.3"
         },
         "priority": {
             "hashes": [

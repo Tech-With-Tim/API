@@ -20,8 +20,6 @@ request: utils.Request
 
 
 DISCORD_ENDPOINT = "https://discord.com/api"
-CLIENT_ID = int(os.environ["DISCORD_CLIENT_ID"])
-CLIENT_SECRET = os.environ["DISCORD_CLIENT_SECRET"]
 
 
 # TODO: Get these variables from database instead of hard-coded
@@ -44,10 +42,10 @@ async def exchange_code(
         data=dict(
             code=code,
             scope=scope,
-            client_id=CLIENT_ID,
+            client_id=int(current_app.config["DISCORD_CLIENT_ID"]),
             grant_type=grant_type,
             redirect_uri=redirect_uri,
-            client_secret=CLIENT_SECRET,
+            client_secret=current_app.config["DISCORD_CLIENT_SECRET"],
         ),
         headers={"Content-Type": "application/x-www-form-urlencoded"},
     ) as response:
@@ -74,7 +72,7 @@ async def get_redirect(frontend_redirect: str, scopes: List[str]):
     """
     return (
         f"{DISCORD_ENDPOINT}/oauth2/authorize?response_type=code"
-        f"&client_id={CLIENT_ID}&scope={format_scope(scopes)}"
+        f"&client_id={int(current_app.config['DISCORD_CLIENT_ID'])}&scope={format_scope(scopes)}"
         f"&redirect_uri={frontend_redirect}&prompt=consent"
     )
 
@@ -129,11 +127,8 @@ async def get_my_token():
         redirect_uri=request.host_url + "/auth/discord/callback",
     )
 
-    if access_data.get("error"):
-        return jsonify(dict(
-            error="Bad request - Bad request syntax or unsupported method",
-            discord_error=access_data
-        )), 400
+    pprint(request.host_url + "/auth/discord/callback")
+    pprint(access_data)
 
     expires_at = datetime.datetime.utcnow() + datetime.timedelta(
         seconds=access_data["expires_in"]
@@ -146,7 +141,7 @@ async def get_my_token():
 
     discord_data["id"] = int(discord_data["id"])
 
-    user = await User.fetch(id=discord_data["id"])
+    user = await current_app.db.get_user(id=discord_data["id"])
 
     if user is None:
         # Create new user.
