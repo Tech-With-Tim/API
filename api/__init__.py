@@ -25,21 +25,22 @@ def setup_app() -> Quart:
     before loading the complete app.
     """
 
-    from api.blueprints import auth
+    from api.blueprints import auth, cdn
     import utils
 
-    _app = Quart(__name__)
+    self = Quart(__name__)
 
     # Add Auth Middleware.
-    _app.asgi_app = auth.UserMiddleware(app=_app, asgi_app=_app.asgi_app)
+    self.asgi_app = auth.UserMiddleware(app=self, asgi_app=self.asgi_app)
 
     # Use custom Request class to implement User property
-    _app.request_class = utils.Request
+    self.request_class = utils.Request
 
     # setup Blueprints:
-    auth.setup(app=_app, url_prefix="/auth")
+    auth.setup(app=self, url_prefix="/auth")
+    cdn.setup(app=self, url_prefix="/cdn")
 
-    return _app
+    return self
 
 
 app = setup_app()
@@ -49,7 +50,7 @@ app = setup_app()
 @app.route("/", methods=["GET"])
 async def index():
     """GET @ / -> Testing endpoint"""
-    return jsonify({"Hello": "World", "method": "GET"})
+    return jsonify({"Hello": "World"})
 
 
 @app.route("/endpoints", methods=["GET"])
@@ -64,7 +65,7 @@ async def testing_endpoints():
             if rule.rule in response:
                 print("WARNING: {} already in response -> skipping".format(rule.rule))
 
-            response[rule.rule] = {"methods": list(rule.methods)}
+            response[rule.rule]["methods"] = list(rule.methods)
             if (doc := app.view_functions[rule.endpoint].__doc__) is not None:
                 response[rule.rule]["docstring"] = dedent(doc)
             else:
@@ -109,7 +110,6 @@ async def error_500(error: BaseException):
     TODO: Return the response before handling the error.
             ( To reduce response time )
     """
-    print_exception(type(error), error, error.__traceback__)
 
     return (
         jsonify({"error": "Internal Server Error - Server got itself in trouble"}),

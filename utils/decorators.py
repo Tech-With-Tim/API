@@ -51,16 +51,19 @@ def auth_required(func: Callable) -> Callable:
 def expects_data(**arguments: Dict[str, Union[Tuple[Type], Type]]) -> Callable:
     """
     A decorator to ensure the user enters provided `arguments`
-
+    If no request data is present, 400 error is returned.
     If request data is not a dict, function is ran normally.
     """
-
     def outer(func: Callable) -> Callable:
         @wraps(func)
         async def inner(*args: Any, **kwargs: Any) -> Any:
             error = {}
 
             data = await request.json
+
+            if data is None:
+                error = "No data"
+                return jsonify({"error": "400 Bad Request", "data": error}), 400
 
             if not isinstance(data, dict):
                 return await func(*args, data=data, **kwargs)
@@ -78,5 +81,68 @@ def expects_data(**arguments: Dict[str, Union[Tuple[Type], Type]]) -> Callable:
                 return jsonify({"error": "400 Bad Request", "data": error}), 400
 
             return await func(*args, data=data, **kwargs)
+        return inner
+    return outer
+
+
+def expects_form_data(**arguments: Dict[str, Union[Tuple[Type], Type]]) -> Callable:
+    """
+    A decorator to ensure the user enters provided `arguments` in form request.
+    If no request data is present, 400 error is returned.
+    If request data is not a dict, function is ran normally.
+    """
+    def outer(func: Callable) -> Callable:
+        @wraps(func)
+        async def inner(*args: Any, **kwargs: Any) -> Any:
+            error = {}
+
+            data = await request.form
+
+            if data is None:
+                error = "No data"
+                return jsonify({"error": "400 Bad Request", "data": error}), 400
+
+            if not isinstance(data, dict):
+                return await func(*args, data=data, **kwargs)
+
+            for arg, _type in arguments.items():
+                if arg not in data:
+                    error[arg] = "This field is required."
+                else:
+                    if not isinstance(data[arg], _type):
+                        error[arg] = "Expected argument of type `{}`, got `{}`".format(
+                            _type.__name__, type(data[arg]).__name__
+                        )
+
+            if error:
+                return jsonify({"error": "400 Bad Request", "data": error}), 400
+
+            return await func(*args, data=data, **kwargs)
+        return inner
+    return outer
+
+
+def expects_files(*filenames: Tuple[str]) -> Callable:
+    """
+    A decorator to ensure the user enters provided `filenames`.
+    """
+    def outer(func: Callable) -> Callable:
+        @wraps(func)
+        async def inner(*args: Any, **kwargs: Any) -> Any:
+            error = {}
+
+            files = await request.files
+
+            if files is None:
+                error = "No data"
+                return jsonify({"error": "400 Bad Request", "data": error}), 400
+
+            if error:
+                return jsonify({"error": "400 Bad Request", "data": error}), 400
+
+            files = dict(files)
+            print(files)
+
+            return await func(*args, files=files, **kwargs)
         return inner
     return outer

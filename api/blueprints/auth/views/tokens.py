@@ -13,12 +13,6 @@ from .. import blueprint
 from api.models import Token, User
 
 
-from pprint import pprint
-
-
-CLIENT_ID = int(os.environ["DISCORD_CLIENT_ID"])
-CLIENT_SECRET = os.environ["DISCORD_CLIENT_SECRET"]
-
 request: utils.Request
 
 
@@ -45,10 +39,10 @@ async def exchange_code(
         data=dict(
             code=code,
             scope=scope,
-            client_id=CLIENT_ID,
+            client_id=int(os.environ["DISCORD_CLIENT_ID"]),
             grant_type=grant_type,
             redirect_uri=redirect_uri,
-            client_secret=CLIENT_SECRET,
+            client_secret=os.environ["DISCORD_CLIENT_SECRET"],
         ),
         headers={"Content-Type": "application/x-www-form-urlencoded"},
     ) as response:
@@ -75,7 +69,7 @@ async def get_redirect(frontend_redirect: str, scopes: List[str]):
     """
     return (
         f"{DISCORD_ENDPOINT}/oauth2/authorize?response_type=code"
-        f"&client_id={CLIENT_ID}&scope={format_scope(scopes)}"
+        f"&client_id={int(os.environ['DISCORD_CLIENT_ID'])}&scope={format_scope(scopes)}"
         f"&redirect_uri={frontend_redirect}&prompt=consent"
     )
 

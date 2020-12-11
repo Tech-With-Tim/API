@@ -40,15 +40,7 @@ class UserMiddleware:
                 jwt=token,
                 key=os.environ["SECRET_KEY"],
             )
-        except (
-            jwt.ExpiredSignatureError,
-            jwt.InvalidTokenError,
-            jwt.InvalidSignatureError,
-        ) as e:
-            log.exception(
-                "Caught exception in jwt decoding",
-                exc_info=(type(e), e, e.__traceback__),
-            )
+        except jwt.PyJWTError:
             scope["no_auth_reason"] = "Invalid token."
             return await self.asgi_app(scope, recieve, send)
         else:
