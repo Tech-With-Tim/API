@@ -10,6 +10,7 @@ from traceback import print_exception
 from quart import Quart, jsonify
 import logging
 
+
 logging.basicConfig(
     level=logging.DEBUG
 )  # TODO: Someone setup a better logging config, thanks.
