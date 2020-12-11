@@ -32,7 +32,7 @@ async def exchange_code(
     scope: str,
     redirect_uri: str,
     grant_type: str = "authorization_code",
-):
+) -> (dict, int):
     """Exchange discord oauth code for access and refresh tokens."""
     async with session.post(
         "%s/v6/oauth2/token" % DISCORD_ENDPOINT,
@@ -46,7 +46,7 @@ async def exchange_code(
         ),
         headers={"Content-Type": "application/x-www-form-urlencoded"},
     ) as response:
-        return await response.json()
+        return await response.json(), response.status
 
 
 async def get_user(session: ClientSession, access_token: str) -> dict:
@@ -91,9 +91,63 @@ async def redirect_to_discord_oauth():
 async def display_code():
     """Parse url and return code."""
     # TODO: Remove this once frontend will be implemented.
-    data = dict(code=parse_qs(request.query_string)[b"code"][0].decode())
 
-    return await get_my_token(code=data["code"])
+    access_data, status_code = await exchange_code(
+        session=current_app.session,
+        code=parse_qs(request.query_string)[b"code"][0].decode(),
+        scope=format_scope(SCOPES),
+        redirect_uri=request.host_url + "/auth/discord/code",
+    )
+
+    if access_data.get("error"):
+        if status_code == 400:
+            return jsonify({"error": "400 Bad Request - Discord returned error", "data": access_data}), 400
+        raise RuntimeError(str(access_data), str(status_code))
+
+    expires_at = datetime.datetime.utcnow() + datetime.timedelta(
+        seconds=access_data["expires_in"]
+    )
+    expires_at = expires_at - datetime.timedelta(microseconds=expires_at.microsecond)
+
+    discord_data: dict = await get_user(
+        session=current_app.session, access_token=access_data["access_token"]
+    )
+
+    discord_data["id"] = int(discord_data["id"])
+
+    user = await User.fetch(discord_data["id"])
+
+    if user is None:
+        user = User(
+            id=discord_data["id"],
+            username=discord_data["username"],
+            discriminator=discord_data["discriminator"],
+            avatar=discord_data["avatar"],
+        )
+        await user.create()
+
+    jwt_token = jwt.encode(
+        {
+            "uid": user.id,
+            "exp": expires_at,
+            "iat": datetime.datetime.utcnow(),
+        },
+        key=os.environ["SECRET_KEY"],
+    ).decode()
+
+    await Token(  # Insert or update OAuth2 token in database.
+        user_id=user.id,
+        token=access_data["access_token"],
+        type="OAuth2",
+        expires_at=expires_at,
+        data=access_data,
+    ).update()
+
+    await Token(  # Insert or update jwt token in database.
+        user_id=user.id, token=jwt_token, type="JWT", expires_at=expires_at, data={}
+    ).update()
+
+    return jsonify(dict(token=jwt_token, exp=expires_at.isoformat()))
 
 
 @blueprint.route("/discord/callback", methods=["POST"])
@@ -107,24 +161,18 @@ async def get_my_token(code: str):
 
     Get or Create a JWT token for the authenticated user.
     """
-    # try:
-    #     code = parse_qs(request.query_string)[b"code"][0].decode()
-    # except (KeyError, UnicodeDecodeError) as e:
-    #     return jsonify(
-    #         {
-    #             "error": "Internal Server Error - Server got itself in trouble",
-    #             "data": str(e)
-    #          }
-    #     ), 500
 
-    # # TODO: Move back to POST endpoint when we implement frontend.
-
-    access_data: dict = await exchange_code(
+    access_data, status_code = await exchange_code(
         session=current_app.session,
-        code=code,
+        code=parse_qs(request.query_string)[b"code"][0].decode(),
         scope=format_scope(SCOPES),
-        redirect_uri=request.host_url + "/auth/discord/callback",
+        redirect_uri=request.host_url + "/auth/discord/code",
     )
+
+    if access_data.get("error"):
+        if status_code == 400:
+            return jsonify({"error": "400 Bad Request - Discord returned error", "data": access_data}), 400
+        raise RuntimeError(str(access_data), str(status_code))
 
     expires_at = datetime.datetime.utcnow() + datetime.timedelta(
         seconds=access_data["expires_in"]
