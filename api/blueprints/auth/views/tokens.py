@@ -16,6 +16,9 @@ from api.models import Token, User
 from pprint import pprint
 
 
+CLIENT_ID = int(os.environ["DISCORD_CLIENT_ID"])
+CLIENT_SECRET = os.environ["DISCORD_CLIENT_SECRET"]
+
 request: utils.Request
 
 
@@ -42,10 +45,10 @@ async def exchange_code(
         data=dict(
             code=code,
             scope=scope,
-            client_id=int(current_app.config["DISCORD_CLIENT_ID"]),
+            client_id=CLIENT_ID,
             grant_type=grant_type,
             redirect_uri=redirect_uri,
-            client_secret=current_app.config["DISCORD_CLIENT_SECRET"],
+            client_secret=CLIENT_SECRET,
         ),
         headers={"Content-Type": "application/x-www-form-urlencoded"},
     ) as response:
@@ -72,7 +75,7 @@ async def get_redirect(frontend_redirect: str, scopes: List[str]):
     """
     return (
         f"{DISCORD_ENDPOINT}/oauth2/authorize?response_type=code"
-        f"&client_id={int(current_app.config['DISCORD_CLIENT_ID'])}&scope={format_scope(scopes)}"
+        f"&client_id={CLIENT_ID}&scope={format_scope(scopes)}"
         f"&redirect_uri={frontend_redirect}&prompt=consent"
     )
 
@@ -84,10 +87,9 @@ async def redirect_to_discord_oauth():
     and wanted scopes.
     """
     redirect_url = await get_redirect(
-        frontend_redirect=quote_plus(request.host_url + "/auth/discord/callback"),
+        frontend_redirect=quote_plus(request.host_url + "/auth/discord/code"),
         scopes=SCOPES,
     )
-
     return redirect(redirect_url)
 
 
@@ -97,28 +99,31 @@ async def display_code():
     # TODO: Remove this once frontend will be implemented.
     data = dict(code=parse_qs(request.query_string)[b"code"][0].decode())
 
-    return await get_my_token(data)
+    return await get_my_token(code=data["code"])
 
 
-@blueprint.route("/discord/callback", methods=["GET"])
-async def get_my_token():
+@blueprint.route("/discord/callback", methods=["POST"])
+@utils.expects_data(
+    code=str
+)
+async def get_my_token(code: str):
     """
     Callback endpoint for finished discord authentication.
     Initial authentication is handled by frontend then they call our endpoint.
 
     Get or Create a JWT token for the authenticated user.
     """
-    try:
-        code = parse_qs(request.query_string)[b"code"][0].decode()
-    except (KeyError, UnicodeDecodeError) as e:
-        return jsonify(
-            {
-                "error": "Internal Server Error - Server got itself in trouble",
-                "data": str(e)
-             }
-        ), 500
+    # try:
+    #     code = parse_qs(request.query_string)[b"code"][0].decode()
+    # except (KeyError, UnicodeDecodeError) as e:
+    #     return jsonify(
+    #         {
+    #             "error": "Internal Server Error - Server got itself in trouble",
+    #             "data": str(e)
+    #          }
+    #     ), 500
 
-    # TODO: Move back to POST endpoint when we implement frontend.
+    # # TODO: Move back to POST endpoint when we implement frontend.
 
     access_data: dict = await exchange_code(
         session=current_app.session,
@@ -126,9 +131,6 @@ async def get_my_token():
         scope=format_scope(SCOPES),
         redirect_uri=request.host_url + "/auth/discord/callback",
     )
-
-    pprint(request.host_url + "/auth/discord/callback")
-    pprint(access_data)
 
     expires_at = datetime.datetime.utcnow() + datetime.timedelta(
         seconds=access_data["expires_in"]
@@ -141,10 +143,9 @@ async def get_my_token():
 
     discord_data["id"] = int(discord_data["id"])
 
-    user = await current_app.db.get_user(id=discord_data["id"])
+    user = await User.fetch(discord_data["id"])
 
     if user is None:
-        # Create new user.
         user = User(
             id=discord_data["id"],
             username=discord_data["username"],

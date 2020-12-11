@@ -42,6 +42,8 @@ for key in env.keys():
             sys.stderr.write(f"Found no `{key}` var in env, exiting..."), exit(1)
 
 app.config.from_mapping(mapping=env)
+for (key, value) in env.items():
+    os.environ[key] = value
 
 
 def run_async(func: Coroutine) -> Any:

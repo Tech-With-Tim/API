@@ -1,4 +1,8 @@
 from postDB import Model, Column, types
+import asyncpg
+
+
+from typing import Optional
 
 
 class Asset(Model):
@@ -18,5 +22,56 @@ class Asset(Model):
     id = Column(types.Serial, unique=True)
     name = Column(types.String(length=100), unique=True)
     url_path = Column(types.String, primary_key=True)
-    type = Column(types.String, primary_key=True)
+    type = Column(types.String)
     data = Column(types.Binary)
+
+    @classmethod
+    async def fetch(cls, name: str = None, url_path: str = None) -> Optional["Asset"]:
+        """
+        Fetch Asset based on any of the provided arguments.
+        If `None` is given it will not be acquainted for in the query.
+
+        :param name:        Asset name
+        :param url_path:    Asset url path
+        :return:            Optional[Asset]
+        """
+
+        if name is None and url_path is None:
+            raise RuntimeWarning("Both name and url_path cannot be None.")
+
+        args = []
+        query = "SELECT * FROM assets"
+        if name is not None:
+            query += " WHERE name = $1"
+            args.append(name)
+            if url_path is not None:
+                query += " AND url_path = $2"
+                args.append(name)
+        else:
+            if url_path is not None:
+                query += " WHERE url_path = $2"
+                args.append(name)
+
+        record = await cls.pool.fetchrow(query, *args)
+        if record is None:
+            return None
+
+        return cls(**record)
+
+    async def create(self) -> bool:
+        """
+        Create the current instance, if not already created.
+        Returns boolean describing if it was created or not.
+        """
+        query = """
+        INSERT INTO assets (name, url_path, type, data)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id
+        """
+        try:
+            record = await self.pool.fetchrow(query, self.name, self.url_path, self.type, self.data)
+        except asyncpg.UniqueViolationError:
+            return False
+
+        self.id = record["id"]
+        return True
