@@ -11,7 +11,7 @@ request: utils.Request
 log = getLogger("/cdn")
 
 
-@blueprint.route('/manage/create', methods=["GET"])
+@blueprint.route('/manage/create', methods=["POST"])
 @utils.auth_required
 @utils.expects_form_data(name=str, url_path=str, type=str)
 @utils.expects_files("data")

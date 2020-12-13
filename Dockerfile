@@ -6,9 +6,6 @@ WORKDIR /app
 ADD . /app
 
 RUN pip install pipenv
-
-RUN pipenv install
-#RUN echo from api.__main__ import app >> asgi.py
-#RUN pipenv run pip freeze >> requirements.txt
-#RUN pip install -r requirements.txt
+RUN pipenv install --system --deploy
+RUN python launch.py initdb
 CMD sh /app/runfile.sh

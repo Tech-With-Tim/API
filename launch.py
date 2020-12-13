@@ -109,4 +109,5 @@ def runserver():
 
 
 if __name__ == "__main__":
+    logging.info(str(app.cli.commands))
     app.cli()

@@ -1,6 +1,5 @@
-from quart import current_app, request, jsonify, redirect
-
 from urllib.parse import quote_plus, parse_qs
+from quart import request, jsonify, redirect
 from aiohttp import ClientSession
 from typing import List
 import datetime
@@ -26,7 +25,6 @@ SCOPES = ["identify"]
 
 
 async def exchange_code(
-    session: ClientSession,
     *,
     code: str,
     scope: str,
@@ -34,7 +32,7 @@ async def exchange_code(
     grant_type: str = "authorization_code",
 ) -> (dict, int):
     """Exchange discord oauth code for access and refresh tokens."""
-    async with session.post(
+    async with ClientSession().post(
         "%s/v6/oauth2/token" % DISCORD_ENDPOINT,
         data=dict(
             code=code,
@@ -49,9 +47,9 @@ async def exchange_code(
         return await response.json(), response.status
 
 
-async def get_user(session: ClientSession, access_token: str) -> dict:
+async def get_user(access_token: str) -> dict:
     """Coroutine to fetch User data from discord using the users `access_token`"""
-    async with session.get(
+    async with ClientSession().get(
         "%s/v6/users/@me" % DISCORD_ENDPOINT,
         headers={"Authorization": "Bearer %s" % access_token},
     ) as response:
@@ -93,7 +91,6 @@ async def display_code():
     # TODO: Remove this once frontend will be implemented.
 
     access_data, status_code = await exchange_code(
-        session=current_app.session,
         code=parse_qs(request.query_string)[b"code"][0].decode(),
         scope=format_scope(SCOPES),
         redirect_uri=request.host_url + "/auth/discord/code",
@@ -109,9 +106,7 @@ async def display_code():
     )
     expires_at = expires_at - datetime.timedelta(microseconds=expires_at.microsecond)
 
-    discord_data: dict = await get_user(
-        session=current_app.session, access_token=access_data["access_token"]
-    )
+    discord_data: dict = await get_user(access_token=access_data["access_token"])
 
     discord_data["id"] = int(discord_data["id"])
 
@@ -163,8 +158,7 @@ async def get_my_token(code: str):
     """
 
     access_data, status_code = await exchange_code(
-        session=current_app.session,
-        code=parse_qs(request.query_string)[b"code"][0].decode(),
+        code=code,
         scope=format_scope(SCOPES),
         redirect_uri=request.host_url + "/auth/discord/code",
     )
@@ -179,9 +173,7 @@ async def get_my_token(code: str):
     )
     expires_at = expires_at - datetime.timedelta(microseconds=expires_at.microsecond)
 
-    discord_data: dict = await get_user(
-        session=current_app.session, access_token=access_data["access_token"]
-    )
+    discord_data: dict = await get_user(access_token=access_data["access_token"])
 
     discord_data["id"] = int(discord_data["id"])
 

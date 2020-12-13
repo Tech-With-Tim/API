@@ -110,6 +110,7 @@ async def error_500(error: BaseException):
     TODO: Return the response before handling the error.
             ( To reduce response time )
     """
+    log.error("500 - Internal Server Error", exc_info=(type(error), error, error.__traceback__))
 
     return (
         jsonify({"error": "Internal Server Error - Server got itself in trouble"}),
