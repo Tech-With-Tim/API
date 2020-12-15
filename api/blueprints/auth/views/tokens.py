@@ -147,7 +147,8 @@ async def display_code():
 
 @blueprint.route("/discord/callback", methods=["POST"])
 @utils.expects_data(
-    code=str
+    code=str,
+    redirect_uri=str
 )
 async def get_my_token(data: dict):
     """
@@ -160,7 +161,7 @@ async def get_my_token(data: dict):
     access_data, status_code = await exchange_code(
         code=data["code"],
         scope=format_scope(SCOPES),
-        redirect_uri=request.host_url + "/auth/discord/code",
+        redirect_uri=data["redirect_uri"],
     )
 
     if access_data.get("error"):
