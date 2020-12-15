@@ -29,4 +29,5 @@ async def fetch_log(log_id: int):
 async def create_log(data: dict):
     """Create a new Log instance."""
     await Log(type=data["type"], data=data["data"]).create()
+    # TODO: idk seems too simple to be true?
     return Response("", 201)
