@@ -14,7 +14,6 @@ class Member(Model):
         :param int id:              The members discord ID
         :param int guild_id:        The guild ID the member belongs to.
         :param bool verified:       Whether or not the Member has verified in the guild.
-        :param float coins:         Members coin balance.
         :param float xp:            Members experience points.
     """
 
@@ -29,7 +28,6 @@ class Member(Model):
     )
 
     verified = Column(types.Boolean)
-    coins = Column(types.Real)
     xp = Column(types.Real)
 
     @property
