@@ -25,10 +25,12 @@ def setup_app() -> Quart:
     before loading the complete app.
     """
 
-    from api.blueprints import auth, cdn
+    from api.blueprints import auth, cdn, logging
+    from quart_cors import cors
     import utils
 
     self = Quart(__name__)
+    self = cors(self)
 
     # Add Auth Middleware.
     self.asgi_app = auth.UserMiddleware(app=self, asgi_app=self.asgi_app)
@@ -37,6 +39,7 @@ def setup_app() -> Quart:
     self.request_class = utils.Request
 
     # setup Blueprints:
+    logging.setup(app=self, url_prefix="/log")
     auth.setup(app=self, url_prefix="/auth")
     cdn.setup(app=self, url_prefix="/cdn")
 

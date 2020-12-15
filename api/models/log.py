@@ -14,3 +14,16 @@ class Log(Model):
     id = Column(types.Serial)
     type = Column(types.String)
     data = Column(types.JSON)
+
+    @classmethod
+    async def fetch(cls, id: int):
+        query = """
+        SELECT * FROM {}
+        WHERE id = $1
+        """.format(cls.tablename)
+        
+        record = await cls.pool.fetchrow(query, id)
+        if record is None:
+            return None
+
+        return cls(**record)
