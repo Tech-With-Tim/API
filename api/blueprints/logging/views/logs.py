@@ -1,4 +1,4 @@
-from quart import Response, request, jsonify, send_file
+from quart import Response, request, jsonify
 from logging import getLogger
 
 from .. import blueprint
@@ -18,3 +18,15 @@ async def fetch_log(log_id: int):
         return jsonify({"error": "404 Not Found - No log with that id in database."}), 404
 
     return jsonify(log.as_dict())
+
+
+@blueprint.route("/", methods=["POST"])
+@utils.auth_required
+@utils.expects_data(
+    type=str,
+    data=dict
+)
+async def create_log(data: dict):
+    """Create a new Log instance."""
+    await Log(type=data["type"], data=data["data"]).create()
+    return Response("", 201)

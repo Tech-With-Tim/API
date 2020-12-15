@@ -149,7 +149,7 @@ async def display_code():
 @utils.expects_data(
     code=str
 )
-async def get_my_token(code: str):
+async def get_my_token(data: dict):
     """
     Callback endpoint for finished discord authentication.
     Initial authentication is handled by frontend then they call our endpoint.
@@ -158,7 +158,7 @@ async def get_my_token(code: str):
     """
 
     access_data, status_code = await exchange_code(
-        code=code,
+        code=data["code"],
         scope=format_scope(SCOPES),
         redirect_uri=request.host_url + "/auth/discord/code",
     )

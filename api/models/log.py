@@ -27,3 +27,14 @@ class Log(Model):
             return None
 
         return cls(**record)
+
+    async def create(self) -> bool:
+        query = """
+        INSERT INTO {} (type, data)
+        VALUES ($1, $2)
+        RETURNING id
+        """.format(self.tablename)
+
+        record = await self.pool.fetchrow(query, self.type, self.data)
+        self.id = record["id"]
+        return True
