@@ -11,24 +11,22 @@ import sys
 import os
 
 
+try:
+    import uvloop  # noqa
+except ImportError:
+    loop = asyncio.new_event_loop()
+else:
+    loop = uvloop.new_event_loop()
+
+asyncio.set_event_loop(loop)
+
+
 env = {
     "SECRET_KEY": None,
     "DB_URI": None,
     "DISCORD_CLIENT_ID": None,
     "DISCORD_CLIENT_SECRET": None,
 }
-try:
-    import uvloop
-except ImportError:
-    loop = asyncio.new_event_loop()
-else:
-    loop = uvloop.new_event_loop()
-
-
-asyncio.set_event_loop(loop)
-
-
-loop = asyncio.get_event_loop()
 
 
 try:

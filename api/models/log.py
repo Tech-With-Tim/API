@@ -20,7 +20,7 @@ class Log(Model):
         query = """
         SELECT * FROM {}
         WHERE id = $1
-        """.format(cls.tablename)
+        """.format(cls.__tablename__)
         
         record = await cls.pool.fetchrow(query, id)
         if record is None:
@@ -33,7 +33,7 @@ class Log(Model):
         INSERT INTO {} (type, data)
         VALUES ($1, $2)
         RETURNING id
-        """.format(self.tablename)
+        """.format(self.__tablename__)
 
         record = await self.pool.fetchrow(query, self.type, self.data)
         self.id = record["id"]

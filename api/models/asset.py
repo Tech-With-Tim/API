@@ -39,7 +39,7 @@ class Asset(Model):
         :return:                Optional[Asset]
         """
         args, i = [], 1
-        query = "SELECT * FROM {}".format(cls.tablename)
+        query = "SELECT * FROM {}".format(cls.__tablename__)
 
         for key in ("id", "name", "url_path"):
             value = kwargs.get(key)

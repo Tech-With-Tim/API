@@ -12,11 +12,12 @@ class Guild(Model):
 
         :param int id:                          The Guild ID.
         :param str name:                        The Guild name.
+        :param str region:                      The Guild region [EU/NAW/NAE/...]
         :param str icon_hash:                   The guilds icon hash.
+        :param int owner_id:                    The owner of the guild.
         :param int muted_role_id:               Muted role ID.
         :param int log_channel_id:              Log channel ID.
         :param int verification_channel_id:     Verification channel
-        TODO: UPDATE THIS MODEL WITH NEW ATTRIBUTES...
     """
 
     id = Column(types.Integer(big=True), primary_key=True)
@@ -34,7 +35,7 @@ class Guild(Model):
 
     @classmethod
     async def fetch(cls, id: int) -> Optional["Guild"]:
-        query = "SELECT * FROM {} WHERE id = $1".format(cls.tablename)
+        query = "SELECT * FROM {} WHERE id = $1".format(cls.__tablename__)
 
         record = await cls.pool.fetchrow(query, id)
         if record is None:

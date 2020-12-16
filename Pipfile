@@ -8,13 +8,14 @@ flake8 = "*"
 black = "*"
 
 [packages]
-quart = "*"
 asyncpg = "*"
-pyjwt = "*"
 aiohttp = "*"
 typing-extensions = "*"
-postdb = "*"
-quart-cors = "*"
+Quart = "*"
+PyJWT = "*"
+postDB = "*"
+Quart-CORS = "*"
+uvloop = {markers = "platform_system == 'linux'", version = "*"}
 
 [requires]
 python_version = "3.8"
