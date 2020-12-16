@@ -105,6 +105,7 @@ celerybeat.pid
 .env
 .venv
 .env.save
+local.env
 env/
 venv/
 ENV/
