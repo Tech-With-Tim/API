@@ -7,5 +7,4 @@ ADD . /app
 
 RUN pip install pipenv
 RUN pipenv install --system --deploy
-CMD python launch.py initdb
 CMD sh /app/runfile.sh

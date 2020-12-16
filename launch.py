@@ -104,8 +104,10 @@ def dropdb():
 
 
 @app.cli.command()
-def runserver():
-    app.run(loop=loop, debug=True, use_reloader=False)
+@click.option('--host', default='127.0.0.1')
+@click.option('--port', default=5000)
+def runserver(host, port):
+    app.run(loop=loop, debug=True, use_reloader=False, host=host, port=int(port))
 
 
 if __name__ == "__main__":
