@@ -10,6 +10,7 @@ logger = getLogger("/logs")
 
 
 @blueprint.route("/<int:log_id>", methods=["GET"])
+@utils.auth_required
 async def fetch_log(log_id: int):
     """Fetch `Log` instance by log ID."""
     log = await Log.fetch(id=log_id)
@@ -21,13 +22,13 @@ async def fetch_log(log_id: int):
 
 
 @blueprint.route("/", methods=["POST"])
-@utils.auth_required
+@utils.auth_required  # TODO: Should be app_only when making BOT, server.
 @utils.expects_data(
     type=str,
     data=dict
 )
 async def create_log(data: dict):
     """Create a new Log instance."""
-    await Log(type=data["type"], data=data["data"]).create()
-    # TODO: idk seems too simple to be true?
-    return Response("", 201)
+    log = Log(type=data["type"], data=data["data"])
+    await log.create()
+    return jsonify(log.as_dict("id")), 201

@@ -1,5 +1,4 @@
 from quart import Quart, Blueprint
-from quart_cors import cors
 
 blueprint: Blueprint = Blueprint("logging", __name__)
 
