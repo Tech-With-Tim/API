@@ -8,6 +8,8 @@ Main app file where we (in order):
 from quart import Quart, jsonify
 import logging
 
+import utils
+
 
 logging.basicConfig(
     level=logging.DEBUG
@@ -55,6 +57,7 @@ async def index():
 
 
 @app.route("/endpoints", methods=["GET"])
+@utils.auth_required
 async def testing_endpoints():
     """Automatically generated list of endpoints."""
     from utils import dedent
