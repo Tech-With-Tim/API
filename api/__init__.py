@@ -5,8 +5,6 @@ Main app file where we (in order):
     - Load blueprints
 """
 
-from quart.exceptions import HTTPStatus
-from traceback import print_exception
 from quart import Quart, jsonify
 import logging
 
@@ -25,10 +23,12 @@ def setup_app() -> Quart:
     before loading the complete app.
     """
 
-    from api.blueprints import auth, cdn
+    from api.blueprints import auth, cdn, logging
+    from quart_cors import cors
     import utils
 
     self = Quart(__name__)
+    self = cors(self)
 
     # Add Auth Middleware.
     self.asgi_app = auth.UserMiddleware(app=self, asgi_app=self.asgi_app)
@@ -37,6 +37,7 @@ def setup_app() -> Quart:
     self.request_class = utils.Request
 
     # setup Blueprints:
+    logging.setup(app=self, url_prefix="/log")
     auth.setup(app=self, url_prefix="/auth")
     cdn.setup(app=self, url_prefix="/cdn")
 
@@ -60,18 +61,28 @@ async def testing_endpoints():
 
     response = {}
 
-    for rule in app.url_map.iter_rules():
-        if rule.endpoint != "static":
-            if rule.rule in response:
-                print("WARNING: {} already in response -> skipping".format(rule.rule))
+    def get_method(rule):
+        rules = list(rule.methods)
+        rules.remove("OPTIONS")
+        if "HEAD" in rules:
+            rules.remove("HEAD")
 
-            response[rule.rule]["methods"] = list(rule.methods)
-            if (doc := app.view_functions[rule.endpoint].__doc__) is not None:
-                response[rule.rule]["docstring"] = dedent(doc)
-            else:
-                response[rule.rule]["docstring"] = None
+        return rules[0]
 
-    return jsonify({"status": "Success!", "endpoints": response})
+    for route in app.url_map.iter_rules():
+        if (doc := app.view_functions[route.endpoint].__doc__) is not None:
+            docstring = dedent(doc)
+        else:
+            docstring = None
+
+        if response.get(str(route)) is None:
+            response[str(route)] = {
+                get_method(route): docstring
+            }
+        else:
+            response[str(route)][get_method(route)] = docstring
+
+    return jsonify({"endpoints": response})
 
 
 """ Error handlers """

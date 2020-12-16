@@ -43,9 +43,7 @@ class Token(Model):
                     data = $5
         """
 
-        con = await self.ensure_con()
-
-        return await con.execute(
+        return await self.pool.execute(
             query, self.user_id, self.type, self.type, self.expires_at, self.data
         )
 

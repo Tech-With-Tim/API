@@ -14,6 +14,7 @@ pyjwt = "*"
 aiohttp = "*"
 typing-extensions = "*"
 postdb = "*"
+quart-cors = "*"
 
 [requires]
 python_version = "3.8"

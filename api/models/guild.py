@@ -1,5 +1,5 @@
 from postDB import Model, Column, types
-
+from typing import Optional
 
 import utils
 
@@ -12,14 +12,18 @@ class Guild(Model):
 
         :param int id:                          The Guild ID.
         :param str name:                        The Guild name.
+        :param str icon_hash:                   The guilds icon hash.
         :param int muted_role_id:               Muted role ID.
         :param int log_channel_id:              Log channel ID.
         :param int verification_channel_id:     Verification channel
+        TODO: UPDATE THIS MODEL WITH NEW ATTRIBUTES...
     """
 
     id = Column(types.Integer(big=True), primary_key=True)
     name = Column(types.String(length=100))
-
+    region = Column(types.String)
+    icon_hash = Column(types.String)
+    owner_id = Column(types.Integer(big=True))
     muted_role_id = Column(types.Integer(big=True), nullable=True)
     log_channel_id = Column(types.Integer(big=True), nullable=True)
     verification_channel_id = Column(types.Integer(big=True), nullable=True)
@@ -28,6 +32,16 @@ class Guild(Model):
     def created_at(self):
         return utils.snowflake_time(self.id)
 
+    @classmethod
+    async def fetch(cls, id: int) -> Optional["Guild"]:
+        query = "SELECT * FROM {} WHERE id = $1".format(cls.tablename)
+
+        record = await cls.pool.fetchrow(query, id)
+        if record is None:
+            return None
+
+        return cls(**record)
+
     async def create(self) -> bool:
         """
         Post a new Guild instance.
@@ -35,17 +49,16 @@ class Guild(Model):
         Returns a bool informing you if a new User object was inserted or not.
         """
         query = """
-        INSERT INTO users (id, name, muted_role_id, log_channel_id)
-        VALUES ($1, $2, $3, $4)
+        INSERT INTO users (id, name, icon_hash, muted_role_id, log_channel_id)
+        VALUES ($1, $2, $3, $4, $5)
         ON CONFLICT DO NOTHING;
         """
 
-        con = await self.ensure_con()
-
-        response = await con.execute(
+        response = await self.pool.execute(
             query,
             self.id,
             self.name,
+            self.icon_hash,
             self.muted_role_id,
             self.log_channel_id
         )
@@ -55,7 +68,7 @@ class Guild(Model):
     async def update(self, **new_kwargs):
         verified = {}
 
-        for arg in ("name", "muted_role_id", "log_channel_id"):
+        for arg in ("name", "icon_hash", "muted_role_id", "log_channel_id"):
             try:
                 value = new_kwargs[arg]
             except KeyError:
@@ -74,5 +87,4 @@ class Guild(Model):
             setattr(self, arg, value)
 
         query = """UPDATE guilds SET name = $1, muted_role_id = $2, log_channel_id = $3"""
-        con = await self.ensure_con()
-        return await con.execute(query, self.name, self.muted_role_id, self.log_channel_id)
+        return await self.pool.execute(query, self.name, self.muted_role_id, self.log_channel_id)

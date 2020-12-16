@@ -1,6 +1,5 @@
 from postDB import Model, Column, types
 import asyncpg
-import io
 
 
 from typing import Optional
@@ -18,7 +17,7 @@ class Asset(Model):
         :param str url_path:        The CDN path this Asset should be mapped to
         :param str mimetype:
         :param str type:            The type of asset this is; Badge|Avatar|Image
-        :param :class:`io.BytesIO` data:            The binary data (the file itself)
+        :param bytes data:           The binary data (the file itself)
 
     """
     id = Column(types.Serial, unique=True)
@@ -29,31 +28,26 @@ class Asset(Model):
     data = Column(types.Binary)
 
     @classmethod
-    async def fetch(cls, name: str = None, url_path: str = None) -> Optional["Asset"]:
+    async def fetch(cls, **kwargs) -> Optional["Asset"]:
         """
         Fetch Asset based on any of the provided arguments.
         If `None` is given it will not be acquainted for in the query.
 
-        :param name:        Asset name
-        :param url_path:    Asset url path
-        :return:            Optional[Asset]
+        :param int id:          Asset ID
+        :param str name:        Asset name
+        :param str url_path:    Asset url path
+        :return:                Optional[Asset]
         """
+        args, i = [], 1
+        query = "SELECT * FROM {}".format(cls.tablename)
 
-        if name is None and url_path is None:
-            raise RuntimeWarning("Both name and url_path cannot be None.")
+        for key in ("id", "name", "url_path"):
+            value = kwargs.get(key)
+            if value is None:
+                continue
 
-        args = []
-        query = "SELECT * FROM assets"
-        if name is not None:
-            query += " WHERE name = $1"
-            args.append(name)
-            if url_path is not None:
-                query += " AND url_path = $2"
-                args.append(url_path)
-        else:
-            if url_path is not None:
-                query += " WHERE url_path = $1"
-                args.append(url_path)
+            query += f" {'WHERE' if i==1 else 'AND'} {key} = ${i}"
+            args.append(value)
 
         record = await cls.pool.fetchrow(query, *args)
         if record is None:
@@ -79,3 +73,34 @@ class Asset(Model):
 
         self.id = record["id"]
         return True
+
+    async def save(self) -> bool:
+        """
+        Update the current instance with new attributes of the class.
+        Returns boolean describing if updating was successful.
+        """
+
+        query = """
+        UPDATE assets SET
+            name = $2,
+            url_path = $3,
+            mimetype = $4,
+            type = $5,
+            data = $6
+        WHERE id = $1
+        """
+
+        try:
+            await self.pool.execute(query, self.id, self.name, self.url_path,
+                                    self.mimetype, self.type, self.data)
+        except asyncpg.UniqueViolationError:
+            return False
+
+        return True
+
+    @classmethod
+    async def delete(cls, asset_id: int) -> str:
+        """
+        Returns boolean describing if an asset was deleted or not.
+        """
+        return await cls.pool.execute("DELETE FROM assets WHERE id = $1", asset_id)

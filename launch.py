@@ -78,10 +78,10 @@ run_async(setup_session(quart_app=app))
 @app.cli.command()
 def initdb():
     async def init_db():
-        from api.models import all_models
+        from api.models import all_models  # Import models in the order I've defined as to avoid reference errors.
 
         for model in all_models:
-            print(await model.create_table(verbose=True))
+            print(await model.create_table(verbose=True))  # Create model Table.
             click.echo(f"Creating table {model.__name__}")
 
     run_async(init_db())
@@ -109,5 +109,4 @@ def runserver():
 
 
 if __name__ == "__main__":
-    logging.info(str(app.cli.commands))
     app.cli()

@@ -47,9 +47,7 @@ class User(Model):
         ON CONFLICT DO NOTHING;
         """
 
-        con = await self.ensure_con()
-
-        response = await con.execute(
+        response = await self.pool.execute(
             query,
             self.id,
             self.username,
