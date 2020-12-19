@@ -1,6 +1,6 @@
 from quart import Response, request, jsonify
 from logging import getLogger
-from typing import Optional
+from typing import Optional, Union
 
 from .. import blueprint
 from api.models import Guild
@@ -26,16 +26,16 @@ async def fetch_guild(guild_id: int):
 
 
 @blueprint.route('/', methods=["POST"])
-@utils.app_only
+@utils.auth_required
 @utils.expects_data(
     id=int,
     name=str,
     region=str,
     owner_id=int,
-    icon_hash=(NoneType, str),
-    muted_role_id=(NoneType, Optional[int]),
-    log_channel_id=(NoneType, Optional[int]),
-    verification_channel_id=(NoneType, Optional[int]),
+    icon_hash=Optional[str],
+    muted_role_id=Optional[int],
+    log_channel_id=Optional[int],
+    verification_channel_id=Optional[int],
 )
 async def create_guild(data: dict):
     """Create a new guild."""
@@ -53,6 +53,28 @@ async def create_guild(data: dict):
 
 
 @blueprint.route('/<int:guild_id>', methods=["PUT"])
-async def update_guild(guild_id: int):
+@utils.expects_data(
+    id=Optional[int],
+    name=Optional[str],
+    region=Optional[str],
+    owner_id=Optional[int],
+    icon_hash=Optional[Union[NoneType, str]],
+    muted_role_id=Optional[Union[NoneType, int]],
+    log_channel_id=Optional[Union[NoneType, int]],
+    verification_channel_id=Optional[Union[NoneType, int]],
+)
+async def update_guild(guild_id: int, data: dict):
     """Update guild with provided kwargs."""
+    if not data:  # data is empty, but exists.
+        return jsonify({"error": "400 Bad Request", "data": "No data"}), 400
 
+    guild = await Guild.fetch(id=guild_id)
+    if guild is None:
+        return jsonify(dict(
+            error="404 Not Found",
+            message="No Guild with that id in database."
+        )), 404
+
+    await guild.update(**data)
+
+    return jsonify({"message": "Success"}), 200

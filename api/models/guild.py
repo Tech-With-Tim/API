@@ -69,7 +69,7 @@ class Guild(Model):
     async def update(self, **new_kwargs):
         verified = {}
 
-        for arg in ("name", "icon_hash", "muted_role_id", "log_channel_id"):
+        for arg in [col.name for col in self.columns if col.name != "id"]:
             try:
                 value = new_kwargs[arg]
             except KeyError:
