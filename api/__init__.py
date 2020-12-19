@@ -25,7 +25,7 @@ def setup_app() -> Quart:
     before loading the complete app.
     """
 
-    from api.blueprints import auth, cdn, logging
+    from api.blueprints import auth, cdn, logging, guilds
     from quart_cors import cors
     import utils
 
@@ -39,6 +39,7 @@ def setup_app() -> Quart:
     self.request_class = utils.Request
 
     # setup Blueprints:
+    guilds.setup(app=self, url_prefix="/guilds")
     logging.setup(app=self, url_prefix="/log")
     auth.setup(app=self, url_prefix="/auth")
     cdn.setup(app=self, url_prefix="/cdn")
@@ -98,7 +99,7 @@ async def not_found(_):
 
     TODO: Log this ?
     """
-    return jsonify({"error": "NotFound - Nothing matches the given URI"}), 404
+    return jsonify({"error": "NotFound", "message": "Nothing matches the given URI"}), 404
 
 
 @app.errorhandler(405)
@@ -111,7 +112,8 @@ async def method_not_allowed(_):
 
     return jsonify(
         {
-            "error": "405 Method Not Allowed - Specified method is invalid for this resource"
+            "error": "405 Method Not Allowed",
+            "message": "Specified method is invalid for this resource"
         }
     )
 
