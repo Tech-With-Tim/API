@@ -1,6 +1,6 @@
 from quart import Quart, Blueprint
 
-blueprint: Blueprint = Blueprint("cdn", __name__)
+blueprint: Blueprint = Blueprint("users", __name__)
 
 
 def setup(app: Quart, url_prefix: str):

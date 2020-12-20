@@ -1,17 +1,17 @@
-from quart import current_app, Response, request, jsonify
+from quart import Response, request, jsonify
 
 from logging import getLogger
 
-from .. import blueprint
+from api.blueprints.auth import blueprint
 
 from api.models import User
 import utils
 
 request: utils.Request
-log = getLogger("/auth/users")
+log = getLogger("/users")
 
 
-@blueprint.route("/users", methods=["GET"])
+@blueprint.route("/", methods=["GET"])
 @utils.auth_required
 async def bulk_get_users():
     """
@@ -36,7 +36,7 @@ async def bulk_get_users():
     )
 
 
-@blueprint.route("/users", methods=["POST"])
+@blueprint.route("/", methods=["POST"])
 @utils.expects_data(
     id=int,
     username=str,
@@ -63,7 +63,7 @@ async def create_user(data: dict):
     return Response("", status=202 - created)
 
 
-@blueprint.route("/users/<int:id>")
+@blueprint.route("/<int:id>")
 @utils.app_only
 async def get_specific_user(id: int):
     """
@@ -85,7 +85,7 @@ async def get_specific_user(id: int):
     return jsonify(user.as_dict(user))
 
 
-@blueprint.route("/users/@me", methods=["GET"])
+@blueprint.route("/@me", methods=["GET"])
 @utils.auth_required
 async def get_user() -> Response:
     """
