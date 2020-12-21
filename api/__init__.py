@@ -1,10 +1,3 @@
-"""
-Main app file where we (in order):
-    - Setup logging
-    - Implement error handling
-    - Load blueprints
-"""
-
 from quart import Quart, jsonify
 import logging
 
@@ -24,8 +17,8 @@ def setup_app() -> Quart:
     """Separate function to setup the Quart app so that we can implement logging
     before loading the complete app.
     """
-
     from api.blueprints import auth, cdn, logging, guilds, users
+
     from quart_cors import cors
     import utils
 
