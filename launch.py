@@ -9,7 +9,8 @@ import asyncio
 import click
 import sys
 import os
-
+from hypercorn.asyncio import serve
+from hypercorn.config import Config
 
 try:
     import uvloop  # noqa
@@ -20,14 +21,12 @@ else:
 
 asyncio.set_event_loop(loop)
 
-
 env = {
     "SECRET_KEY": None,
     "DB_URI": None,
     "DISCORD_CLIENT_ID": None,
     "DISCORD_CLIENT_SECRET": None,
 }
-
 
 try:
     with open("local.env", "r") as f:
@@ -37,7 +36,6 @@ try:
         }
 except FileNotFoundError:
     env_file = {}
-
 
 for key in env.keys():
     try:
@@ -114,7 +112,10 @@ def dropdb():
 @click.option('--host', default='127.0.0.1')
 @click.option('--port', default=5000)
 def runserver(host, port):
-    app.run(loop=loop, debug=True, use_reloader=False, host=host, port=int(port))
+    # app.run(loop=loop, debug=True, use_reloader=False, host=host, port=int(port))
+    config = Config()
+    config.bind = [host + ':' + str(port)]
+    loop.run_until_complete(serve(app), config)
 
 
 if __name__ == "__main__":
