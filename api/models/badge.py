@@ -13,6 +13,7 @@ class Badge(Model):
         :param str asset:           The connected asset name
     """
     id = Column(types.Serial)
+    name = Column(types.String)
     user_id = Column(
         types.ForeignKey("users", "id", sql_type=types.Integer(big=True))
     )

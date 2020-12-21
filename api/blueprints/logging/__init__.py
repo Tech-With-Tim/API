@@ -4,7 +4,8 @@ blueprint: Blueprint = Blueprint("logging", __name__)
 
 
 def setup(app: Quart, url_prefix: str):
-    from .views import __all__
+    from .views import placeholder
+    # Import anything in the file so we load the blueprint routes.
 
     # Reguster blueprint to Quart instance.
     app.register_blueprint(blueprint=blueprint, url_prefix=url_prefix)
