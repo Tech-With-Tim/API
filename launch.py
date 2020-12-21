@@ -1,5 +1,7 @@
 from api import app
 
+from hypercorn.asyncio import serve
+from hypercorn.config import Config
 from typing import Any, Coroutine
 from aiohttp import ClientSession
 from postDB import Model
@@ -9,8 +11,6 @@ import asyncio
 import click
 import sys
 import os
-from hypercorn.asyncio import serve
-from hypercorn.config import Config
 
 try:
     import uvloop  # noqa
@@ -112,10 +112,9 @@ def dropdb():
 @click.option('--host', default='127.0.0.1')
 @click.option('--port', default=5000)
 def runserver(host, port):
-    # app.run(loop=loop, debug=True, use_reloader=False, host=host, port=int(port))
     config = Config()
     config.bind = [host + ':' + str(port)]
-    loop.run_until_complete(serve(app), config)
+    loop.run_until_complete(serve(app, config))
 
 
 if __name__ == "__main__":
