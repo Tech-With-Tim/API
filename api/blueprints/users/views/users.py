@@ -2,7 +2,7 @@ from quart import Response, request, jsonify
 
 from logging import getLogger
 
-from api.blueprints.auth import blueprint
+from .. import blueprint
 
 from api.models import User
 import utils
