@@ -24,7 +24,7 @@ class User(Model):
     TYPES = Enum("UserTypes", "USER APP")
     default = "USER"
 
-    id = Column(types.Integer(big=True), unique=True)
+    id = Column(types.String(), unique=True)
     username = Column(types.String(length=32), primary_key=True)
     discriminator = Column(types.String(length=32), primary_key=True)
     avatar = Column(types.String, nullable=True)
