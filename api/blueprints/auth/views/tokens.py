@@ -176,8 +176,6 @@ async def get_my_token(data: dict):
 
     discord_data: dict = await get_user(access_token=access_data["access_token"])
 
-    discord_data["id"] = int(discord_data["id"])
-
     user = await User.fetch(discord_data["id"])
 
     if user is None:

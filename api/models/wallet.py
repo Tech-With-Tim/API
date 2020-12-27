@@ -10,12 +10,12 @@ class Wallet(Model):
         :param int tokens:          The members challenge tokens.
     """
     user_id = Column(
-        types.ForeignKey("users", "id", sql_type=types.Integer(big=True)),
+        types.ForeignKey("users", "id", sql_type=types.String()),
         primary_key=True
     )
 
     guild_id = Column(
-        types.ForeignKey("guilds", "id", sql_type=types.Integer(big=True)),
+        types.ForeignKey("guilds", "id", sql_type=types.String()),
         primary_key=True
     )
 

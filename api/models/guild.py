@@ -20,7 +20,7 @@ class Guild(Model):
         :param int verification_channel_id:     Verification channel
     """
 
-    id = Column(types.Integer(big=True), primary_key=True)
+    id = Column(types.String(), primary_key=True)
     name = Column(types.String(length=100))
     region = Column(types.String)
     icon_hash = Column(types.String)
@@ -31,7 +31,7 @@ class Guild(Model):
 
     @property
     def created_at(self):
-        return utils.snowflake_time(self.id)
+        return utils.snowflake_time(int(self.id))
 
     @classmethod
     async def fetch(cls, id: int) -> Optional["Guild"]:

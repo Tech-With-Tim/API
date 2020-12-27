@@ -13,7 +13,7 @@ class User(Model):
     Database Attributes:
         Attributes stored in the `users` table.
 
-        :param int id:              The users Discord ID
+        :param str id:              The users Discord ID
         :param str username:        The users discord username.
         :param str discriminator:   The users discord discriminator.
         :param str avatar:          The users avatar hash, could be None.
@@ -33,7 +33,7 @@ class User(Model):
 
     @property
     def created_at(self):
-        return utils.snowflake_time(self.id)
+        return utils.snowflake_time(int(self.id))
 
     async def create(self) -> bool:
         """

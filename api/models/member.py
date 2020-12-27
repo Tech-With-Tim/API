@@ -18,12 +18,12 @@ class Member(Model):
     """
 
     id = Column(
-        types.ForeignKey("users", "id", sql_type=types.Integer(big=True)),
+        types.ForeignKey("users", "id", sql_type=types.String()),
         primary_key=True
     )
 
     guild_id = Column(
-        types.ForeignKey("guilds", "id", sql_type=types.Integer(big=True)),
+        types.ForeignKey("guilds", "id", sql_type=types.String()),
         primary_key=True
     )
 
@@ -32,4 +32,4 @@ class Member(Model):
 
     @property
     def created_at(self):
-        return utils.snowflake_time(self.id)
+        return utils.snowflake_time(int(self.id))

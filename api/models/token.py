@@ -12,7 +12,7 @@ class Token(Model):
     Database Attributes:
         Attributes stored in the `tokens` table.
 
-        :param int user_id: The discord user this token relates to.
+        :param str user_id: The discord user this token relates to.
         :param str token: The token itself.
         :param str type: The token type (JWT / OAUTH2)
         :param :class:`datetime.datetime` expires_at: The time this token expires.
@@ -21,7 +21,7 @@ class Token(Model):
     """
 
     user_id = Column(
-        types.ForeignKey("users", "id", sql_type=types.Integer(big=True)),
+        types.ForeignKey("users", "id", sql_type=types.String()),
         primary_key=True,
     )
     type = Column(

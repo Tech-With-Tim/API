@@ -9,13 +9,13 @@ class Badge(Model):
         Attributes stored in the `badges` table.
 
         :param int id:              The badge ID.  - Barely used.
-        :param int user_id:         The user who recieved this badge.
+        :param str user_id:         The user who recieved this badge.
         :param str asset:           The connected asset name
     """
     id = Column(types.Serial)
     name = Column(types.String)
     user_id = Column(
-        types.ForeignKey("users", "id", sql_type=types.Integer(big=True))
+        types.ForeignKey("users", "id", sql_type=types.String())
     )
     asset = Column(
         types.ForeignKey("assets", "name", sql_type=types.String(length=100))
