@@ -93,6 +93,4 @@ async def get_user() -> Response:
 
     Requires Token authentication.
     """
-    user = request.user.as_dict()
-    user["id"] = str(user["id"])
-    return jsonify(user)
+    return jsonify(request.user.as_dict())
