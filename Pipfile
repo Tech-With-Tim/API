@@ -4,8 +4,18 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+black = "*"
 
 [packages]
+quart = "*"
+quart-cors = "*"
+postdb = "*"
+pyjwt = "*"
+aiohttp = "*"
+uvloop = {markers = "platform_system == 'linux'", version = "*"}
 
 [requires]
 python_version = "3.8"
+
+[pipenv]
+allow_prereleases = true
