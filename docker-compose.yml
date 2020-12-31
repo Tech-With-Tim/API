@@ -1,0 +1,32 @@
+version: "3.7"
+services:
+
+  db:
+    image: postgres:13
+    ports:
+      - "127.0.0.1:7777:5432"
+    restart: always
+    environment:
+      POSTGRES_USER: API
+      POSTGRES_PASSWORD: API
+      POSTGRES_DB: API
+
+    volumes:
+      - /var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    links:
+      - db
+    environment:
+      SECRET_KEY: "${SECRET_KEY}"
+      DISCORD_CLIENT_ID: "${DISCORD_CLIENT_ID}"
+      DISCORD_CLIENT_SECRET: "${DISCORD_CLIENT_SECRET}"
+      DB_URI: postgres://API:API@db:5432/API
