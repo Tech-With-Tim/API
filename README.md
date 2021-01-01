@@ -1,11 +1,3 @@
-# API
-[![Discord](https://img.shields.io/static/v1?label=Tech%20With%20Tim&logo=discord&message=%3E20k%20members&color=%237289DA&logoColor=white)](https://discord.gg/twt)
-[![Status](https://img.shields.io/website?url=https%3A%2F%2Fapi.dev.twtcodejam.net)](https://api.dev.twtcodejam.net) <!-- TODO: Switch to main API link. -->
-[![Licence](https://img.shields.io/badge/license-MIT-green)](LICENCE)
-
-TODO: Lint & Test status\
-TODO: Build & Deploy status
-
 <img align="right" width=200px height=200px src="https://cdn.discordapp.com/attachments/776153365452554301/786297555415859220/Tech-With-Tim.png" alt="Project logo">
 
 <h1>Tech With Tim website API</h1>
@@ -14,11 +6,13 @@ TODO: Build & Deploy status
 
 <div>
 
+[![Status](https://img.shields.io/website?url=https%3A%2F%2Fapi.dev.twtcodejam.net)](https://api.dev.twtcodejam.net) <!-- TODO: Switch to main API link. -->
 [![GitHub Issues](https://img.shields.io/github/issues/Tech-With-Tim/API.svg)](https://github.com/Tech-With-Tim/API/issues)
 [![GitHub Pull Requests](https://img.shields.io/github/issues-pr/Tech-With-Tim/API.svg)](https://github.com/Tech-With-Tim/API/pulls)
 [![Licence](https://img.shields.io/badge/licence-MIT-blue.svg)](/LICENCE)
 [![Discord](https://discord.com/api/guilds/501090983539245061/widget.png?style=shield)](https://discord.gg/twt)
 [![Test and deploy](https://github.com/Tech-With-Tim/API/workflows/Release%20-%20Test%2C%20Build%20%26%20Redeploy/badge.svg)](https://github.com/Tech-With-Tim/API/actions?query=workflow%3A%22Release+-+Test%2C+Build+%26+Redeploy%22)
+<!-- TODO: Lint & Test status -->
 
 </div>
 
@@ -28,7 +22,7 @@ API for the Tech With Tim website using [Quart](https://pgjones.gitlab.io/quart/
 
 <!-- - [About](#about) -->
 - [Getting Started](#getting_started)
-- [Deployment](#deployment)
+- [Deployment with Docker](#deployment)
 - [Built Using](#built_using)
 - [Contributing](/CONTRIBUTING.md)
 - [License](/LICENSE.md)
@@ -40,7 +34,7 @@ TODO: Write about 1-2 paragraphs describing the purpose of your project. -->
 
 ## 🏁 Getting Started <a name = "getting_started"></a>
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See [deployment](#deployment) for notes on how to deploy the project on a live system.
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See [deployment with Docker](#deployment) if you want to setup the API easier.
 
 ### Discord application <a name = "discord_application"></a>
 
@@ -147,6 +141,5 @@ Both the API and the [frontend](https://github.com/Tech-With-Tim/Frontend) can b
 - [@SylteA](https://github.com/SylteA) - Most of the backend
 - [@Shubhaankar-sharma](https://github.com/Shubhaankar-sharma) - Docker deployment
 - [@takos22](https://github.com/takos22) - Markdown files
-
 
 See also the list of [contributors](https://github.com/Tech-With-Tim/API/contributors) who participated in this project.
