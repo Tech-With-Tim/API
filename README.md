@@ -122,19 +122,21 @@ python launch.py runserver --initdb
 
 The API should run at [http://127.0.0.1:5000](http://127.0.0.1:5000).
 
-## 🚀 Deployment <a name = "deployment"></a>
+## 🚀 Deployment with Docker <a name = "deployment"></a>
 
-Setup the discord app like done [here](#discord-application).
+Both the API and the [frontend](https://github.com/Tech-With-Tim/Frontend) can be started using Docker. Using Docker is generally recommended (but not stricly required) because it abstracts away some additional set up work.
 
-Make a file named `.env` like done [here](#environment-variables).
+- Setup the discord app like done [here](#discord-application).
 
-Then make sure you have `docker` and `docker-compose` installed, if not read [this for docker](https://docs.docker.com/engine/install/) and [this for docker compose](https://docs.docker.com/compose/install/).
+- Make a file named `.env` like done [here](#environment-variables).
 
-Deploy the API:
+- Then make sure you have `docker` and `docker-compose` installed, if not read [this for docker](https://docs.docker.com/engine/install/) and [this for docker compose](https://docs.docker.com/compose/install/).
 
-```sh
-docker-compose up
-```
+- Deploy the API:
+
+    ```sh
+    docker-compose up
+    ```
 
 ## ⛏️ Built Using <a name = "built_using"></a>
 
