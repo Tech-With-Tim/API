@@ -13,6 +13,9 @@ import sys
 import os
 
 
+logging.basicConfig(level=logging.DEBUG)
+
+
 try:
     import uvloop  # noqa
 except ModuleNotFoundError:
@@ -73,7 +76,7 @@ async def prepare_postgres(retries: int = 5, interval: float = 10.0) -> bool:
     """
     log = logging.getLogger("DB")
     db_name = ENV["DB_URI"].split("/")[-1]
-    log.info('Attempting to connect to DB "%s"' % db_name)
+    log.info('[i] Attempting to connect to DB "%s"' % db_name)
     for i in range(1, retries + 1):
         try:
             await Model.create_pool(
@@ -104,7 +107,7 @@ async def prepare_postgres(retries: int = 5, interval: float = 10.0) -> bool:
 
             await asyncio.sleep(interval)
 
-    log.info('[!] Connected to database "%s"' % db_name)
+    log.info('[✔] Connected to database "%s"' % db_name)
     return True
 
 
