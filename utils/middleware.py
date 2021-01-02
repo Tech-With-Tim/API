@@ -3,9 +3,6 @@ import jwt
 import os
 
 
-from api.models import User
-
-
 class TokenAuthMiddleware:
     """
     Class used to authorize requests.
@@ -43,7 +40,6 @@ class TokenAuthMiddleware:
         except jwt.PyJWTError:
             return await run()
 
-        scope["payload"] = payload
-        scope["user"] = partial(User.fetch, payload["uid"])()
+        scope["jwt"] = payload
 
         return await run()
