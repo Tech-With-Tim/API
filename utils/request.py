@@ -8,5 +8,13 @@ class Request(BaseRequest):
     """Custom request class to implement authorization."""
 
     @property
-    def user(self) -> Optional[User]:
-        return self.scope.get("user", None)
+    async def user(self) -> Optional[User]:
+        coro = self.scope.get("user")
+        if coro is None:
+            return None
+
+        return await coro
+
+    @property
+    def payload(self) -> Optional[dict]:
+        return self.scope.get("payload")

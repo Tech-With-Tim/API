@@ -1,4 +1,4 @@
-from quart import Quart, Response, exceptions, jsonify
+from quart import Quart, exceptions, jsonify, request
 from datetime import datetime, date
 from aiohttp import ClientSession
 from typing import Any, Optional
@@ -29,7 +29,7 @@ class API(Quart):
     json_encoder = JSONEncoder
 
     def __init__(self, *args, **kwargs):
-        kwargs.setdefault('static_folder', None)
+        kwargs.setdefault("static_folder", None)
         super().__init__(*args, **kwargs)
 
     async def handle_http_exception(self, error: exceptions.HTTPException):
@@ -43,6 +43,9 @@ class API(Quart):
         if handler is not None:
             return await handler(error)
 
+        from pprint import pprint
+        pprint(request.scope.get("payload"))
+
         return (
             jsonify({"error": "%s - %s" % (error.name, error.description)}),
             error.status_code,
@@ -54,6 +57,7 @@ class API(Quart):
 
 
 app = API(__name__)
+app.asgi_app = utils.TokenAuthMiddleware(app.asgi_app, app)
 app = cors(app, allow_origin="*")  # TODO: Restrict the origin(s) in production.
 
 

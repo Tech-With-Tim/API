@@ -20,7 +20,7 @@ API for the Tech With Tim website using [Quart](https://pgjones.gitlab.io/quart/
 
 <!-- - [About](#about) -->
 - [Getting Started](#getting_started)
-- [Deployment with Docker](#deployment)
+- [Running with Docker](#deployment)
 - [Built Using](#built_using)
 - [Contributing](/CONTRIBUTING.md)
 - [License](/LICENSE.md)
@@ -32,7 +32,7 @@ TODO: Write about 1-2 paragraphs describing the purpose of your project. -->
 
 ## 🏁 Getting Started <a name = "getting_started"></a>
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See [deployment with Docker](#deployment) if you want to setup the API easier.
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See [Running with Docker](#deployment) if you want to setup the API easier.
 
 ### Discord application <a name = "discord_application"></a>
 
@@ -114,7 +114,7 @@ python launch.py runserver --initdb
 
 The API should run at [http://127.0.0.1:5000](http://127.0.0.1:5000).
 
-## 🚀 Deployment with Docker <a name = "deployment"></a>
+## 🚀 Running with Docker <a name = "deployment"></a>
 
 Both the API and the [frontend](https://github.com/Tech-With-Tim/Frontend) can be started using Docker. Using Docker is generally recommended (but not stricly required) because it abstracts away some additional set up work.
 
