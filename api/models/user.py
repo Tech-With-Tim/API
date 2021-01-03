@@ -52,7 +52,9 @@ class User(Model):
         ON CONFLICT DO NOTHING;
         """
 
-        record = await cls.pool.fetchrow(query, int(id), username, discriminator, avatar, type)
+        record = await cls.pool.fetchrow(
+            query, int(id), username, discriminator, avatar, type
+        )
 
         if record is None:
             return None

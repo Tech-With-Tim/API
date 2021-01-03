@@ -11,6 +11,7 @@ class TokenAuthMiddleware:
     If the request was authorized, you can use "await request.user" to get the user that made the request.
     Delaying this request is to reduce the average response time.
     """
+
     def __init__(self, asgi_app, app):
         self.asgi_app = asgi_app
         self.app = app
@@ -32,9 +33,7 @@ class TokenAuthMiddleware:
 
         try:
             payload = jwt.decode(
-                jwt=token,
-                algorithms=["HS256"],
-                key=os.environ["SECRET_KEY"]
+                jwt=token, algorithms=["HS256"], key=os.environ["SECRET_KEY"]
             )
 
         except jwt.PyJWTError:

@@ -89,7 +89,7 @@ async def prepare_postgres(retries: int = 5, interval: float = 10.0) -> bool:
             log.error("[!] %s" % str(e))
             return False
 
-        except (ConnectionRefusedError, ):
+        except (ConnectionRefusedError,):
             log.warning(
                 "[!] Failed attempt #%s/%s, trying again in %ss"
                 % (i, retries - i, interval)

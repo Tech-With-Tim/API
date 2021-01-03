@@ -43,9 +43,6 @@ class API(Quart):
         if handler is not None:
             return await handler(error)
 
-        from pprint import pprint
-        pprint(request.scope.get("payload"))
-
         return (
             jsonify({"error": "%s - %s" % (error.name, error.description)}),
             error.status_code,
