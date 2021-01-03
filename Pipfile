@@ -5,6 +5,8 @@ verify_ssl = true
 
 [dev-packages]
 black = "*"
+flake8 = "*"
+pre-commit = "*"
 
 [packages]
 quart = "*"
@@ -19,3 +21,5 @@ python_version = "3.8"
 
 [pipenv]
 allow_prereleases = true
+
+[scripts]
