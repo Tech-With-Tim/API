@@ -37,7 +37,7 @@ class Request(BaseRequest):
         if not self.is_authorized:
             return None
 
-        return self.jwt["uid"]
+        return int(self.jwt["uid"])
 
     @property
     def jwt(self) -> Optional[dict]:

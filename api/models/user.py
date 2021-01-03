@@ -52,7 +52,7 @@ class User(Model):
         ON CONFLICT DO NOTHING;
         """
 
-        record = await cls.pool.fetchrow(query, id, username, discriminator, avatar, type)
+        record = await cls.pool.fetchrow(query, int(id), username, discriminator, avatar, type)
 
         if record is None:
             return None
@@ -60,10 +60,10 @@ class User(Model):
         return cls(**record)
 
     @classmethod
-    async def fetch(cls, id: int) -> Optional["User"]:
+    async def fetch(cls, id: Union[str, int]) -> Optional["User"]:
         """Fetch a user with the given ID."""
         query = "SELECT * FROM users WHERE id = $1"
-        user = await cls.pool.fetchrow(query, id)
+        user = await cls.pool.fetchrow(query, int(id))
 
         if user is not None:
             user = cls(**user)
