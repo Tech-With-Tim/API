@@ -85,17 +85,11 @@ async def prepare_postgres(retries: int = 5, interval: float = 10.0) -> bool:
                 loop=loop,
             )
 
-        except (ValueError,) as _:
-            log.critical(
-                "[!] Error when to connecting to DB, exiting...", exc_info=True
-            )
-            return False
-
         except asyncpg.InvalidPasswordError as e:
             log.error("[!] %s" % str(e))
             return False
 
-        except asyncpg.PostgresConnectionError:
+        except (ConnectionRefusedError, ):
             log.warning(
                 "[!] Failed attempt #%s/%s, trying again in %ss"
                 % (i, retries - i, interval)
