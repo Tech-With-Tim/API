@@ -6,7 +6,7 @@ name: Python test package
 on: 
   push:
     branches:
-      - master
+      - rewrite
   pull_request:
 
 jobs:
