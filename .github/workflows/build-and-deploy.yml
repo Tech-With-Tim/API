@@ -36,7 +36,7 @@ jobs:
           tags: ${{ secrets.DOCKER_REPO_API }}
 
       - name: Redeploy on Server
-        uses: joelwmale/webhook-action@v2
+        uses: joelwmale/webhook-action@master
         with:
           url: ${{ secrets.DEPLOY_WEBHOOK_URL }}
           data: '{"token": "${{ secrets.DEPLOY_TOKEN }}"}'
