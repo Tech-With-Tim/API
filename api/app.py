@@ -1,4 +1,4 @@
-from quart import Quart, exceptions, jsonify, request
+from quart import Quart, exceptions, jsonify
 from datetime import datetime, date
 from aiohttp import ClientSession
 from typing import Any, Optional
@@ -56,6 +56,12 @@ class API(Quart):
 app = API(__name__)
 app.asgi_app = utils.TokenAuthMiddleware(app.asgi_app, app)
 app = cors(app, allow_origin="*")  # TODO: Restrict the origin(s) in production.
+
+
+@app.route("/")
+async def index():
+    """Index endpoint used for testing."""
+    return jsonify({"status": "OK"})
 
 
 @app.errorhandler(500)

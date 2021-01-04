@@ -32,6 +32,17 @@ class User(Model):
     type = Column(types.String(), default="USER")
 
     @classmethod
+    async def fetch(cls, id: Union[str, int]) -> Optional["User"]:
+        """Fetch a user with the given ID."""
+        query = "SELECT * FROM users WHERE id = $1"
+        user = await cls.pool.fetchrow(query, int(id))
+
+        if user is not None:
+            user = cls(**user)
+
+        return user
+
+    @classmethod
     async def create(
         cls,
         id: Union[str, int],
@@ -60,17 +71,6 @@ class User(Model):
             return None
 
         return cls(**record)
-
-    @classmethod
-    async def fetch(cls, id: Union[str, int]) -> Optional["User"]:
-        """Fetch a user with the given ID."""
-        query = "SELECT * FROM users WHERE id = $1"
-        user = await cls.pool.fetchrow(query, int(id))
-
-        if user is not None:
-            user = cls(**user)
-
-        return user
 
     @property
     def created_at(self) -> datetime:

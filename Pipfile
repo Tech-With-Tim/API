@@ -15,6 +15,7 @@ postdb = "*"
 pyjwt = "*"
 aiohttp = "*"
 uvloop = {markers = "platform_system == 'linux'", version = "*"}
+pytest-asyncio = "*"
 
 [requires]
 python_version = "3.8"
@@ -23,3 +24,5 @@ python_version = "3.8"
 allow_prereleases = true
 
 [scripts]
+precommit = "pre-commit install"
+lint = "pre-commit run --all-files"

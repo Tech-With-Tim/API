@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 try:
-    import uvloop  # noqa
+    import uvloop
 except ModuleNotFoundError:
     loop = asyncio.new_event_loop()
 else:
@@ -118,7 +118,7 @@ async def safe_create_tables(verbose: bool = False) -> None:
 
     for model in models_ordered:
         await model.create_table(verbose=verbose)
-        log.info("Created table %s" % type(model).__tablename__)
+        log.info("Created table %s" % model.__tablename__)
 
 
 @app.cli.command(name="initdb")
