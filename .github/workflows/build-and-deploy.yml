@@ -39,4 +39,4 @@ jobs:
         uses: joelwmale/webhook-action@master
         with:
           url: ${{ secrets.DEPLOY_WEBHOOK_URL }}
-          data: '{"token": "${{ secrets.DEPLOY_TOKEN }}"}'
+          body: '{"token": "${{ secrets.DEPLOY_TOKEN }}"}'
