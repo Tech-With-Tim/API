@@ -1,0 +1,25 @@
+name: Greeting
+
+on: [issues, pull_request]
+
+jobs:
+  greeting:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/first-interaction@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          issue-message: |
+            Hi **${{ github.actor }}**, Thanks for reporting an issue in our Repository.
+            If you haven't already, please include relevant information asked for in our templates.
+          pr-message: |
+            <img align="right" src="https://cdn.discordapp.com/attachments/794169526509764620/794491932666757141/Tech-With-TimM.png">
+            Hey **${{ github.actor }}**, welcome to the repo for the Tech With Tim API.
+            Please follow the following guidelines while opening a PR:
+
+            - Any new or changed endpoints should be thoroughly documented.
+            - Write and or update tests for your new / updated endpoints.
+            - All code should be easly readable or commented.
+
+            If your code does not meet these requirements your PR will not be accepted.
