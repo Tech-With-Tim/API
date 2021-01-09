@@ -5,6 +5,8 @@ on:
     branches:
       - rewrite
   pull_request:
+    branches:
+      - rewrite
 
 
 jobs:
