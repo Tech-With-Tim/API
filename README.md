@@ -1,6 +1,6 @@
 <img align="right" width=200px height=200px src="https://cdn.discordapp.com/attachments/776153365452554301/786297555415859220/Tech-With-Tim.png" alt="Project logo">
 
-# Tech With Tim - API
+<h1>Tech With Tim - API</h1>
 
 <div>
 
@@ -18,23 +18,27 @@ API for the Tech With Tim website using [Quart](https://pgjones.gitlab.io/quart/
 
 ## 📝 Table of Contents
 
-<!-- - [About](#about) -->
-- [Getting Started](#getting_started)
-- [Running with Docker](#deployment)
-- [Built Using](#built_using)
-- [Contributing](/CONTRIBUTING.md)
-- [License](/LICENSE.md)
-- [Authors](#authors)
+<!-- - [🧐 About](#-about) -->
+- [🏁 Getting Started](#-getting-started)
+  - [Discord application](#discord-application)
+  - [Prerequisites](#prerequisites)
+  - [Environment variables](#environment-variables)
+  - [Running](#running)
+- [🐳 Running with Docker](#-running-with-docker)
+- [🚨 Tests](#-tests)
+- [📜 Licence](/LICENCE)
+- [⛏️ Built Using](#️-built-using)
+- [✍️ Authors](#️-authors)
 
-<!-- ## 🧐 About <a name = "about"></a>
+<!-- ## 🧐 About
 
 TODO: Write about 1-2 paragraphs describing the purpose of your project. -->
 
-## 🏁 Getting Started <a name = "getting_started"></a>
+## 🏁 Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See [Running with Docker](#deployment) if you want to setup the API easier.
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See [Running with Docker](#-running-with-docker) if you want to setup the API faster with Docker.
 
-### Discord application <a name = "discord_application"></a>
+### Discord application
 
 Create a new Discord application [here](https://discord.com/developers/applications) by clicking the `New application` button and name it whatever you want.
 
@@ -62,13 +66,13 @@ Install the required packages with Pipenv:
 pipenv install
 ```
 
-### Environment variables <a name = "env_vars"></a>
+### Environment variables
 
 Set the environment variables:
 
 > You can do this with a file named `local.env` or directly through the console. We recomend the `local.env` file as it won't be deleted when you open the console again.
 
-#### `local.env` file <a name = "local_env"></a>
+#### `local.env` file
 
 ```prolog
 SECRET_KEY=some_random_characters_here
@@ -109,12 +113,12 @@ DISCORD_CLIENT_SECRET=
 Run the API and initialise the database:
 
 ```sh
-python launch.py runserver --initdb
+pipenv run python launch.py runserver --initdb
 ```
 
 The API should run at [http://127.0.0.1:5000](http://127.0.0.1:5000).
 
-## 🚀 Running with Docker <a name = "deployment"></a>
+## 🐳 Running with Docker
 
 Both the API and the [frontend](https://github.com/Tech-With-Tim/Frontend) can be started using Docker. Using Docker is generally recommended (but not stricly required) because it abstracts away some additional set up work.
 
@@ -130,11 +134,26 @@ Both the API and the [frontend](https://github.com/Tech-With-Tim/Frontend) can b
     docker-compose up
     ```
 
-## ⛏️ Built Using <a name = "built_using"></a>
+## 🚨 Tests
 
+To test the API, we use the [pytest](https://docs.pytest.org/en/stable/) framework to make sure that the code we write works.
+
+Run the tests:
+
+```sh
+pipenv run pytest
+```
+
+**When you contribute, you need to add tests on the features you add.** An example can be seen in [tests/test_index.py](/tests/test_index.py).
+
+## ⛏️ Built Using
+
+- [Python](https://www.python.org/) - Language
 - [Quart](https://pgjones.gitlab.io/quart/) - Backend module
+- [PostDB](https://github.com/SylteA/postDB) - Database module
+- [pytest](https://docs.pytest.org/en/stable/) - Test framework
 
-## ✍️ Authors <a name = "authors"></a>
+## ✍️ Authors
 
 - [@SylteA](https://github.com/SylteA) - Most of the backend
 - [@Shubhaankar-sharma](https://github.com/Shubhaankar-sharma) - Docker deployment
