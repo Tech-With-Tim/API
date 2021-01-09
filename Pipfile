@@ -7,6 +7,7 @@ verify_ssl = true
 black = "*"
 flake8 = "*"
 pre-commit = "*"
+pytest = "*"
 
 [packages]
 quart = "*"
