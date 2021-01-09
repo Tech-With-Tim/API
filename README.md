@@ -25,6 +25,7 @@ API for the Tech With Tim website using [Quart](https://pgjones.gitlab.io/quart/
   - [Environment variables](#environment-variables)
   - [Running](#running)
 - [🐳 Running with Docker](#-running-with-docker)
+- [✅ Linting](#-linting)
 - [🚨 Tests](#-tests)
 - [📜 Licence](/LICENCE)
 - [⛏️ Built Using](#️-built-using)
@@ -48,9 +49,9 @@ Now that you have an application, go to the OAuth2 tab.
 
 ![OAuth2 tab](https://cdn.discordapp.com/attachments/721750194797936823/794648158272487435/unknown.png)
 
-And add `http://localhost:5000/auth/discord/code` to the redirects.
+And add `http://localhost:5000/auth/discord/callback` to the redirects.
 
-![Redirects](https://cdn.discordapp.com/attachments/721750194797936823/794648574150836224/unknown.png)
+![Redirects](https://cdn.discordapp.com/attachments/721750194797936823/797485068238716958/unknown.png)
 
 ### Prerequisites
 
@@ -68,11 +69,7 @@ pipenv install
 
 ### Environment variables
 
-Set the environment variables:
-
-> You can do this with a file named `local.env` or directly through the console. We recomend the `local.env` file as it won't be deleted when you open the console again.
-
-#### `local.env` file
+Set the environment variables. Start by writing this in a file named `local.env`:
 
 ```prolog
 SECRET_KEY=some_random_characters_here
@@ -81,32 +78,14 @@ DISCORD_CLIENT_ID=
 DISCORD_CLIENT_SECRET=
 ```
 
+And fill in the variables with the values below:
+
 - `SECRET_KEY` is the key used for the JWT token encoding.
 - `DB_URI` is the PostgreSQL database URI.
 - `DISCORD_CLIENT_ID` is the Discord application ID. Copy it from your Discord application page (see below).
 - `DISCORD_CLIENT_SECRET` is the Discord application secret. Copy it from your Discord application page (see below).
 
 ![Client ID and secret](https://cdn.discordapp.com/attachments/721750194797936823/794646777840140298/unknown.png)
-
-#### Console
-
-- For cmd:
-
-    ```cmd
-    set SECRET_KEY=some_random_characters_here
-    set DB_URI=postgresql://user:password@db:5432/twt
-    set DISCORD_CLIENT_ID=
-    set DISCORD_CLIENT_SECRET=
-    ```
-
-- For shell:
-
-    ```sh
-    export SECRET_KEY=some_random_characters_here
-    export DB_URI=postgresql://user:password@db:5432/twt
-    export DISCORD_CLIENT_ID=
-    export DISCORD_CLIENT_SECRET=
-    ```
 
 ### Running
 
@@ -124,7 +103,7 @@ Both the API and the [frontend](https://github.com/Tech-With-Tim/Frontend) can b
 
 - Setup the discord app like done [here](#discord-application).
 
-- Make a file named `.env` like done [here](#environment-variables).
+- Make a file named `.env` like done [here](#environment-variables). You don't need the DB_URI environment variable though.
 
 - Then make sure you have `docker` and `docker-compose` installed, if not read [this for docker](https://docs.docker.com/engine/install/) and [this for docker compose](https://docs.docker.com/compose/install/).
 
@@ -133,6 +112,20 @@ Both the API and the [frontend](https://github.com/Tech-With-Tim/Frontend) can b
     ```sh
     docker-compose up
     ```
+
+## ✅ Linting
+
+We use a pre-commit hook for linting the code before each commit. Set up the pre-commit hook:
+
+```sh
+pre-commit install
+```
+
+If you want to run the pre-commit checks before trying to commit, you can do it with:
+
+```sh
+pipenv run lint
+```
 
 ## 🚨 Tests
 
