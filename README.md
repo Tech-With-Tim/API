@@ -118,7 +118,7 @@ Both the API and the [frontend](https://github.com/Tech-With-Tim/Frontend) can b
 We use a pre-commit hook for linting the code before each commit. Set up the pre-commit hook:
 
 ```sh
-pre-commit install
+pipenv run pre-commit install
 ```
 
 If you want to run the pre-commit checks before trying to commit, you can do it with:
