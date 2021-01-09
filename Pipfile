@@ -7,7 +7,7 @@ verify_ssl = true
 black = "*"
 flake8 = "*"
 pre-commit = "*"
-pytest = "*"
+pytest-asyncio = "*"
 
 [packages]
 quart = "*"
@@ -16,7 +16,6 @@ postdb = "*"
 pyjwt = "*"
 aiohttp = "*"
 uvloop = {markers = "platform_system == 'linux'", version = "*"}
-pytest-asyncio = "*"
 
 [requires]
 python_version = "3.8"
