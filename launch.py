@@ -1,10 +1,9 @@
 from api import app
 
+from typing import Any, Coroutine, Iterable
 from hypercorn.asyncio import serve
 from hypercorn.config import Config
-from typing import Any, Coroutine
 from postDB import Model
-from quart import Quart
 import logging
 import asyncio
 import asyncpg
@@ -25,36 +24,49 @@ else:
 
 asyncio.set_event_loop(loop)
 
-app: Quart
-ENV_FILE = "./local.env"
-ENV = dict(
-    SECRET_KEY=None, DB_URI=None, DISCORD_CLIENT_ID=None, DISCORD_CLIENT_SECRET=None
-)
 
+def load_env(fp: str, args: Iterable[str], exit_on_missing: bool = True) -> dict:
+    """
+    Load all env values from `args`.
 
-try:
-    with open(ENV_FILE) as f:
-        env_file = {
-            key.strip(): arg.strip()
-            for (key, arg) in [
-                line.strip().split("=") for line in f.readlines() if line.strip()
-            ]
-        }
-except FileNotFoundError:
-    env_file = {}
+    :param fp:              Local file to load from
+    :param args:            Arguments to load
+    :param exit_on_missing: Exit on missing env values?
+    """
+    if not (env := {arg: None for arg in args}):
+        return env  # Return if `args` is empty.
 
-
-for key in ENV.keys():
     try:
-        ENV[key] = os.environ[key]
-    except KeyError:
-        try:
-            ENV[key] = env_file[key]
-            os.environ[key] = ENV[key]
-        except KeyError:
-            sys.stderr.write(f"Found no `{key}` var in env, exiting..."), exit(1)
+        with open(fp) as f:
+            env_file = {
+                key.strip(): arg.strip()
+                for (key, arg) in [
+                    line.strip().split("=") for line in f.readlines() if line.strip()
+                ]
+            }
+    except FileNotFoundError:
+        env_file = {}
 
-app.config.from_mapping(mapping=ENV)
+    for key in args:
+        try:
+            env[key] = os.environ[key]
+        except KeyError:
+            try:
+                env[key] = env_file[key]
+                os.environ[key] = env[key]
+            except KeyError:
+                if exit_on_missing:
+                    sys.stderr.write(
+                        "Found no `%s` var in env, exiting..." % key
+                    ), exit(1)
+
+                sys.stderr.write(
+                    "Found no `%s` var in env, setting as empty string." % key
+                )
+                env[key] = ""
+                os.environ[key] = ""
+
+    return env
 
 
 def run_async(coro: Coroutine) -> Any:
@@ -179,4 +191,10 @@ def runserver(host: str, port: str, initdb: bool, verbose: bool):
 
 
 if __name__ == "__main__":
+    ENV = load_env(
+        fp="./local.env",
+        args=("SECRET_KEY", "DB_URI", "DISCORD_CLIENT_ID", "DISCORD_CLIENT_SECRET"),
+    )
+    app.config.from_mapping(mapping=ENV)
+
     app.cli()
