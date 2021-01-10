@@ -96,7 +96,7 @@ Run the API and initialise the database:
 pipenv run python launch.py runserver --initdb
 ```
 
-The API should run at [http://127.0.0.1:5000](http://127.0.0.1:5000).
+The API should run at [http://127.0.0.1:5000](http://127.0.0.1:5000). For more information about the CLI, check the docs [here](/docs/cli.md).
 
 ## 🐳 Running with Docker
 

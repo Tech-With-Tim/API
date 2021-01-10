@@ -2,6 +2,7 @@
 
 ## 📝 Table of Contents
 
+- [CLI docs](./cli.md)
 - [/auth](./auth)
   - [/discord](./auth/discord)
     - [/redirect](./auth/discord/redirect.md)
