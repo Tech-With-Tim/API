@@ -8,9 +8,11 @@ Redirect user to correct Discord OAuth link depending on specified domain and re
 
 ## Expected data
 
-### ``callback``
+### Optional ``callback``
 
 The url to redirect to, after the Discord OAuth is passed.
+
+> **This argument is optional**
 
 **Location:** ``query``
 
