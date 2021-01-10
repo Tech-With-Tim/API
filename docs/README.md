@@ -2,13 +2,13 @@
 
 ## 📝 Table of Contents
 
-- [/auth](/auth)
-  - [/discord](/auth/discord)
-    - [/redirect](/auth/discord/redirect.md)
+- [/auth](./auth)
+  - [/discord](./auth/discord)
+    - [/redirect](./auth/discord/redirect.md)
 
 ## 📚 Writing your own docs
 
-Copy paste the [_template.md](/_template.md) file and rename it to your endpoint name. Fill in the sections with information about your endpoint:
+Copy paste the [_template.md](./_template.md) file and rename it to your endpoint name. Fill in the sections with information about your endpoint:
 
 > Note that each section is marked by a comment, for example ``<!-- URL -->`` needs to be replaced by the URL.
 
