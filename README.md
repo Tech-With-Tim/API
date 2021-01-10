@@ -81,10 +81,10 @@ DISCORD_CLIENT_SECRET=
 
 And fill in the variables with the values below:
 
-- `SECRET_KEY` is the key used for the JWT token encoding.
-- `DB_URI` is the PostgreSQL database URI.
-- `DISCORD_CLIENT_ID` is the Discord application ID. Copy it from your Discord application page (see below).
-- `DISCORD_CLIENT_SECRET` is the Discord application secret. Copy it from your Discord application page (see below).
+- ``SECRET_KEY`` is the key used for the JWT token encoding.
+- ``DB_URI`` is the PostgreSQL database URI.
+- ``DISCORD_CLIENT_ID`` is the Discord application ID. Copy it from your Discord application page (see below).
+- ``DISCORD_CLIENT_SECRET`` is the Discord application secret. Copy it from your Discord application page (see below).
 
 ![Client ID and secret](https://cdn.discordapp.com/attachments/721750194797936823/794646777840140298/unknown.png)
 
