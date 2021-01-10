@@ -18,6 +18,7 @@ def pytest_collection_modifyitems(config, items):
     if not config.getoption("--no-db"):
         # --no-db not given in cli: do not skip tests that require database
         return
+
     skip_db = pytest.mark.skip(reason="need --no-db option removed to run")
     for item in items:
         if "db" in item.keywords:
