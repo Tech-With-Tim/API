@@ -168,14 +168,16 @@ def dropdb(verbose: bool):
 @app.cli.command()
 @click.option("--host", default="127.0.0.1")
 @click.option("--port", default="5000")
+@click.option("--debug", default=False, is_flag=True)
 @click.option("--initdb", default=False, is_flag=True)
 @click.option("--verbose", default=False, is_flag=True)
-def runserver(host: str, port: str, initdb: bool, verbose: bool):
+def runserver(host: str, port: str, debug: bool, initdb: bool, verbose: bool):
     """
     Run the Quart app.
 
     :param host:        Host to run it on.
     :param port:        Port to run it on.
+    :param debug:       Run server in debug mode?
     :param initdb:      Create models before running API?
     :param verbose:     Print SQL statements when creating models?
     """
@@ -184,6 +186,8 @@ def runserver(host: str, port: str, initdb: bool, verbose: bool):
 
     if initdb:
         run_async(safe_create_tables(verbose=verbose))
+
+    app.debug = debug
 
     config = Config()
     config.bind = [host + ":" + port]
