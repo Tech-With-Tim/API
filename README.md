@@ -27,6 +27,7 @@ API for the Tech With Tim website using [Quart](https://pgjones.gitlab.io/quart/
 - [🐳 Running with Docker](#-running-with-docker)
 - [✅ Linting](#-linting)
 - [🚨 Tests](#-tests)
+- [📚 Docs](/docs/README.md)
 - [📜 Licence](/LICENCE)
 - [⛏️ Built Using](#️-built-using)
 - [✍️ Authors](#️-authors)
