@@ -1,6 +1,6 @@
 from quart import current_app, request, redirect, jsonify
 from urllib.parse import quote_plus, parse_qs, urlparse
-from typing import List
+from typing import List, Tuple
 import os
 
 
@@ -17,7 +17,7 @@ current_app: API
 
 async def exchange_code(
     *, code: str, scope: str, redirect_uri: str, grant_type: str = "authorization_code"
-) -> (dict, int):
+) -> Tuple[dict, int]:
     """Exchange discord oauth code for access and refresh tokens."""
     async with current_app.http_session.post(
         "%s/v6/oauth2/token" % DISCORD_ENDPOINT,
