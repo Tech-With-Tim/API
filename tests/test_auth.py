@@ -30,7 +30,10 @@ async def test_auth_redirect_no_qs(app: QuartClient):
 @pytest.mark.asyncio
 async def test_auth_redirect_invalid_qs(app: QuartClient):
     response = await app.get("/auth/discord/redirect?callback=invalid")
-    assert await response.json == {"error": "Bad Request", "message": "Not a well formed redirect URL."}
+    assert await response.json == {
+        "error": "Bad Request",
+        "message": "Not a well formed redirect URL.",
+    }
     assert response.mimetype == "application/json"
     assert response.status_code == 400
 
