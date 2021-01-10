@@ -12,7 +12,7 @@ import sys
 import os
 
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 
 try:
@@ -134,7 +134,7 @@ async def safe_create_tables(verbose: bool = False) -> None:
 
 
 @app.cli.command(name="initdb")
-@click.option("--verbose", default=False, is_flag=True)
+@click.option("-v", "--verbose", default=False, is_flag=True)
 def _initdb(verbose: bool):
     """
     Creates all tables defined in the app.
@@ -148,7 +148,7 @@ def _initdb(verbose: bool):
 
 
 @app.cli.command()
-@click.option("--verbose", default=False, is_flag=True)
+@click.option("-v", "--verbose", default=False, is_flag=True)
 def dropdb(verbose: bool):
     """
     Drops all tables defined in the app.
@@ -166,10 +166,10 @@ def dropdb(verbose: bool):
 
 
 @app.cli.command()
-@click.option("--host", default="127.0.0.1")
-@click.option("--port", default="5000")
-@click.option("--initdb", default=False, is_flag=True)
-@click.option("--verbose", default=False, is_flag=True)
+@click.option("-h", "--host", default="127.0.0.1")
+@click.option("-p", "--port", default="5000")
+@click.option("-i", "--initdb", default=False, is_flag=True)
+@click.option("-v", "--verbose", default=False, is_flag=True)
 def runserver(host: str, port: str, initdb: bool, verbose: bool):
     """
     Run the Quart app.
@@ -177,8 +177,12 @@ def runserver(host: str, port: str, initdb: bool, verbose: bool):
     :param host:        Host to run it on.
     :param port:        Port to run it on.
     :param initdb:      Create models before running API?
-    :param verbose:     Print SQL statements when creating models?
+    :param verbose:     Set logging to DEBUG instead of INFO
     """
+
+    if verbose:
+        logging.basicConfig(level=logging.DEBUG)
+
     if not run_async(prepare_postgres(retries=6, interval=10.0)):
         exit(1)  # Connecting to our postgres server failed.
 
