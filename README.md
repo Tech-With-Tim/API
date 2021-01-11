@@ -50,9 +50,9 @@ Now that you have an application, go to the OAuth2 tab.
 
 ![OAuth2 tab](https://cdn.discordapp.com/attachments/721750194797936823/794648158272487435/unknown.png)
 
-And add `http://localhost:5000/auth/discord/callback` to the redirects.
+And add `http://127.0.0.1:5000/auth/discord/callback` to the redirects.
 
-![Redirects](https://cdn.discordapp.com/attachments/721750194797936823/797485068238716958/unknown.png)
+![Redirects](https://cdn.discordapp.com/attachments/721750194797936823/798276213776318494/unknown.png)
 
 ### Prerequisites
 
