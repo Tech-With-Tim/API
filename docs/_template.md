@@ -10,6 +10,22 @@ Parameter | Type | Description
 --------- | ---- | -----------
 <!-- Parameter name --> | <!-- Parameter type, for example ``str`` --> |  <!-- Short parameter description -->
 
+### Example request data
+
+<!-- for ``body`` location -->
+
+```json
+{
+    "parameter_name": "example_parameter_value"
+}
+```
+
+<!-- for ``querystring`` location -->
+
+```http
+?parameter_name=example_parameter_value
+```
+
 ## Returned data
 
 <!-- Describe what is returned, remove the section if nothing is returned. For the case of a dict: -->
@@ -17,6 +33,14 @@ Parameter | Type | Description
 Parameter | Type | Description
 --------- | ---- | -----------
 <!-- Parameter name --> | <!-- Parameter type, for example ``str`` --> |  <!-- Short parameter description -->
+
+### Example response data
+
+```json
+{
+    "parameter_name": "example_parameter_value"
+}
+```
 
 ## Status codes
 
