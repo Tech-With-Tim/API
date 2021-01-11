@@ -8,7 +8,15 @@ Redirect user to correct Discord OAuth link depending on specified domain and re
 
 Parameter | Type | Description
 --------- | ---- | -----------
-callback | ``Optional[str]`` | The url to redirect to, after the Discord OAuth is passed.
+callback | ``Optional[str]`` | The URL to redirect to, after the Discord OAuth is passed. Default: ``http://127.0.0.1:5000/auth/discord/callback``
+
+### Example request data
+
+For a redirect to ``http://127.0.0.1:5000/auth/discord/callback``
+
+```http
+?callback=http%3A%2F%2F127.0.0.1%3A5000%2Fauth%2Fdiscord%2Fcallback
+```
 
 ## Status codes
 
