@@ -120,8 +120,8 @@ async def discord_oauth_callback():
     elif request.method == "POST":
         data = await request.json
 
-        code = data["code"]
-        callback = data["callback"]
+        code = data.get("code")
+        callback = data.get("callback", "")
     else:
         raise RuntimeWarning("Unexpected request method. (%s)" % request.method)
 
