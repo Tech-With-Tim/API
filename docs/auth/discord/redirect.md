@@ -1,35 +1,19 @@
-# URL: /auth/discord/redirect
+# GET /auth/discord/redirect
 
 Redirect user to correct Discord OAuth link depending on specified domain and requested scopes.
 
-## Method
+## Parameters
 
-``GET``
+**Location:** ``querystring``
 
-## Expected data
-
-### Optional ``callback``
-
-The url to redirect to, after the Discord OAuth is passed.
-
-> **This argument is optional**
-
-**Location:** ``query``
-
-**Type:** ``Optional[str]``
-
-**Default:** ``/auth/discord/redirect``
-
-## Returned data
-
-None
+Parameter | Type | Description
+--------- | ---- | -----------
+callback | ``Optional[str]`` | The url to redirect to, after the Discord OAuth is passed.
 
 ## Status codes
 
-### 302
+- ``302`` Moved temporarily  
+  Redirect to the Discord OAuth portal succeeded.
 
-Moved temporarily, redirect to the Discord OAuth portal succeeded.
-
-### 400
-
-Bad Request, callback URL provided isn't a well formed redirect URL.
+- ``400`` Bad Request  
+  Callback URL provided isn't a well formed redirect URL.
