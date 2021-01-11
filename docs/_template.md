@@ -22,10 +22,8 @@ Parameter | Type | Description
 
 <!-- List every possible status code that is returned by the endpoint, the status codes below are examples -->
 
-### ``200``
+- ``200`` Success  
+  <!-- Description -->
 
-Success, <!-- Description of what was successfully done, like User added to the database-->
-
-### ``404``
-
-Not found, <!-- For example, if the user with ID 4 is requested, but there's no user with ID 4, it will return a not found status code -->
+- ``400`` Bad Request  
+  <!-- Description -->
