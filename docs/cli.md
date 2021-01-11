@@ -44,5 +44,6 @@ pipenv run python launch.py runserver
 
 - ``-h {host}`` | ``--host {host}`` : Host to run the API on. Default: `127.0.0.1`.
 - ``-p {port}`` | ``--port {port}`` : Port to run the API on. Default: `5000`.
+- ``-d`` | ``--debug`` : Run server in debug mode.
 - ``-i`` | ``--initdb`` : Create models before running the API. Equivalent of running the ``initdb`` command.
 - ``-v`` | ``--verbose`` : Set logging to DEBUG instead of INFO.
