@@ -48,3 +48,12 @@ async def test_auth_redirect_valid_qs(app: QuartClient):
     assert response.headers["Location"] == correct_location
     assert response.mimetype == "text/html"
     assert response.status_code == 302
+
+
+@pytest.mark.asyncio
+async def test_auth_callback_no_qs(app: QuartClient):
+    response = await app.get("/auth/discord/callback")
+
+    expected_status = 400 if app.app.debug else 405
+    assert response.status_code == expected_status
+    assert response.mimetype == "application/json"

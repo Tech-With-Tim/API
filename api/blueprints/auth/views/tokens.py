@@ -1,9 +1,12 @@
 from quart import current_app, request, redirect, jsonify
 from urllib.parse import quote_plus, parse_qs, urlparse
+from quart.exceptions import MethodNotAllowed
+from datetime import datetime, timedelta
 from typing import List
+import jwt
 import os
 
-
+from api.models import Token, User
 from api.app import API
 from .. import bp
 import utils
@@ -73,14 +76,14 @@ def is_valid_url(string: str) -> bool:
 @bp.route("/discord/redirect", methods=["GET"])
 async def redirect_to_discord_oauth_portal():
     """Redirect user to correct oauth link depending on specified domain and requested scopes."""
-    querystring_args = parse_qs(request.query_string)
+    qs = parse_qs(request.query_string.decode())
 
-    callback = querystring_args.get(
-        b"callback", (request.scheme + "://" + request.host + "/auth/discord/callback")
+    callback = qs.get(
+        "callback", (request.scheme + "://" + request.host + "/auth/discord/callback")
     )
 
     if isinstance(callback, list):  #
-        callback = callback[0].decode()
+        callback = callback[0]
 
     if not is_valid_url(callback):
         return (
@@ -91,3 +94,105 @@ async def redirect_to_discord_oauth_portal():
         )
 
     return redirect(get_redirect(callback=callback, scopes=SCOPES))
+
+
+@bp.route("/discord/callback", methods=["GET", "POST"])
+async def discord_oauth_callback():
+    """
+    Callback endpoint for finished discord authorization flow.
+
+    GET ->  Only used in DEBUG mode.
+            Gets code from querystring.
+
+    POST -> Gets code from request data.
+    """
+
+    if request.method == "GET":
+        if not current_app.debug:
+            # A GET request to this endpoint should only be used in testing.
+            raise MethodNotAllowed(("POST",))
+
+        qs = parse_qs(request.query_string.decode())
+        code = qs.get("code")
+        if code is not None:
+            code = code[0]
+        callback = request.scheme + "://" + request.host + "/auth/discord/callback"
+    elif request.method == "POST":
+        data = await request.json
+
+        code = data["code"]
+        callback = data["callback"]
+    else:
+        raise RuntimeWarning("Unexpected request method. (%s)" % request.method)
+
+    if code is None:
+        return (
+            jsonify(
+                {
+                    "error": "Bad Request",
+                    "message": "Missing code in %s." % "querystring arguments"
+                    if request.method == "GET"
+                    else "JSON data",
+                }
+            ),
+            400,
+        )
+
+    if not is_valid_url(callback):
+        return (
+            jsonify(
+                {"error": "Bad Request", "message": "Not a well formed redirect URL."}
+            ),
+            400,
+        )
+
+    access_data, status_code = await exchange_code(
+        code=code, scope=format_scopes(SCOPES), redirect_uri=callback
+    )
+
+    if access_data.get("error", False):
+        if status_code == 400:
+            return (
+                jsonify(
+                    {
+                        "error": "Bad Request",
+                        "message": "Discord returned 400 status.",
+                        "data": access_data,
+                    }
+                ),
+                400,
+            )
+
+        raise RuntimeWarning(
+            "Unpredicted status_code.\n%s\n%s" % (str(access_data), status_code)
+        )
+
+    expires_at = datetime.utcnow() + timedelta(seconds=access_data["expires_in"])
+    expires_at.replace(microsecond=0)
+
+    user_data = await get_user(access_token=access_data["access_token"])
+    user_data["id"] = uid = int(user_data["id"])
+
+    user = await User.fetch(id=uid)
+
+    if user is None:
+        user = await User.create(
+            id=user_data["id"],
+            username=user_data["username"],
+            discriminator=user_data["discriminator"],
+            avatar=user_data["avatar"],
+        )
+
+    await Token(
+        user_id=user.id,
+        data=access_data,
+        expires_at=expires_at,
+        token=access_data["access_token"],
+    ).update()
+
+    token = jwt.encode(
+        {"uid": user.id, "exp": expires_at, "iat": datetime.utcnow()},
+        key=os.environ["SECRET_KEY"],
+    )
+
+    return jsonify({"token": token, "exp": expires_at})
