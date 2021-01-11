@@ -12,4 +12,4 @@ RUN pip install -U pipenv
 RUN pipenv install --system --deploy
 
 # Run the API.
-CMD python launch.py runserver --host 0.0.0.0 --port 5000 --initdb
+CMD python launch.py runserver --host 0.0.0.0 --port 5000 --initdb --debug

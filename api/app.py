@@ -46,9 +46,13 @@ class API(Quart):
         if handler is not None:
             return await handler(error)
 
+        headers = error.get_headers()
+        headers["Content-Type"] = "application/json"
+
         return (
-            jsonify({"error": "%s - %s" % (error.name, error.description)}),
+            jsonify({"error": error.name, "message": error.description}),
             error.status_code,
+            headers,
         )
 
     async def startup(self) -> None:
