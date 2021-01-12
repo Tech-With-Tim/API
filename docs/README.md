@@ -6,6 +6,7 @@
 - [/auth](./auth)
   - [/discord](./auth/discord)
     - [/redirect](./auth/discord/redirect.md)
+    - [/callback](./auth/discord/callback.md)
 
 ## 📚 Writing your own docs
 
