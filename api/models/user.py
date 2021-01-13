@@ -60,7 +60,8 @@ class User(Model):
         query = """
         INSERT INTO users (id, username, discriminator, avatar, type)
         VALUES ($1, $2, $3, $4, $5)
-        ON CONFLICT DO NOTHING;
+        ON CONFLICT DO NOTHING
+        RETURNING *;
         """
 
         record = await cls.pool.fetchrow(

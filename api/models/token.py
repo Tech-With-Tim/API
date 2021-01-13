@@ -17,7 +17,7 @@ class Token(Model):
         types.ForeignKey("users", "id", sql_type=types.Integer(big=True)),
         primary_key=True,
     )
-    expires_at = Column(types.String())
+    expires_at = Column(types.DateTime())
     token = Column(types.String())
     data = Column(types.JSON())
 

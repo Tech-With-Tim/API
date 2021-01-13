@@ -27,6 +27,7 @@ API for the Tech With Tim website using [Quart](https://pgjones.gitlab.io/quart/
 - [🐳 Running with Docker](#-running-with-docker)
 - [✅ Linting](#-linting)
 - [🚨 Tests](#-tests)
+- [📚 Docs](/docs/README.md)
 - [📜 Licence](/LICENCE)
 - [⛏️ Built Using](#️-built-using)
 - [✍️ Authors](#️-authors)
@@ -49,9 +50,9 @@ Now that you have an application, go to the OAuth2 tab.
 
 ![OAuth2 tab](https://cdn.discordapp.com/attachments/721750194797936823/794648158272487435/unknown.png)
 
-And add `http://localhost:5000/auth/discord/callback` to the redirects.
+And add `http://127.0.0.1:5000/auth/discord/callback` to the redirects.
 
-![Redirects](https://cdn.discordapp.com/attachments/721750194797936823/797485068238716958/unknown.png)
+![Redirects](https://cdn.discordapp.com/attachments/721750194797936823/798276213776318494/unknown.png)
 
 ### Prerequisites
 
@@ -80,10 +81,10 @@ DISCORD_CLIENT_SECRET=
 
 And fill in the variables with the values below:
 
-- `SECRET_KEY` is the key used for the JWT token encoding.
-- `DB_URI` is the PostgreSQL database URI.
-- `DISCORD_CLIENT_ID` is the Discord application ID. Copy it from your Discord application page (see below).
-- `DISCORD_CLIENT_SECRET` is the Discord application secret. Copy it from your Discord application page (see below).
+- ``SECRET_KEY`` is the key used for the JWT token encoding.
+- ``DB_URI`` is the PostgreSQL database URI.
+- ``DISCORD_CLIENT_ID`` is the Discord application ID. Copy it from your Discord application page (see below).
+- ``DISCORD_CLIENT_SECRET`` is the Discord application secret. Copy it from your Discord application page (see below).
 
 ![Client ID and secret](https://cdn.discordapp.com/attachments/721750194797936823/794646777840140298/unknown.png)
 
@@ -95,7 +96,7 @@ Run the API and initialise the database:
 pipenv run python launch.py runserver --initdb
 ```
 
-The API should run at [http://127.0.0.1:5000](http://127.0.0.1:5000).
+The API should run at [http://127.0.0.1:5000](http://127.0.0.1:5000). For more information about the CLI, check the docs [here](/docs/cli.md).
 
 ## 🐳 Running with Docker
 
