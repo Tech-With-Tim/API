@@ -1,4 +1,3 @@
-from typing import Union
 from .. import bp
 from quart import request, jsonify
 from api.models import User
@@ -6,10 +5,10 @@ from api.models import User
 
 @bp.route("/", methods=["GET"])
 async def overview():
-    return jsonify({"get all users": "/all"})
+    return jsonify({"get all users": "/get-all"})
 
 
-@bp.route("/all", methods=["GET"])
+@bp.route("/get-all", methods=["GET"])
 async def get_users():
     # Queries
     sort_by: str = request.args.get("sort_by", default="id")
@@ -17,8 +16,8 @@ async def get_users():
     username: str = request.args.get("username", default=None)
     discriminator: str = request.args.get("discriminator", default=None)
     type: str = request.args.get("type", default=None)
-    page: Union[str, int] = request.args.get("page", default=0)
-    limit: Union[str, int] = request.args.get("limit", default=100)
+    page: int = request.args.get("page", default=0, type=int)
+    limit: int = request.args.get("limit", default=100, type=int)
     users = []
 
     # The following if statements are to check the number of queries passed
@@ -45,7 +44,7 @@ async def get_users():
             sort_by, order
         )
 
-        users = await User.pool.fetchval(query, int(page), int(limit))
+        users = await User.pool.fetchval(query, page, limit)
 
     # To check if all queries are passed
     if username is not None and type is not None and discriminator is not None:
@@ -75,9 +74,9 @@ async def get_users():
             query,
             username + "%",
             discriminator + "%",
-            type + "%",
-            int(page),
-            int(limit),
+            type,
+            page,
+            limit,
         )
 
     # The next 3 if statements are to check if 2 queries are passed
@@ -98,15 +97,13 @@ async def get_users():
                 GROUP BY id
                 ORDER BY {0} {1}
                 OFFSET $3::INT * $4::INT
-                LIMIT $4
+                LIMIT $4::INT
             ) as users;
         """.format(
             sort_by, order
         )
 
-        users = await User.pool.fetchval(
-            query, username + "%", type + "%", int(page), int(limit)
-        )
+        users = await User.pool.fetchval(query, username + "%", type, page, limit)
 
     if username is not None and type is None and discriminator is not None:
         query = """
@@ -132,7 +129,7 @@ async def get_users():
         )
 
         users = await User.pool.fetchval(
-            query, username + "%", discriminator + "%", int(page), int(limit)
+            query, username + "%", discriminator + "%", page, limit
         )
 
     if username is None and type is not None and discriminator is not None:
@@ -158,9 +155,7 @@ async def get_users():
             sort_by, order
         )
 
-        users = await User.pool.fetchval(
-            query, discriminator + "%", type + "%", int(page), int(limit)
-        )
+        users = await User.pool.fetchval(query, discriminator + "%", type, page, limit)
 
     # The next 3 if statements are to check if only one query is passed
     if username is not None and discriminator is None and type is None:
@@ -180,13 +175,13 @@ async def get_users():
                 GROUP BY id
                 ORDER BY {0} {1}
                 OFFSET $2::INT * $3::INT
-                LIMIT $4
+                LIMIT $3
             ) as users;
         """.format(
             sort_by, order
         )
 
-        users = await User.pool.fetchval(query, username + "%", int(page), int(limit))
+        users = await User.pool.fetchval(query, username + "%", page, limit)
 
     if discriminator is not None and username is None and type is None:
         query = """
@@ -204,16 +199,14 @@ async def get_users():
                 WHERE discriminator LIKE $1
                 GROUP BY id
                 ORDER BY {0} {1}
-                OFFSET $1::INT * $2::INT
-                LIMIT $4
+                OFFSET $2::INT * $3::INT
+                LIMIT $3
             ) as users;
         """.format(
             sort_by, order
         )
 
-        users = await User.pool.fetchval(
-            query, discriminator + "%", int(page), int(limit)
-        )
+        users = await User.pool.fetchval(query, discriminator + "%", page, limit)
 
     if type is not None and username is None and discriminator is None:
         query = """
@@ -231,21 +224,24 @@ async def get_users():
                 WHERE type LIKE $1
                 GROUP BY id
                 ORDER BY {0} {1}
-                OFFSET $1:INT * $2::INT
-                LIMIT $4
+                OFFSET $2:INT * $3::INT
+                LIMIT $3
             ) as users;
         """.format(
             sort_by, order
         )
 
-        users = await User.pool.fetchval(query, type + "%", int(page), int(limit))
+        users = await User.pool.fetchval(query, type, page, limit)
 
     if page is not None and limit is None:
-        return jsonify(
+        response = jsonify(
             {
-                "error": "If the pages query is provided then limit query should also be provided."
+                "error": "If the pages query is provided then limit query should also be provided.",
+                "status_code": 400,
             }
         )
+        response.status_code = 400
+        return response
 
     # To check if there are no users
     if users is None or users == []:
