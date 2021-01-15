@@ -122,4 +122,4 @@ avatar | ``str`` or ``null`` |  Discord avatar hash of the user
   You provided correct parameters and no errors occurred
 
 - ``400`` Bad Request  
-  If page is set to an integer and limit is set to NoneType/None/null (this will rarely happen as there are default types.)
+  If page is set to an integer and limit is set to NoneType/None/null or an invalid value is set for a query string. This will rarely happen as there are default values.
