@@ -5,6 +5,11 @@ from api.models import User
 
 
 @bp.route("/", methods=["GET"])
+async def overview():
+    return jsonify({"get all users": "/all"})
+
+
+@bp.route("/all", methods=["GET"])
 async def get_users():
     # Queries
     sort_by: str = request.args.get("sort_by", default="id")
