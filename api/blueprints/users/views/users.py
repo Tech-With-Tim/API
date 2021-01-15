@@ -39,6 +39,7 @@ async def get_users():
                     GROUP BY id
                     ORDER BY {0} {1}
                     OFFSET $1::INT * $2::INT
+                    LIMIT $2
                 ) as users;
             """.format(
             sort_by, order
@@ -64,6 +65,7 @@ async def get_users():
                 GROUP BY id
                 ORDER BY {0} {1}
                 OFFSET $4::INT * $5::INT
+                LIMIT $5
             ) as users;
         """.format(
             sort_by, order
@@ -96,6 +98,7 @@ async def get_users():
                 GROUP BY id
                 ORDER BY {0} {1}
                 OFFSET $3::INT * $4::INT
+                LIMIT $4
             ) as users;
         """.format(
             sort_by, order
@@ -122,6 +125,7 @@ async def get_users():
                 GROUP BY id
                 ORDER BY {0} {1}
                 OFFSET $3::INT * $4::INT
+                LIMIT $4
             ) as users;
         """.format(
             sort_by, order
@@ -148,6 +152,7 @@ async def get_users():
                 GROUP BY id
                 ORDER BY {0} {1}
                 OFFSET $3::INT * $4::INT
+                LIMIT $4
             ) as users;
         """.format(
             sort_by, order
@@ -175,6 +180,7 @@ async def get_users():
                 GROUP BY id
                 ORDER BY {0} {1}
                 OFFSET $2::INT * $3::INT
+                LIMIT $4
             ) as users;
         """.format(
             sort_by, order
@@ -199,6 +205,7 @@ async def get_users():
                 GROUP BY id
                 ORDER BY {0} {1}
                 OFFSET $1::INT * $2::INT
+                LIMIT $4
             ) as users;
         """.format(
             sort_by, order
@@ -225,6 +232,7 @@ async def get_users():
                 GROUP BY id
                 ORDER BY {0} {1}
                 OFFSET $1:INT * $2::INT
+                LIMIT $4
             ) as users;
         """.format(
             sort_by, order
