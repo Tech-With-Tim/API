@@ -1,12 +1,11 @@
 from postDB.model.model import Model
-from quart import Quart, exceptions, jsonify
+from quart import Quart, exceptions, jsonify, request
 from datetime import datetime, date
 from aiohttp import ClientSession
 from typing import Any, Optional
 from quart_cors import cors
 import logging
 import json
-
 import utils
 
 
@@ -76,29 +75,41 @@ async def index():
 
 
 @app.route("/users", methods=["GET"])
-async def get_users(parameter: str = "all", sort_by: str = "id"):
+async def get_users():
 
     # TODO:
-    # * Ability to search by a parameter
-    # * Ability to change the ordering ( ID / USERNAME )
     # * Pagination with:
     #     * x users per page
     #     * Selecting page y
     #     * Selecting users from index a->b
 
-    query = """
-        SELECT (
-            json_agg(json_build_object(
-                'id', u.id::TEXT,
-                'username', u.username,
-                'discriminator', u.discriminator,
-                'avatar', u.avatar,
-                'type', u.type
-                ))
-        )
-        FROM users u;
+    sort_by: str = request.args.get("sort_by", default="id")
+    order: str = request.args.get("order", default="ASC")
+    username: str = request.args.get("username", default="%")
+    discriminator: str = request.args.get("discriminator", default="%")
+    type: str = request.args.get("type", default="%")
+
+    query = f"""
+            SELECT json_agg(records)
+            FROM (
+                SELECT
+                        json_build_object(
+                            'id', id,
+                            'username', username,
+                            'discriminator', discriminator,
+                            'avatar', avatar,
+                            'type', type
+                        ) as records
+                FROM users
+                WHERE username LIKE $1 AND discriminator LIKE $2 AND type LIKE $3
+                GROUP BY {sort_by}
+                ORDER BY {sort_by} {order}
+            ) as users;
         """
-    users = await Model.pool.fetchval(query)
+
+    users = await Model.pool.fetchval(
+        query, username + "%", discriminator + "%", type + "%"
+    )
 
     return jsonify(users)
 
