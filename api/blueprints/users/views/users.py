@@ -249,13 +249,9 @@ async def get_users():
 
         # To check if there are no users
         if users is None or users == []:
-            response = jsonify([])
-            response.status_code = 200
-            return response
+            return jsonify([])
 
-        response = jsonify(users)
-        print(response.status_code)
-        return response
+        return jsonify(users)
 
     except CharacterNotInRepertoireError:
         response = jsonify(
