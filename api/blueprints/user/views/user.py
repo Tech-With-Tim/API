@@ -6,13 +6,7 @@ from api.models import User
 
 @bp.route("/users", methods=["GET"])
 async def get_users():
-
-    # TODO:
-    # * Pagination with:
-    #     * x users per page
-    #     * Selecting page y
-    #     * Selecting users from index a->b
-
+    # Queries
     sort_by: str = request.args.get("sort_by", default="id")
     order: str = request.args.get("order", default="ASC")
     username: str = request.args.get("username", default=None)
