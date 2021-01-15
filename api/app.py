@@ -1,3 +1,4 @@
+from postDB.model.model import Model
 from quart import Quart, exceptions, jsonify
 from datetime import datetime, date
 from aiohttp import ClientSession
@@ -72,6 +73,34 @@ auth.setup(app=app, url_prefix="/auth")
 async def index():
     """Index endpoint used for testing."""
     return jsonify({"status": "OK"})
+
+
+@app.route("/users", methods=["GET"])
+async def get_users(parameter: str = "all", sort_by: str = "id"):
+
+    # TODO:
+    # * Ability to search by a parameter
+    # * Ability to change the ordering ( ID / USERNAME )
+    # * Pagination with:
+    #     * x users per page
+    #     * Selecting page y
+    #     * Selecting users from index a->b
+
+    query = """
+        SELECT (
+            json_agg(json_build_object(
+                'id', u.id::TEXT,
+                'username', u.username,
+                'discriminator', u.discriminator,
+                'avatar', u.avatar,
+                'type', u.type
+                ))
+        )
+        FROM users u;
+        """
+    users = await Model.pool.fetchval(query)
+
+    return jsonify(users)
 
 
 @app.errorhandler(500)
