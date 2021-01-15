@@ -67,7 +67,7 @@ app.asgi_app = utils.TokenAuthMiddleware(app.asgi_app, app)
 app = cors(app, allow_origin="*")  # TODO: Restrict the origin(s) in production.
 # Set up blueprints
 auth.setup(app=app, url_prefix="/auth")
-user.setup(app=app, url_prefix="/user")
+user.setup(app=app, url_prefix="/users")
 
 
 @app.route("/")

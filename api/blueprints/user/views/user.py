@@ -4,7 +4,7 @@ from quart import request, jsonify
 from api.models import User
 
 
-@bp.route("/users", methods=["GET"])
+@bp.route("/", methods=["GET"])
 async def get_users():
     # Queries
     sort_by: str = request.args.get("sort_by", default="id")
