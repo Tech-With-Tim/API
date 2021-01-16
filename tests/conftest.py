@@ -4,6 +4,7 @@ from launch import load_env, prepare_postgres, safe_create_tables, delete_tables
 from quart.testing import QuartClient
 import pytest
 import asyncio
+from postdb import Model
 
 
 @pytest.fixture(scope="session")
@@ -23,9 +24,9 @@ def _test_app(event_loop) -> QuartClient:
 @pytest.fixture(name="db", scope="session")
 async def _db(event_loop) -> bool:
     env = load_env("./local.env", ("TEST_DB_URI",))
-    await prepare_postgres(db_uri=env["TEST_DB_URI"], loop=event_loop)
+    assert await prepare_postgres(db_uri=env["TEST_DB_URI"], loop=event_loop)
     await safe_create_tables()
-    yield
+    yield Model.pool
     await delete_tables()
 
 
