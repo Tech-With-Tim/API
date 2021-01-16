@@ -1,5 +1,5 @@
 from postDB import Model, Column, types
-from typing import Any, Dict, Optional, Union
+from typing import Optional, Union, Literal
 from datetime import datetime
 
 import utils
@@ -122,15 +122,21 @@ class Guild(Model):
         """Indicates if the guild has an animated icon."""
         return bool(self.icon_hash and self.icon_hash.startswith("a_"))
 
-    def icon_url_as(self, *, format=None, static_format="webp", size=1024) -> Optional[str]:
-        if not size & (size - 1) and size in range(16, 4097):
-            raise RuntimeWarning("size must be a power of 2 between 16 and 4096")
+    def icon_url_as(
+        self,
+        *,
+        format: Literal["jpeg", "jpg", "webp", "png", "gif"] = None,
+        static_format: Literal["jpeg", "jpg", "webp", "png"] = "webp",
+        size: Literal[16, 32, 64, 128, 256, 512, 1024, 2048, 4096] = 128
+    ) -> Optional[str]:
+        if (size & (size - 1)) or size not in range(16, 4097):
+            raise ValueError("size must be a power of 2 between 16 and 4096")
         if format is not None and format not in VALID_ICON_FORMATS:
-            raise RuntimeWarning("format must be None or one of {}".format(VALID_ICON_FORMATS))
+            raise ValueError("format must be None or one of {}".format(VALID_ICON_FORMATS))
         if format == "gif" and not self.is_icon_animated():
-            raise RuntimeWarning("non animated avatars do not support gif format")
+            raise ValueError("non animated avatars do not support gif format")
         if static_format not in VALID_STATIC_FORMATS:
-            raise RuntimeWarning("static_format must be one of {}".format(VALID_STATIC_FORMATS))
+            raise ValueError("static_format must be one of {}".format(VALID_STATIC_FORMATS))
 
         if self.icon_hash is None:
             return None
