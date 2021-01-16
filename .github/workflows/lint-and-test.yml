@@ -50,4 +50,5 @@ jobs:
 
       - name: Run pytest
         run: |
-          pytest
+          pytest --no-db
+        # DB isn't setup yet in workflow
