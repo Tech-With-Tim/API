@@ -16,13 +16,13 @@ logging.basicConfig(level=logging.INFO)
 
 
 try:
-    import uvloop
+    import uvloop  # noqa
 except ModuleNotFoundError:
-    loop = asyncio.new_event_loop()
+    LOOP = asyncio.new_event_loop()
 else:
-    loop = uvloop.new_event_loop()
+    LOOP = uvloop.new_event_loop()
 
-asyncio.set_event_loop(loop)
+asyncio.set_event_loop(LOOP)
 
 
 def load_env(fp: str, args: Iterable[str], exit_on_missing: bool = True) -> dict:
@@ -76,23 +76,30 @@ def run_async(coro: Coroutine) -> Any:
     :param coro:    The coroutine to run.
     :returns:       Whatever the coroutine returned.
     """
-    return loop.run_until_complete(coro)
+    return LOOP.run_until_complete(coro)
 
 
-async def prepare_postgres(retries: int = 5, interval: float = 10.0) -> bool:
+async def prepare_postgres(
+    retries: int = 5,
+    interval: float = 10.0,
+    db_uri: str = None,
+    loop: asyncio.AbstractEventLoop = None,
+) -> bool:
     """
     Prepare the postgres database connection.
 
     :param int retries:     Included to fix issue with docker starting API before DB is finished starting.
     :param float interval:  Interval of which to wait for next retry.
     """
+    DB_URI = db_uri or ENV["DB_URI"]
+    loop = loop or LOOP
     log = logging.getLogger("DB")
-    db_name = ENV["DB_URI"].split("/")[-1]
+    db_name = DB_URI.split("/")[-1]
     log.info('[i] Attempting to connect to DB "%s"' % db_name)
     for i in range(1, retries + 1):
         try:
             await Model.create_pool(
-                uri=ENV["DB_URI"],
+                uri=DB_URI,
                 max_con=10,  # We might want to increase this number in the future.
                 loop=loop,
             )
@@ -133,6 +140,20 @@ async def safe_create_tables(verbose: bool = False) -> None:
         log.info("Created table %s" % model.__tablename__)
 
 
+async def delete_tables(verbose: bool = False):
+    """
+    Delete all tables.
+
+    :param verbose:     Whether or not to print the postgres statements being executed.
+    """
+
+    log = logging.getLogger("DB")
+
+    for model in Model.all_models():
+        await model.drop_table(verbose=verbose)
+        log.info("Dropped table %s" % type(model).__tablename__)
+
+
 @app.cli.command(name="initdb")
 @click.option("-v", "--verbose", default=False, is_flag=True)
 def _initdb(verbose: bool):
@@ -158,11 +179,7 @@ def dropdb(verbose: bool):
     if not run_async(prepare_postgres(retries=6, interval=10.0)):
         exit(1)  # Connecting to our postgres server failed.
 
-    log = logging.getLogger("DB")
-
-    for model in Model.all_models():
-        run_async(model.drop_table(verbose=verbose))
-        log.info("Dropped table %s" % type(model).__tablename__)
+    run_async(delete_tables(verbose=verbose))
 
 
 @app.cli.command()
