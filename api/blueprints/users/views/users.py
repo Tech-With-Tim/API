@@ -1,7 +1,7 @@
 from .. import bp
 from quart import request, jsonify
 from api.models import User
-from asyncpg.exceptions import CharacterNotInRepertoireError
+from asyncpg.exceptions import CharacterNotInRepertoireError, PostgresSyntaxError
 
 
 @bp.route("/", methods=["GET"])
@@ -240,7 +240,8 @@ async def get_users():
         if page is not None and limit is None:
             response = jsonify(
                 {
-                    "error": "If the pages query is provided then limit query should also be provided.",
+                    "error": "Bad Request",
+                    "message": "If the pages query is provided then limit query should also be provided.",
                     "status_code": 400,
                 }
             )
@@ -253,11 +254,12 @@ async def get_users():
 
         return jsonify(users)
 
-    except CharacterNotInRepertoireError:
+    except (CharacterNotInRepertoireError, PostgresSyntaxError):
         response = jsonify(
             {
                 "error": "Bad Request",
                 "message": "Please enter a valid value for querystring.",
+                "status_code": 400,
             }
         )
         response.status_code = 400
