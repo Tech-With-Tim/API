@@ -1,4 +1,32 @@
+from api import app as quart_app
+from launch import load_env, prepare_postgres, safe_create_tables, delete_tables
+
+from quart.testing import QuartClient
 import pytest
+import asyncio
+
+
+@pytest.fixture(scope="session")
+def event_loop():
+    """Create an instance of the default event loop for each test case."""
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    asyncio.set_event_loop(loop)
+    yield loop
+    loop.close()
+
+
+@pytest.fixture(name="app", scope="session")
+def _test_app(event_loop) -> QuartClient:
+    return quart_app.test_client()
+
+
+@pytest.fixture(name="db", scope="session")
+async def _db(event_loop) -> bool:
+    env = load_env("./local.env", ("TEST_DB_URI",))
+    await prepare_postgres(db_uri=env["TEST_DB_URI"], loop=event_loop)
+    await safe_create_tables()
+    yield
+    await delete_tables()
 
 
 def pytest_addoption(parser):

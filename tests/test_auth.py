@@ -1,5 +1,4 @@
 from api.blueprints.auth.views.tokens import get_redirect, SCOPES
-from api import app as quart_app
 from launch import load_env
 
 from quart.testing import QuartClient
@@ -7,11 +6,6 @@ import pytest
 
 
 load_env(fp="./local.env", args=("DISCORD_CLIENT_ID",), exit_on_missing=False)
-
-
-@pytest.fixture(name="app")
-def _test_app() -> QuartClient:
-    return quart_app.test_client()
 
 
 @pytest.mark.asyncio
