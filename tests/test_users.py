@@ -1,9 +1,6 @@
-import os
-from api import app as quart_app
-
-from quart.testing import QuartClient
-from postDB import Model
 import pytest
+from api import app as quart_app
+from quart.testing import QuartClient
 
 
 @pytest.fixture(name="app")
@@ -12,8 +9,71 @@ def _test_app() -> QuartClient:
 
 
 @pytest.mark.asyncio
-async def test_get_all_users_no_queries(app: QuartClient):
-    await Model.create_pool(os.environ["DB_URI"])
-    response = await app.get("/users/get-all")
-    assert response.status_code == 200
+@pytest.mark.parametrize(
+    "query_strings, status_code",
+    [
+        (
+            {
+                "username": "DemoUser",
+                "discriminator": "3",
+                "type": "ADMIN",
+                "order": "DESC",
+            },
+            200,
+        ),
+        (
+            {
+                "username": "DemoUser",
+                "limit": 5,
+                "page": 2,
+                "order": "DESC",
+            },
+            200,
+        ),
+        (
+            {
+                "discriminator": "3",
+                "type": "ADMIN",
+                "order": "DESC",
+                "limit": 10,
+            },
+            200,
+        ),
+        (
+            {
+                "username": "DemoUser",
+                "limit": 5,
+                "page": 2,
+                "order": "DESC",
+            },
+            200,
+        ),
+        (
+            {
+                "username": "%00",
+                "discriminator": "%00",
+                "type": "%00",
+            },
+            400,
+        ),
+        (
+            {
+                "discriminator": "%00",
+            },
+            400,
+        ),
+        (
+            {
+                "type": "%00",
+            },
+            400,
+        ),
+    ],
+)
+async def test_get_all_users_no_queries(
+    app: QuartClient, query_strings: dict, status_code: int
+):
+    # TODO: Add db fixture after takos pull request merged
+    response = await app.get("/users/get-all", query_string=query_strings)
+    assert response.status_code == status_code
     assert response.content_type == "application/json"
