@@ -80,3 +80,39 @@ async def guild(guild_id):
         "owner_id": str(guild.owner_id),
         "icon_hash": guild.icon_hash,
     }
+
+
+@bp.route("/<int:guild_id>/icon", methods=["GET"])
+async def guild_icon(guild_id):
+    """Get a guild icon from its ID"""
+    guild = await Guild.fetch(guild_id)
+
+    format = request.args.get("format", None)
+    static_format = request.args.get("static_format", "webp")
+    try:
+        size = int(request.args.get("size", 128))
+    except ValueError:
+        return (
+            {
+                "error": "Bad Request",
+                "message": "size needs to be an integer.",
+            },
+            400,
+        )
+
+    try:
+        url = guild.icon_url_as(
+            format=format,
+            static_format=static_format,
+            size=size,
+        )
+    except ValueError as e:
+        return (
+            {
+                "error": "Bad Request",
+                "message": str(e) + ".",
+            },
+            400,
+        )
+
+    return redirect(url)
