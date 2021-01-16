@@ -72,7 +72,9 @@ class Guild(Model):
             return self
 
         allowed_fields = ("name", "owner_id", "icon_hash")
-        fields = {name: fields.get(name, getattr(self, name)) for name in allowed_fields}
+        fields = {
+            name: fields.get(name, getattr(self, name)) for name in allowed_fields
+        }
 
         if "owner_id" in fields:
             fields["owner_id"] = int(fields["owner_id"])
@@ -132,11 +134,15 @@ class Guild(Model):
         if (size & (size - 1)) or size not in range(16, 4097):
             raise ValueError("size must be a power of 2 between 16 and 4096")
         if format is not None and format not in VALID_ICON_FORMATS:
-            raise ValueError("format must be None or one of {}".format(VALID_ICON_FORMATS))
+            raise ValueError(
+                "format must be None or one of {}".format(VALID_ICON_FORMATS)
+            )
         if format == "gif" and not self.is_icon_animated():
             raise ValueError("non animated avatars do not support gif format")
         if static_format not in VALID_STATIC_FORMATS:
-            raise ValueError("static_format must be one of {}".format(VALID_STATIC_FORMATS))
+            raise ValueError(
+                "static_format must be one of {}".format(VALID_STATIC_FORMATS)
+            )
 
         if self.icon_hash is None:
             return None
@@ -144,6 +150,8 @@ class Guild(Model):
         if format is None:
             format = "gif" if self.is_icon_animated() else static_format
 
-        return "https://cdn.discordapp.com/icons/{0.id}/{0.icon_hash}.{1}?size={2}".format(
-            self, format, size
+        return (
+            "https://cdn.discordapp.com/icons/{0.id}/{0.icon_hash}.{1}?size={2}".format(
+                self, format, size
+            )
         )

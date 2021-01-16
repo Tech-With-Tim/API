@@ -91,7 +91,9 @@ class GuildConfig(Model):
             "verification_type",
             "verification_channel_id",
         )
-        fields = {name: value for name, value in fields.items() if name in allowed_fields}
+        fields = {
+            name: value for name, value in fields.items() if name in allowed_fields
+        }
 
         query = f"""
         UPDATE guildconfigs

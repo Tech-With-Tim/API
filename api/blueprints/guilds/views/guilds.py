@@ -1,13 +1,11 @@
-from quart import current_app, request, redirect, jsonify
+from quart import request, redirect, jsonify
 
-from api.models import Guild, GuildConfig
-from api.app import API
+from api.models import Guild
 from .. import bp
 import utils
 
 
 request: utils.Request
-current_app: API
 GUILD_COLUMNS = {column.name for column in Guild.columns} - {"icon_hash"}
 
 
