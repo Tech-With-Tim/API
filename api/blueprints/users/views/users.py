@@ -30,7 +30,7 @@ async def get_users():
                     FROM (
                         SELECT
                                 json_build_object(
-                                    'id', id,
+                                    'id', id::TEXT,
                                     'username', username,
                                     'discriminator', discriminator,
                                     'avatar', avatar,
@@ -88,7 +88,7 @@ async def get_users():
                 FROM (
                     SELECT
                             json_build_object(
-                                'id', id,
+                                'id', id::TEXT,
                                 'username', username,
                                 'discriminator', discriminator,
                                 'avatar', avatar,
@@ -113,7 +113,7 @@ async def get_users():
                 FROM (
                     SELECT
                             json_build_object(
-                                'id', id,
+                                'id', id::TEXT,
                                 'username', username,
                                 'discriminator', discriminator,
                                 'avatar', avatar,
@@ -140,7 +140,7 @@ async def get_users():
                 FROM (
                     SELECT
                             json_build_object(
-                                'id', id,
+                                'id', id::TEXT,
                                 'username', username,
                                 'discriminator', discriminator,
                                 'avatar', avatar,
@@ -168,7 +168,7 @@ async def get_users():
                 FROM (
                     SELECT
                             json_build_object(
-                                'id', id,
+                                'id', id::TEXT,
                                 'username', username,
                                 'discriminator', discriminator,
                                 'avatar', avatar,
@@ -193,7 +193,7 @@ async def get_users():
                 FROM (
                     SELECT
                             json_build_object(
-                                'id', id,
+                                'id', id::TEXT,
                                 'username', username,
                                 'discriminator', discriminator,
                                 'avatar', avatar,
@@ -218,7 +218,7 @@ async def get_users():
                 FROM (
                     SELECT
                             json_build_object(
-                                'id', id,
+                                'id', id::TEXT,
                                 'username', username,
                                 'discriminator', discriminator,
                                 'avatar', avatar,
