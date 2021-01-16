@@ -46,9 +46,16 @@ import pytest
             {},
             400,
         ),
+        (
+            None,
+            400,
+        ),
     ],
 )
 async def test_create_guild(app: QuartClient, db, data: dict, status_code: int):
     response = await app.post("/guilds", json=data)
     assert response.content_type == "application/json"
     assert response.status_code == status_code
+
+# TODO: Add test for GET/PATCH/DELETE /guilds/<id>
+# TODO: Add test for GET /guilds/<id>/icon
