@@ -70,9 +70,7 @@ def _test_app() -> QuartClient:
         ),
     ],
 )
-async def test_get_all_users_no_queries(
-    app: QuartClient, query_strings: dict, status_code: int
-):
+async def test_get_all_users(app: QuartClient, query_strings: dict, status_code: int):
     # TODO: Add db fixture after takos pull request merged
     response = await app.get("/users/get-all", query_string=query_strings)
     assert response.status_code == status_code
