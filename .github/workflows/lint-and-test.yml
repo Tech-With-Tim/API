@@ -50,5 +50,6 @@ jobs:
 
       - name: Run pytest
         run: |
-          pytest --no-db
-        # DB isn't setup yet in workflow
+          pytest
+        env:
+          TEST_DB_URI: ${{ secrets.TEST_DB_URI }}

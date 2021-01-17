@@ -4,7 +4,7 @@ from launch import load_env, prepare_postgres, safe_create_tables, delete_tables
 from quart.testing import QuartClient
 import pytest
 import asyncio
-from postdb import Model
+from postDB import Model
 
 
 @pytest.fixture(scope="session")

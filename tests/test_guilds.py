@@ -60,13 +60,7 @@ async def test_create_guild(app: QuartClient, db, data: dict, status_code: int):
 
 @pytest.mark.asyncio
 @pytest.mark.db
-async def test_get_guild(app: QuartClient, db):
-    guild = await Guild.create(
-        id=501090983539245061,
-        name="Tech With Tim",
-        owner_id=501089409379205161,
-        icon_hash="a_5aa83d87a200585758846a075ffc52ba",
-    )
+async def test_get_guild(app: QuartClient, db, guild: Guild):
     response = await app.get(f"/guilds/{guild.id}")
     assert response.status_code == 200
     assert response.content_type == "application/json"
@@ -109,5 +103,57 @@ async def test_patch_guild(app: QuartClient, db):
     assert json["icon_hash"] == guild.icon_hash
 
 
-# TODO: Add test for DELETE /guilds/<id>
-# TODO: Add test for GET /guilds/<id>/icon
+@pytest.mark.asyncio
+@pytest.mark.db
+async def test_delete_guild(app: QuartClient, db):
+    guild = await Guild.create(
+        id=781645181744316476,
+        name="postDB",
+        owner_id=144112966176997376,
+        icon_hash="ffa2d83b0779a1cf240f8df018324be6",
+    )
+    response = await app.delete(f"/guilds/{guild.id}")
+    assert response.status_code == 200
+    assert response.content_type == "application/json"
+    json = await response.json
+    assert int(json["id"]) == guild.id
+    assert json["name"] == guild.name
+    assert int(json["owner_id"]) == guild.owner_id
+    assert json["icon_hash"] == guild.icon_hash
+    guild = await Guild.fetch(guild.id)  # guild was deleted in db, need to fetch again
+    assert guild is None
+
+
+@pytest.fixture(name="guild", scope="session")
+async def _guild():
+    return await Guild.create(
+        id=501090983539245061,
+        name="Tech With Tim",
+        owner_id=501089409379205161,
+        icon_hash="a_5aa83d87a200585758846a075ffc52ba",
+    )
+
+
+@pytest.mark.asyncio
+@pytest.mark.db
+@pytest.mark.parametrize(
+    ("querystring", "expected_url"),
+    [("", "gif?size=128")]
+    + [
+        (f"format={format}", f"{format}?size=128")
+        for format in ["jpeg", "jpg", "webp", "png", "gif"]
+    ]
+    + [
+        (f"size={size}", f"gif?size={size}")
+        for size in [16, 32, 64, 128, 256, 512, 1024, 2048, 4096]
+    ],
+)
+async def test_get_guild_icon(
+    app: QuartClient, db, guild: Guild, querystring: str, expected_url: str
+):
+    response = await app.get(f"/guilds/{guild.id}/icon?{querystring}")
+    assert response.status_code == 302
+    assert (
+        response.headers["Location"]
+        == f"https://cdn.discordapp.com/icons/{guild.id}/{guild.icon_hash}.{expected_url}"
+    )
