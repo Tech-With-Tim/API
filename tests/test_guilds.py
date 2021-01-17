@@ -56,6 +56,13 @@ async def test_create_guild(app: QuartClient, db, data: dict, status_code: int):
     response = await app.post("/guilds", json=data)
     assert response.content_type == "application/json"
     assert response.status_code == status_code
+    if status_code == 201:
+        json = await response.json
+        assert int(json["id"]) == int(data["id"])
+        assert json["name"] == data["name"]
+        assert int(json["owner_id"]) == int(data["owner_id"])
+        assert json["icon_hash"] == data.get("icon_hash", None)
+        assert response.headers["Location"] == f"/guilds/{data['id']}"
 
 
 @pytest.mark.asyncio
@@ -74,7 +81,9 @@ async def test_get_guild(app: QuartClient, db, guild: Guild):
 @pytest.mark.asyncio
 @pytest.mark.db
 async def test_get_guild_404(app: QuartClient, db):
-    response = await app.get("/guilds/523456202403")  # spamming random digits on keyboard
+    response = await app.get(
+        "/guilds/523456202403"
+    )  # spamming random digits on keyboard
     assert response.status_code == 404
     assert response.content_type == "application/json"
     json = await response.json
@@ -91,7 +100,8 @@ async def test_patch_guild(app: QuartClient, db):
         icon_hash="63fadd7a1f176935279865f88bd3c1e8",
     )
     response = await app.patch(
-        f"/guilds/{guild.id}", json={"owner_id": 268837679884402688, "name": "avib is the best"}
+        f"/guilds/{guild.id}",
+        json={"owner_id": 268837679884402688, "name": "avib is the best"},
     )
     assert response.status_code == 200
     assert response.content_type == "application/json"

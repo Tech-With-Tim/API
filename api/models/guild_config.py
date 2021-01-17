@@ -110,3 +110,21 @@ class GuildConfig(Model):
             setattr(self, field, value)
 
         return self
+
+    async def delete(self) -> Optional["GuildConfig"]:
+        """Delete the GuildConfig."""
+
+        query = """
+        DELETE FROM guildconfigs
+        WHERE id = $1
+        RETURNING *;
+        """
+        record = await self.pool.fetchrow(query, self.guild_id)
+
+        if record is None:
+            return None
+
+        for field, value in record.items():
+            setattr(self, field, value)
+
+        return self
