@@ -10,12 +10,12 @@ class GuildConfig(Model):
     xp_enabled = Column(types.Boolean())
     xp_multiplier = Column(types.Real())
     eco_enabled = Column(types.Boolean())
-    muted_role_id = Column(types.Integer(big=True))
+    muted_role_id = Column(types.Integer(big=True), nullable=True)
     do_logging = Column(types.Boolean())
-    log_channel_id = Column(types.Integer(big=True))
+    log_channel_id = Column(types.Integer(big=True), nullable=True)
     do_verification = Column(types.Boolean())
     verification_type = Column(types.String())  # enum
-    verification_channel_id = Column(types.Integer(big=True))
+    verification_channel_id = Column(types.Integer(big=True), nullable=True)
 
     @classmethod
     async def fetch(cls, guild_id: Union[str, int]) -> Optional["GuildConfig"]:
@@ -40,7 +40,7 @@ class GuildConfig(Model):
         do_logging: Optional[bool] = False,
         log_channel_id: Optional[Union[str, int]] = None,
         do_verification: Optional[bool] = False,
-        verification_type: Optional[str] = False,
+        verification_type: Optional[str] = "",
         verification_channel_id: Optional[Union[str, int]] = None,
     ) -> Optional["GuildConfig"]:
         """
@@ -64,12 +64,12 @@ class GuildConfig(Model):
             xp_enabled,
             xp_multiplier,
             eco_enabled,
-            int(muted_role_id),
+            int(muted_role_id) if muted_role_id else None,
             do_logging,
-            int(log_channel_id),
+            int(log_channel_id) if log_channel_id else None,
             do_verification,
             verification_type,
-            int(verification_channel_id),
+            int(verification_channel_id) if verification_channel_id else None,
         )
 
         if record is None:
@@ -92,21 +92,29 @@ class GuildConfig(Model):
             "verification_channel_id",
         )
         fields = {
-            name: value for name, value in fields.items() if name in allowed_fields
+            name: fields.get(name, getattr(self, name)) for name in allowed_fields
         }
+
+        for name in (
+            "muted_role_id",
+            "log_channel_id",
+            "verification_channel_id",
+        ):
+            if fields[name] is not None:
+                fields[name] = int(fields[name])
 
         query = f"""
         UPDATE guildconfigs
-        SET ({", ".join(fields)}) = ({", ".join("$" + str(i) for i in range(2, len(fields) + 2))})
-        WHERE id = $1
+        SET ({", ".join(allowed_fields)}) = ($2, $3, $4, $5, $6, $7, $8, $9, $10)
+        WHERE guild_id = $1
         RETURNING *;
         """
-        record = await self.pool.fetchrow(query, int(self.guild_id), *fields.items())
+        record = await self.pool.fetchrow(query, int(self.guild_id), *fields.values())
 
         if record is None:
             return None
 
-        for field, value in record:
+        for field, value in record.items():
             setattr(self, field, value)
 
         return self
@@ -116,7 +124,7 @@ class GuildConfig(Model):
 
         query = """
         DELETE FROM guildconfigs
-        WHERE id = $1
+        WHERE guild_id = $1
         RETURNING *;
         """
         record = await self.pool.fetchrow(query, self.guild_id)

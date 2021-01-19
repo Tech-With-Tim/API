@@ -76,8 +76,7 @@ class Guild(Model):
             name: fields.get(name, getattr(self, name)) for name in allowed_fields
         }
 
-        if "owner_id" in fields:
-            fields["owner_id"] = int(fields["owner_id"])
+        fields["owner_id"] = int(fields["owner_id"])
 
         query = """
         UPDATE guilds

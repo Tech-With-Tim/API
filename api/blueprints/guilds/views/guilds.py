@@ -211,7 +211,7 @@ async def post_guild_config(guild_id: int):
             jsonify(
                 {
                     "error": "Conflict",
-                    "message": f"Guild with ID {int(data['id'])} already has a Config.",
+                    "message": f"Guild with ID {guild_id} already has a config.",
                 }
             ),
             409,
@@ -219,7 +219,7 @@ async def post_guild_config(guild_id: int):
 
     response = jsonify(
         {
-            name: str(value) if name.endswith("_id") else value
+            name: str(value) if name.endswith("_id") and value is not None else value
             for name, value in guild_config.as_dict().items()
         }
     )
@@ -261,7 +261,7 @@ async def get_guild_config(guild_id: int):
 
     return jsonify(
         {
-            name: str(value) if name.endswith("_id") else value
+            name: str(value) if name.endswith("_id") and value is not None else value
             for name, value in guild_config.as_dict().items()
         }
     )
@@ -299,7 +299,7 @@ async def patch_guild_config(guild_id: int):
 
     return jsonify(
         {
-            name: str(value) if name.endswith("_id") else value
+            name: str(value) if name.endswith("_id") and value is not None else value
             for name, value in guild_config.as_dict().items()
         }
     )
@@ -336,7 +336,7 @@ async def delete_guild_config(guild_id: int):
 
     return jsonify(
         {
-            name: str(value) if name.endswith("_id") else value
+            name: str(value) if name.endswith("_id") and value is not None else value
             for name, value in guild_config.as_dict().items()
         }
     )
