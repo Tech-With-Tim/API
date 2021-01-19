@@ -1,6 +1,6 @@
 from quart import request, redirect, jsonify
 
-from api.models import Guild, GuildConfig
+from api.models import Guild, GuildConfig, VerificationTypes
 from .. import bp
 import utils
 
@@ -204,7 +204,11 @@ async def post_guild_config(guild_id: int):
 
     data: dict = await request.json or {}
     data = {name: value for name, value in data.items() if name in GUILD_CONFIG_COLUMNS}
-    guild_config = await GuildConfig.create(guild_id, **data)
+    try:
+        guild_config = await GuildConfig.create(guild_id, **data)
+    except ValueError as e:
+        return jsonify({"error": "Bad request", "message": str(e) + "."}), 400
+
     if guild_config is None:
         # GuildConfig already exists
         return (
@@ -295,7 +299,10 @@ async def patch_guild_config(guild_id: int):
         )
 
     data = await request.json or {}
-    await guild_config.update(**data)
+    try:
+        await guild_config.update(**data)
+    except ValueError as e:
+        return jsonify({"error": "Bad request", "message": str(e) + "."}), 400
 
     return jsonify(
         {

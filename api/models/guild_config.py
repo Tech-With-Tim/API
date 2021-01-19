@@ -1,5 +1,16 @@
 from postDB import Model, Column, types
-from typing import Optional, Union
+from typing import Optional, Union, Literal
+from enum import Enum
+
+
+class VerificationTypes(Enum):
+    DISCORD_INTEGRATED = "DISCORD_INTEGRATED"
+    DISCORD_CODE = "DISCORD_CODE"
+    DISCORD_INTEGRATED_CODE = "DISCORD_INTEGRATED_CODE"
+    DISCORD_CAPTCHA = "DISCORD_CAPTCHA"
+    DISCORD_INTEGRATED_CAPTCHA = "DISCORD_INTEGRATED_CAPTCHA"
+    DISCORD_REACTION = "DISCORD_REACTION"
+    DISCORD_INTEGRATED_REACTION = "DISCORD_INTEGRATED_REACTION"
 
 
 class GuildConfig(Model):
@@ -40,7 +51,7 @@ class GuildConfig(Model):
         do_logging: Optional[bool] = False,
         log_channel_id: Optional[Union[str, int]] = None,
         do_verification: Optional[bool] = False,
-        verification_type: Optional[str] = "",
+        verification_type: Optional[Literal["DISCORD_INTEGRATED"]] = "DISCORD_INTEGRATED",
         verification_channel_id: Optional[Union[str, int]] = None,
     ) -> Optional["GuildConfig"]:
         """
@@ -49,6 +60,11 @@ class GuildConfig(Model):
         Returns the new instance if created.
         Returns `None` if a Unique Violation occurred.
         """
+
+        if verification_type not in VerificationTypes.__members__:
+            raise ValueError(
+                f"verification_type must be one of {[m for m in VerificationTypes.__members__]}"
+            )
 
         query = """
         INSERT INTO guildconfigs (guild_id, xp_enabled, xp_multiplier, eco_enabled, muted_role_id,
@@ -102,6 +118,14 @@ class GuildConfig(Model):
         ):
             if fields[name] is not None:
                 fields[name] = int(fields[name])
+
+        if (
+            "verification_type" in fields
+            and fields["verification_type"] not in VerificationTypes.__members__
+        ):
+            raise ValueError(
+                f"verification_type must be one of {[m for m in VerificationTypes.__members__]}"
+            )
 
         query = f"""
         UPDATE guildconfigs
