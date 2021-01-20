@@ -62,10 +62,10 @@ Install Pipenv:
 pip install pipenv
 ```
 
-Install the required packages with Pipenv:
+Install the required packages and the packages for development with Pipenv:
 
 ```sh
-pipenv install
+pipenv install --dev
 ```
 
 ### Environment variables
@@ -145,7 +145,7 @@ pipenv run pytest
 - [Python](https://www.python.org/) - Language
 - [Quart](https://pgjones.gitlab.io/quart/) - Backend module
 - [PostDB](https://github.com/SylteA/postDB) - Database module
-- [pytest](https://docs.pytest.org/en/stable/) - Test framework
+- [pytest-asyncio](https://github.com/pytest-dev/pytest-asyncio) - Test framework (asynchronous version of [pytest](https://docs.pytest.org/en/stable/))
 
 ## ✍️ Authors
 
