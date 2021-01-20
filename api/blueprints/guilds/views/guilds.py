@@ -1,6 +1,6 @@
 from quart import request, redirect, jsonify
 
-from api.models import Guild, GuildConfig, VerificationTypes
+from api.models import Guild, GuildConfig
 from .. import bp
 import utils
 
