@@ -51,7 +51,9 @@ class GuildConfig(Model):
         do_logging: Optional[bool] = False,
         log_channel_id: Optional[Union[str, int]] = None,
         do_verification: Optional[bool] = False,
-        verification_type: Optional[Literal["DISCORD_INTEGRATED"]] = "DISCORD_INTEGRATED",
+        verification_type: Optional[
+            Literal["DISCORD_INTEGRATED"]
+        ] = "DISCORD_INTEGRATED",
         verification_channel_id: Optional[Union[str, int]] = None,
     ) -> Optional["GuildConfig"]:
         """
