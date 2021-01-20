@@ -7,7 +7,7 @@
 [![Status](https://img.shields.io/website?url=https%3A%2F%2Fapi.dev.twtcodejam.net)](https://api.dev.twtcodejam.net) <!-- TODO: Switch to main API link. -->
 [![GitHub Issues](https://img.shields.io/github/issues/Tech-With-Tim/API.svg)](https://github.com/Tech-With-Tim/API/issues)
 [![GitHub Pull Requests](https://img.shields.io/github/issues-pr/Tech-With-Tim/API.svg)](https://github.com/Tech-With-Tim/API/pulls)
-[![Licence](https://img.shields.io/badge/licence-MIT-blue.svg)](/LICENCE)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
 [![Discord](https://discord.com/api/guilds/501090983539245061/widget.png?style=shield)](https://discord.gg/twt)
 [![Test and deploy](https://github.com/Tech-With-Tim/API/workflows/Release%20-%20Test%2C%20Build%20%26%20Redeploy/badge.svg)](https://github.com/Tech-With-Tim/API/actions?query=workflow%3A%22Release+-+Test%2C+Build+%26+Redeploy%22)
 <!-- TODO: Lint & Test status -->
@@ -28,7 +28,7 @@ API for the Tech With Tim website using [Quart](https://pgjones.gitlab.io/quart/
 - [✅ Linting](#-linting)
 - [🚨 Tests](#-tests)
 - [📚 Docs](/docs/README.md)
-- [📜 Licence](/LICENCE)
+- [📜 License](/LICENCE)
 - [⛏️ Built Using](#️-built-using)
 - [✍️ Authors](#️-authors)
 
@@ -90,7 +90,7 @@ And fill in the variables with the values below:
 
 ### Running
 
-Run the API and initialise the database:
+Run the API and initialize the database:
 
 ```sh
 pipenv run python launch.py runserver --initdb
@@ -100,7 +100,7 @@ The API should run at [http://127.0.0.1:5000](http://127.0.0.1:5000). For more i
 
 ## 🐳 Running with Docker
 
-Both the API and the [frontend](https://github.com/Tech-With-Tim/Frontend) can be started using Docker. Using Docker is generally recommended (but not stricly required) because it abstracts away some additional set up work.
+Both the API and the [frontend](https://github.com/Tech-With-Tim/Frontend) can be started using Docker. Using Docker is generally recommended (but not strictly required) because it abstracts away some additional set up work.
 
 - Setup the discord app like done [here](#discord-application).
 
