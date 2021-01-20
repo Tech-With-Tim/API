@@ -9,7 +9,7 @@ import json
 import utils
 
 
-from api.blueprints import auth
+from api.blueprints import auth, users
 
 
 log = logging.getLogger()
@@ -66,6 +66,7 @@ app.asgi_app = utils.TokenAuthMiddleware(app.asgi_app, app)
 app = cors(app, allow_origin="*")  # TODO: Restrict the origin(s) in production.
 # Set up blueprints
 auth.setup(app=app, url_prefix="/auth")
+users.setup(app=app, url_prefix="/users")
 
 
 @app.route("/")
