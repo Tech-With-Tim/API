@@ -89,14 +89,15 @@ class User(Model):
         )
 
     @property
-    def avatar_url_as(self, *, format=None, static_format="webp", size=1024):
+    def avatar_url_as(self, *, fmt=None, static_format="webp", size=1024):
         if not size & (size - 1) and size in range(16, 4097):
             raise RuntimeWarning("size must be a power of 2 between 16 and 4096")
-        if format is not None and format not in VALID_AVATAR_FORMATS:
+        if fmt is not None and fmt not in VALID_AVATAR_FORMATS:
             raise RuntimeWarning(
                 "format must be None or one of {}".format(VALID_AVATAR_FORMATS)
             )
-        if format == "gif" and not self.is_avatar_animated():
+
+        if fmt == "gif" and not self.is_avatar_animated():
             raise RuntimeWarning("non animated avatars do not support gif format")
         if static_format not in VALID_STATIC_FORMATS:
             raise RuntimeWarning(
@@ -104,13 +105,12 @@ class User(Model):
             )
 
         if self.avatar is None:
-            return self.default_avatar_url
+            return self.default_avatar_url + "?size=%s" % size
 
-        if format is None:
-            format = "gif" if self.is_avatar_animated() else static_format
+        if fmt is None:
+            fmt = "gif" if self.is_avatar_animated() else static_format
 
         return (
-            "https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.{1}?size={2}".format(
-                self, format, size
-            )
+            "https://cdn.discordapp.com/avatars"
+            "/{0.id}/{0.avatar}.{1}?size={2}".format(self, fmt, size)
         )

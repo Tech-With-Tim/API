@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 try:
-    import uvloop
+    import uvloop  # noqa f401
 except ModuleNotFoundError:
     loop = asyncio.new_event_loop()
 else:
@@ -162,7 +162,7 @@ def dropdb(verbose: bool):
 
     for model in Model.all_models():
         run_async(model.drop_table(verbose=verbose))
-        log.info("Dropped table %s" % type(model).__tablename__)
+        log.info("Dropped table %s" % model.__tablename__)
 
 
 @app.cli.command()
