@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 try:
-    import uvloop  # noqa
+    import uvloop  # noqa f401
 except ModuleNotFoundError:
     LOOP = asyncio.new_event_loop()
 else:
