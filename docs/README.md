@@ -13,6 +13,9 @@ Copy paste the [_template.md](./_template.md) file and rename it to your endpoin
 > Note that each section is marked by a comment, for example ``<!-- URL -->`` needs to be replaced by the URL.
 
 - The base URL, for example ``/auth``.
+
+Repeat these for every endpoint:
+
 - The request method, usually ``GET`` or ``POST``.
 - The URL, for example ``/auth/discord/redirect``.
 - A brief description of the endpoint, you can simply copy paste the docstring you wrote.
