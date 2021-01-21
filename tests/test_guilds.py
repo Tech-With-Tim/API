@@ -123,13 +123,7 @@ async def test_delete_guild(app: QuartClient, db):
         icon_hash="ffa2d83b0779a1cf240f8df018324be6",
     )
     response = await app.delete(f"/guilds/{guild.id}")
-    assert response.status_code == 200
-    assert response.content_type == "application/json"
-    json = await response.json
-    assert int(json["id"]) == guild.id
-    assert json["name"] == guild.name
-    assert int(json["owner_id"]) == guild.owner_id
-    assert json["icon_hash"] == guild.icon_hash
+    assert response.status_code == 204
     guild = await Guild.fetch(guild.id)  # guild was deleted in db, need to fetch again
     assert guild is None
 

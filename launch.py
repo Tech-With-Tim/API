@@ -18,11 +18,11 @@ logging.basicConfig(level=logging.INFO)
 try:
     import uvloop  # noqa f401
 except ModuleNotFoundError:
-    LOOP = asyncio.new_event_loop()
+    loop = asyncio.new_event_loop()
 else:
-    LOOP = uvloop.new_event_loop()
+    loop = uvloop.new_event_loop()
 
-asyncio.set_event_loop(LOOP)
+asyncio.set_event_loop(loop)
 
 
 def load_env(fp: str, args: Iterable[str], exit_on_missing: bool = True) -> dict:
@@ -76,7 +76,7 @@ def run_async(coro: Coroutine) -> Any:
     :param coro:    The coroutine to run.
     :returns:       Whatever the coroutine returned.
     """
-    return LOOP.run_until_complete(coro)
+    return asyncio.get_event_loop().run_until_complete(coro)
 
 
 async def prepare_postgres(
@@ -88,18 +88,19 @@ async def prepare_postgres(
     """
     Prepare the postgres database connection.
 
-    :param int retries:     Included to fix issue with docker starting API before DB is finished starting.
-    :param float interval:  Interval of which to wait for next retry.
+    :param int retries:             Included to fix issue with docker starting API before DB is finished starting.
+    :param float interval:          Interval of which to wait for next retry.
+    :param str db_uri:              DB URI to connect to.
+    :param AbstractEventLoop loop:  Asyncio loop to run the pool with.
     """
-    DB_URI = db_uri or ENV["DB_URI"]
-    loop = loop or LOOP
+
     log = logging.getLogger("DB")
-    db_name = DB_URI.split("/")[-1]
+    db_name = db_uri.split("/")[-1]
     log.info('[i] Attempting to connect to DB "%s"' % db_name)
     for i in range(1, retries + 1):
         try:
             await Model.create_pool(
-                uri=DB_URI,
+                uri=db_uri,
                 max_con=10,  # We might want to increase this number in the future.
                 loop=loop,
             )
@@ -162,7 +163,9 @@ def _initdb(verbose: bool):
 
     :param verbose:     Print SQL statements when creating models?
     """
-    if not run_async(prepare_postgres(retries=6, interval=10.0)):
+    if not run_async(
+        prepare_postgres(retries=6, interval=10.0, db_uri=ENV["DB_URI"], loop=loop)
+    ):
         exit(1)  # Connecting to our postgres server failed.
 
     run_async(safe_create_tables(verbose=verbose))
@@ -176,7 +179,9 @@ def dropdb(verbose: bool):
 
     :param verbose:     Print SQL statements when dropping models?
     """
-    if not run_async(prepare_postgres(retries=6, interval=10.0)):
+    if not run_async(
+        prepare_postgres(retries=6, interval=10.0, db_uri=ENV["DB_URI"], loop=loop)
+    ):
         exit(1)  # Connecting to our postgres server failed.
 
     run_async(delete_tables(verbose=verbose))
@@ -202,7 +207,9 @@ def runserver(host: str, port: str, debug: bool, initdb: bool, verbose: bool):
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
 
-    if not run_async(prepare_postgres(retries=6, interval=10.0)):
+    if not run_async(
+        prepare_postgres(retries=6, interval=10.0, db_uri=ENV["DB_URI"], loop=loop)
+    ):
         exit(1)  # Connecting to our postgres server failed.
 
     if initdb:
