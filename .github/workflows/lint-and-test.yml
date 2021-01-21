@@ -17,6 +17,19 @@ jobs:
       PIPENV_HIDE_EMOJIS: 1
       PIPENV_NOSPIN: 1
 
+    services:
+      postgres:
+        image: postgres:10.8
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: api
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -47,13 +60,6 @@ jobs:
         run: "flake8 \
         --format='::error file=%(path)s,line=%(row)d,col=%(col)d::\
         [flake8] %(code)s: %(text)s'"
-
-      - name: Setup PostgreSQL
-        uses: Harmon758/postgresql-action@v1.0.0
-        with:
-          postgresql db: api
-          postgresql user: postgres
-          postgresql password: postgres
 
       - name: Run pytest
         run: |
