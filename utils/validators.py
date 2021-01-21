@@ -6,6 +6,23 @@ import typing
 request: Request
 
 
+NoneType = type(None)
+supported_validation_types = [
+    typing.Literal,
+    typing.Union,
+    typing.List,
+    typing.Dict,
+    NoneType,
+    float,
+    list,
+    dict,
+    str,
+    int,
+]
+
+special_validation_types = [typing.Literal, typing.Union, typing.List, typing.Dict]
+
+
 def find_excess(valid_keys: typing.Iterable[str], data: dict) -> typing.List[str]:
     """
     Finds excess data in the json `data` provided.
@@ -19,6 +36,23 @@ def is_optional(field: typing.Any) -> bool:
     return typing.get_origin(field) is typing.Union and type(None) in typing.get_args(
         field
     )
+
+
+def format_type_name(field: typing.Any) -> str:
+    """Format the supported types to a more human-readable string."""
+
+    if typing.get_origin(field) in special_validation_types:
+        return str(field).replace("typing.", "")
+
+    return field.__name__
+
+
+def is_supported(_type: typing.Any) -> bool:
+    """Is the provided type a supported type in our validation?"""
+    if typing.get_origin(_type) in special_validation_types:
+        return True
+
+    return _type in supported_validation_types
 
 
 def is_iterable(field: typing.Any) -> bool:
@@ -44,7 +78,7 @@ def find_missing(
     ]
 
 
-def validate_list(expected, lst: list) -> typing.Union[str, bool]:
+def validate_list(expected: typing.Any, lst: list) -> typing.Union[str, bool]:
     """
     Validate a list against our expected schema.
 
@@ -54,7 +88,7 @@ def validate_list(expected, lst: list) -> typing.Union[str, bool]:
 
     if not isinstance(lst, list):
         return "Expected argument of type `%s`, got `%s`" % (
-            str(expected).replace("typing.", ""),
+            format_type_name(expected),
             type(lst).__name__,
         )
 
@@ -63,23 +97,11 @@ def validate_list(expected, lst: list) -> typing.Union[str, bool]:
     for item in lst:
         if not isinstance(item, each_arg_type):
             return "Not all list items are of expected value, `%s`, found `%s`" % (
-                each_arg_type.__name__,
+                format_type_name(each_arg_type),
                 type(item).__name__,
             )
 
     return False  # The list is valid.
-
-
-supported_validation_types = [
-    typing.Union,
-    typing.List,
-    typing.Dict,
-    float,
-    list,
-    dict,
-    str,
-    int,
-]
 
 
 def validate(
@@ -102,6 +124,13 @@ def validate(
             if is_optional(arg_type):
                 continue
 
+        if not is_supported(arg_type):
+            raise ValueError(
+                "Type `%s` is not a supported validation type." % str(arg_type)
+            )
+
+        original = arg_type
+
         if typing.get_origin(arg_type) == list:
             if result := validate_list(expected=arg_type, lst=data[arg]):
                 errors[arg] = result
@@ -113,21 +142,28 @@ def validate(
             # Handles both Union and Optional.
             arg_type = typing.get_args(arg_type)
 
+        if typing.get_origin(arg_type) == typing.Literal:
+            if data[arg] not in typing.get_args(arg_type):
+                errors[arg] = "Parameter needs to be one of %s" % format_type_name(
+                    arg_type
+                )
+            continue
+
         if is_iterable(arg_type):
             for t in arg_type:
-                if t not in supported_validation_types:
-                    raise RuntimeWarning(
+                if not is_supported(t):
+                    raise ValueError(
                         "Type `%s` is not a supported validation type." % str(t)
                     )
         else:
-            if arg_type not in supported_validation_types:
-                raise RuntimeWarning(
+            if not is_supported(arg_type):
+                raise ValueError(
                     "Type `%s` is not a supported validation type." % str(arg_type)
                 )
 
         if not isinstance(data[arg], arg_type):
             errors[arg] = "Expected argument of type `%s`, got `%s`" % (
-                str(arg_type).replace("typing.", ""),
+                format_type_name(original),
                 type(data[arg]).__name__,
             )
 
@@ -146,12 +182,12 @@ def expects_data(
     """
 
     if not isinstance(scheme, dict):
-        raise RuntimeWarning(
+        raise ValueError(
             "expects_data does not support validating other data models than dicts."
         )
 
     if __data_type not in ("json", "form"):
-        raise RuntimeWarning("data_type can only be `json` or `form`.")
+        raise ValueError("data_type can only be `json` or `form`.")
 
     def outer(func: typing.Callable) -> typing.Callable:
         @wraps(func)
@@ -190,9 +226,14 @@ def expects_data(
 
             if out := validate(scheme=scheme, data=data):
                 # validate returns `False` if data matches scheme.
-                return jsonify(**out), 400
+                return (
+                    jsonify(
+                        error="Bad Request", message="JSON Validation failed.", data=out
+                    ),
+                    400,
+                )
 
-            kwargs.update(out)
+            kwargs.update(data)
 
             return await func(*args, **kwargs)
 
@@ -227,7 +268,14 @@ def expects_files(*filenames: typing.Tuple[str]) -> typing.Callable:
                     error[filename] = "This file is required."
 
             if error:
-                return jsonify({"error": "400 Bad Request", "data": error}), 400
+                return (
+                    jsonify(
+                        error="Bad Request",
+                        message="File validation failed.",
+                        data=error,
+                    ),
+                    400,
+                )
 
             return await func(*args, files=files, **kwargs)
 
