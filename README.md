@@ -100,7 +100,7 @@ The API should run at [http://127.0.0.1:5000](http://127.0.0.1:5000). For more i
 
 ## 🐳 Running with Docker
 
-Both the API and the [frontend](https://github.com/Tech-With-Tim/Frontend) can be started using Docker. Using Docker is generally recommended (but not stricly required) because it abstracts away some additional set up work.
+Both the API and the [frontend](https://github.com/Tech-With-Tim/Frontend) can be started using Docker. Using Docker is generally recommended (but not strictly required) because it abstracts away some additional set up work.
 
 - Setup the discord app like done [here](#discord-application).
 
