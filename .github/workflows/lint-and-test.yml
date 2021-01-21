@@ -48,8 +48,15 @@ jobs:
         --format='::error file=%(path)s,line=%(row)d,col=%(col)d::\
         [flake8] %(code)s: %(text)s'"
 
+      - name: Setup PostgreSQL
+        uses: Harmon758/postgresql-action@v1.0.0
+        with:
+          postgresql db: api
+          postgresql user: postgres
+          postgresql password: postgres
+
       - name: Run pytest
         run: |
           pytest
         env:
-          TEST_DB_URI: ${{ secrets.TEST_DB_URI }}
+          TEST_DB_URI: postgresql://postgres:postgres@localhost:5432/api
