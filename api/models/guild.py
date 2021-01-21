@@ -76,8 +76,6 @@ class Guild(Model):
             name: fields.get(name, getattr(self, name)) for name in allowed_fields
         }
 
-        fields["owner_id"] = int(fields["owner_id"])
-
         query = """
         UPDATE guilds
         SET (name, owner_id, icon_hash) = ($2, $3, $4)
@@ -85,7 +83,11 @@ class Guild(Model):
         RETURNING *;
         """
         record = await self.pool.fetchrow(
-            query, int(self.id), fields["name"], fields["owner_id"], fields["icon_hash"]
+            query,
+            int(self.id),
+            fields["name"],
+            int(fields["owner_id"]),
+            fields["icon_hash"],
         )
 
         if record is None:
@@ -126,17 +128,17 @@ class Guild(Model):
     def icon_url_as(
         self,
         *,
-        format: Literal["jpeg", "jpg", "webp", "png", "gif"] = None,
+        fmt: Literal["jpeg", "jpg", "webp", "png", "gif"] = None,
         static_format: Literal["jpeg", "jpg", "webp", "png"] = "webp",
         size: Literal[16, 32, 64, 128, 256, 512, 1024, 2048, 4096] = 128
     ) -> Optional[str]:
         if (size & (size - 1)) or size not in range(16, 4097):
             raise ValueError("size must be a power of 2 between 16 and 4096")
-        if format is not None and format not in VALID_ICON_FORMATS:
+        if fmt is not None and fmt not in VALID_ICON_FORMATS:
             raise ValueError(
                 "format must be None or one of {}".format(VALID_ICON_FORMATS)
             )
-        if format == "gif" and not self.is_icon_animated():
+        if fmt == "gif" and not self.is_icon_animated():
             raise ValueError("non animated avatars do not support gif format")
         if static_format not in VALID_STATIC_FORMATS:
             raise ValueError(
@@ -146,11 +148,11 @@ class Guild(Model):
         if self.icon_hash is None:
             return None
 
-        if format is None:
-            format = "gif" if self.is_icon_animated() else static_format
+        if fmt is None:
+            fmt = "gif" if self.is_icon_animated() else static_format
 
         return (
             "https://cdn.discordapp.com/icons/{0.id}/{0.icon_hash}.{1}?size={2}".format(
-                self, format, size
+                self, fmt, size
             )
         )
