@@ -8,7 +8,6 @@ import json
 
 import utils
 
-
 from api.blueprints import auth, users
 
 
@@ -50,7 +49,7 @@ class API(Quart):
         headers["Content-Type"] = "application/json"
 
         return (
-            jsonify({"error": error.name, "message": error.description}),
+            jsonify(error=error.name, message=error.description),
             error.status_code,
             headers,
         )
@@ -72,7 +71,7 @@ users.setup(app=app, url_prefix="/users")
 @app.route("/")
 async def index():
     """Index endpoint used for testing."""
-    return jsonify({"status": "OK"})
+    return jsonify(status="OK")
 
 
 @app.errorhandler(500)
@@ -86,6 +85,6 @@ async def error_500(error: BaseException):
     )
 
     return (
-        jsonify({"error": "Internal Server Error - Server got itself in trouble"}),
+        jsonify(error="Internal Server Error", message="Server got itself in trouble"),
         500,
     )
