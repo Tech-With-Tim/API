@@ -1,4 +1,4 @@
-from quart import request, redirect, jsonify
+from quart import jsonify
 from typing import Optional, Union
 
 from api.models import Guild
