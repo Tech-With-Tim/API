@@ -1,10 +1,14 @@
 from api import app as quart_app
+from api.models import User, Token
 from launch import load_env, prepare_postgres, safe_create_tables, delete_tables
 
 from quart.testing import QuartClient
+from postDB import Model
 import pytest
 import asyncio
-from postDB import Model
+import datetime
+import jwt
+import os
 
 
 @pytest.fixture(scope="session")
@@ -16,13 +20,30 @@ def event_loop():
     loop.close()
 
 
-@pytest.fixture(name="app", scope="session")
-def _test_app(event_loop) -> QuartClient:
+@pytest.fixture(scope="session")
+def app(event_loop) -> QuartClient:
     return quart_app.test_client()
 
 
-@pytest.fixture(name="db", scope="session")
-async def _db(event_loop) -> bool:
+@pytest.fixture(scope="session")
+async def auth_app(event_loop, db) -> QuartClient:
+    auth_client = quart_app.test_client()
+    user = await User.create(1, "test", "0000", type="APP")
+    token = await Token(
+        user_id=user.id,
+        data={},
+        expires_at=datetime.datetime.utcnow() + datetime.timedelta(hours=1),
+        token="1234",
+    ).update()
+    auth_client.token = jwt.encode(
+        {"uid": user.id, "exp": token.expires_at, "iat": datetime.datetime.utcnow()},
+        key=os.environ["SECRET_KEY"],
+    )
+    return auth_client
+
+
+@pytest.fixture(scope="session")
+async def db(event_loop) -> bool:
     env = load_env("./local.env", ("TEST_DB_URI",))
     assert await prepare_postgres(db_uri=env["TEST_DB_URI"], loop=event_loop)
     await safe_create_tables()

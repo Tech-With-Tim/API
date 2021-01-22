@@ -7,6 +7,7 @@ import utils
 
 
 @bp.route("/<int:guild_id>/config", methods=["POST"])
+@utils.app_only
 @utils.expects_data(
     xp_enabled=Optional[bool],
     xp_multiplier=Optional[float],
@@ -69,6 +70,7 @@ async def post_guild_config(guild_id: int, **data):
 
 
 @bp.route("/<int:guild_id>/config", methods=["GET"])
+@utils.app_only
 async def get_guild_config(guild_id: int):
     """Get the Config for a guild"""
     guild = await Guild.fetch(guild_id)
@@ -99,6 +101,7 @@ async def get_guild_config(guild_id: int):
 
 
 @bp.route("/<int:guild_id>/config", methods=["PATCH"])
+@utils.app_only
 @utils.expects_data(
     xp_enabled=Optional[bool],
     xp_multiplier=Optional[float],
@@ -141,10 +144,7 @@ async def patch_guild_config(guild_id: int, **data):
             404,
         )
 
-    try:
-        await guild_config.update(**data)
-    except ValueError as e:
-        return jsonify(error="Bad request", message=str(e) + "."), 400
+    await guild_config.update(**data)
 
     return jsonify(
         {
@@ -155,6 +155,7 @@ async def patch_guild_config(guild_id: int, **data):
 
 
 @bp.route("/<int:guild_id>/config", methods=["DELETE"])
+@utils.app_only
 async def delete_guild_config(guild_id: int):
     """Delete the Config for a guild"""
     guild = await Guild.fetch(guild_id)

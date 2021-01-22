@@ -10,6 +10,7 @@ request: utils.Request
 
 
 @bp.route("", methods=["POST"])
+@utils.app_only
 @utils.expects_data(
     id=Union[str, int],
     name=str,
@@ -68,6 +69,7 @@ async def get_guild(guild_id: int):
 
 
 @bp.route("/<int:guild_id>", methods=["PATCH"])
+@utils.app_only
 @utils.expects_data(
     name=Optional[str],
     owner_id=Optional[Union[str, int]],
@@ -95,6 +97,7 @@ async def patch_guild(guild_id: int, **data):
 
 
 @bp.route("/<int:guild_id>", methods=["DELETE"])
+@utils.app_only
 async def delete_guild(guild_id: int):
     """Delete a guild from its ID"""
     guild = await Guild.fetch(guild_id)
@@ -109,40 +112,3 @@ async def delete_guild(guild_id: int):
     await guild.delete()
 
     return "", 204
-
-
-@bp.route("/<int:guild_id>/icon", methods=["GET"])
-async def get_guild_icon(guild_id: int):
-    """Get a guild icon from its ID"""
-    guild = await Guild.fetch(guild_id)
-    if guild is None:
-        return (
-            jsonify(
-                error="Not found", message=f"Guild with ID {guild_id} doesn't exist."
-            ),
-            404,
-        )
-
-    fmt = request.args.get("format", None)
-    static_format = request.args.get("static_format", "webp")
-    try:
-        size = int(request.args.get("size", 128))
-    except ValueError:
-        return (
-            jsonify(error="Bad Request", message="size needs to be an integer."),
-            400,
-        )
-
-    try:
-        url = guild.icon_url_as(
-            fmt=fmt,
-            static_format=static_format,
-            size=size,
-        )
-    except ValueError as e:
-        return (
-            jsonify(error="Bad Request", message=str(e) + "."),
-            400,
-        )
-
-    return redirect(url)
