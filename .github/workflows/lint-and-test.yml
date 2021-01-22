@@ -66,3 +66,5 @@ jobs:
           pytest
         env:
           TEST_DB_URI: postgresql://postgres:postgres@localhost:5432/api
+          # This isn't the real SECRET_KEY but the one used for testing
+          SECRET_KEY: nqk8umrpc4f968_2%jz_%r-r2o@v4!21#%)h&-s_7qm150=o@6
