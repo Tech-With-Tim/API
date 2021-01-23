@@ -1,5 +1,5 @@
 from api import app as quart_app
-from api.models import User, Token
+from api.models import User
 from launch import load_env, prepare_postgres, safe_create_tables, delete_tables
 
 from quart.testing import QuartClient
