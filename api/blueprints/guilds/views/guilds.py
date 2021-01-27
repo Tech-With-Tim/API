@@ -51,14 +51,9 @@ async def post_guild(
 @bp.route("/<int:guild_id>", methods=["GET"])
 async def get_guild(guild_id: int):
     """Get a guild from its ID"""
-    guild = await Guild.fetch(guild_id)
-    if guild is None:
-        return (
-            jsonify(
-                error="Not found", message=f"Guild with ID {guild_id} doesn't exist."
-            ),
-            404,
-        )
+    found, guild, response = await Guild.fetch_or_404(guild_id)
+    if not found:
+        return response
 
     return jsonify(
         id=str(guild.id),
@@ -77,14 +72,9 @@ async def get_guild(guild_id: int):
 )
 async def patch_guild(guild_id: int, **data):
     """Patch a guild from its ID"""
-    guild = await Guild.fetch(guild_id)
-    if guild is None:
-        return (
-            jsonify(
-                error="Not found", message=f"Guild with ID {guild_id} doesn't exist."
-            ),
-            404,
-        )
+    found, guild, response = await Guild.fetch_or_404(guild_id)
+    if not found:
+        return response
 
     await guild.update(**data)
 
@@ -100,14 +90,9 @@ async def patch_guild(guild_id: int, **data):
 @utils.app_only
 async def delete_guild(guild_id: int):
     """Delete a guild from its ID"""
-    guild = await Guild.fetch(guild_id)
-    if guild is None:
-        return (
-            jsonify(
-                error="Not found", message=f"Guild with ID {guild_id} doesn't exist."
-            ),
-            404,
-        )
+    found, guild, response = await Guild.fetch_or_404(guild_id)
+    if not found:
+        return response
 
     await guild.delete()
 

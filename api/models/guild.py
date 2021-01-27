@@ -1,5 +1,6 @@
 from postDB import Model, Column, types
-from typing import Optional, Union, Literal
+from quart import jsonify, Response
+from typing import Optional, Tuple, Union, Literal
 from datetime import datetime
 
 import utils
@@ -35,6 +36,36 @@ class Guild(Model):
             return None
 
         return cls(**record)
+
+    @classmethod
+    async def fetch_or_404(
+        cls, id: Union[str, int]
+    ) -> Tuple[bool, Optional["Guild"], Optional[Response]]:
+        """Fetch a guild with the given ID or send a 404 error.
+
+        Args:
+            id (Union[str, int]): the guild's id.
+
+        Returns:
+            bool: Whether the guild is found.
+            Optional[Guild]: The guild (if found).
+            Optional[Response]: The 404 response (if not found).
+        """
+
+        guild = await cls.fetch(id)
+        if guild:
+            return True, guild, None
+        else:
+            return (
+                False,
+                None,
+                (
+                    jsonify(
+                        error="Not found", message=f"Guild with ID {id} doesn't exist."
+                    ),
+                    404,
+                ),
+            )
 
     @classmethod
     async def create(
@@ -78,7 +109,10 @@ class Guild(Model):
 
         query = """
         UPDATE guilds
-        SET (name, owner_id, icon_hash) = ($2, $3, $4)
+        SET
+            name = $2,
+            owner_id = $3,
+            icon_hash = $4
         WHERE id = $1
         RETURNING *;
         """
@@ -130,16 +164,21 @@ class Guild(Model):
         *,
         fmt: Literal["jpeg", "jpg", "webp", "png", "gif"] = None,
         static_format: Literal["jpeg", "jpg", "webp", "png"] = "webp",
-        size: Literal[16, 32, 64, 128, 256, 512, 1024, 2048, 4096] = 128
+        size: Literal[16, 32, 64, 128, 256, 512, 1024, 2048, 4096] = 128,
     ) -> Optional[str]:
+        """Constructs a link to discord's CDN for the guild's icon."""
+
         if (size & (size - 1)) or size not in range(16, 4097):
             raise ValueError("size must be a power of 2 between 16 and 4096")
+
         if fmt is not None and fmt not in VALID_ICON_FORMATS:
             raise ValueError(
                 "format must be None or one of {}".format(VALID_ICON_FORMATS)
             )
+
         if fmt == "gif" and not self.is_icon_animated():
             raise ValueError("non animated avatars do not support gif format")
+
         if static_format not in VALID_STATIC_FORMATS:
             raise ValueError(
                 "static_format must be one of {}".format(VALID_STATIC_FORMATS)

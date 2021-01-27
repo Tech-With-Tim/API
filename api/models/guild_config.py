@@ -1,5 +1,6 @@
 from postDB import Model, Column, types
-from typing import Optional, Union, Literal
+from quart import jsonify, Response
+from typing import Optional, Tuple, Union, Literal
 from enum import Enum
 
 
@@ -14,6 +15,21 @@ class VerificationTypes(Enum):
 
 
 class GuildConfig(Model):
+    """
+    Configuration for a guild, for storing information about what the guild configured.
+
+    :param int guild_id:                The guild's id.
+    :param bool xp_enabled:             Wheter XP for every message is enabled.
+    :param float xp_multiplier:         XP multiplier for every message.
+    :param bool eco_enabled:            Wheter economy commands are enabled.
+    :param int muted_role_id:           The muted role's id.
+    :param bool do_logging:             Whether to do logging.
+    :param int log_channel_id:          The logging channel's id.
+    :param bool do_verification:        Wheter to do verification.
+    :param str verification_type:       The verification's type.
+    :param int verification_channel_id: The verification channel's id.
+    """
+
     guild_id = Column(
         types.ForeignKey("guilds", "id", sql_type=types.Integer(big=True)),
         primary_key=True,
@@ -38,6 +54,37 @@ class GuildConfig(Model):
             return None
 
         return cls(**record)
+
+    @classmethod
+    async def fetch_or_404(
+        cls, guild_id: Union[str, int]
+    ) -> Tuple[bool, Optional["GuildConfig"], Optional[Response]]:
+        """Fetch a guild configuration with the given ID or send a 404 error.
+
+        Args:
+            guild_id (Union[str, int]): the guild's id.
+
+        Returns:
+            bool: Whether the guild config is found.
+            Optional[Guild]: The guild config (if found).
+            Optional[Response]: The 404 response (if not found).
+        """
+
+        guild_config = await cls.fetch(id)
+        if guild_config:
+            return True, guild_config, None
+        else:
+            return (
+                False,
+                None,
+                (
+                    jsonify(
+                        error="Not found",
+                        message=f"Guild with ID {guild_id} doesn't have a configuration.",
+                    ),
+                    404,
+                ),
+            )
 
     @classmethod
     async def create(
@@ -137,9 +184,18 @@ class GuildConfig(Model):
                 f"verification_type must be one of {[m for m in VerificationTypes.__members__]}"
             )
 
-        query = f"""
+        query = """
         UPDATE guildconfigs
-        SET ({", ".join(allowed_fields)}) = ($2, $3, $4, $5, $6, $7, $8, $9, $10)
+        SET
+            xp_enabled = $2,
+            xp_multiplier = $3,
+            eco_enabled = $4,
+            muted_role_id = $5,
+            do_logging = $6,
+            log_channel_id = $7,
+            do_verification = $8,
+            verification_type = $9,
+            verification_channel_id = $10
         WHERE guild_id = $1
         RETURNING *;
         """

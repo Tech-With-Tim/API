@@ -31,14 +31,9 @@ import utils
 )
 async def post_guild_config(guild_id: int, **data):
     """Create a Config for a guild"""
-    guild = await Guild.fetch(guild_id)
-    if guild is None:
-        return (
-            jsonify(
-                error="Not found", message=f"Guild with ID {guild_id} doesn't exist."
-            ),
-            404,
-        )
+    found, guild, response = await Guild.fetch_or_404(guild_id)
+    if not found:
+        return response
 
     try:
         guild_config = await GuildConfig.create(guild_id, **data)
@@ -73,24 +68,13 @@ async def post_guild_config(guild_id: int, **data):
 @utils.app_only
 async def get_guild_config(guild_id: int):
     """Get the Config for a guild"""
-    guild = await Guild.fetch(guild_id)
-    if guild is None:
-        return (
-            jsonify(
-                error="Not found", message=f"Guild with ID {guild_id} doesn't exist."
-            ),
-            404,
-        )
+    found, guild, response = await Guild.fetch_or_404(guild_id)
+    if not found:
+        return response
 
-    guild_config = await GuildConfig.fetch(guild_id)
-    if guild_config is None:
-        return (
-            jsonify(
-                error="Not found",
-                message=f"Guild with ID {guild_id} doesn't have a configuration.",
-            ),
-            404,
-        )
+    found, guild_config, response = await GuildConfig.fetch_or_404(guild.id)
+    if not found:
+        return response
 
     return jsonify(
         {
@@ -125,24 +109,13 @@ async def get_guild_config(guild_id: int):
 )
 async def patch_guild_config(guild_id: int, **data):
     """Patch the Config for a guild"""
-    guild = await Guild.fetch(guild_id)
-    if guild is None:
-        return (
-            jsonify(
-                error="Not found", message=f"Guild with ID {guild_id} doesn't exist."
-            ),
-            404,
-        )
+    found, guild, response = await Guild.fetch_or_404(guild_id)
+    if not found:
+        return response
 
-    guild_config = await GuildConfig.fetch(guild_id)
-    if guild_config is None:
-        return (
-            jsonify(
-                error="Not found",
-                message=f"Guild with ID {guild_id} doesn't have a configuration.",
-            ),
-            404,
-        )
+    found, guild_config, response = await GuildConfig.fetch_or_404(guild.id)
+    if not found:
+        return response
 
     await guild_config.update(**data)
 
@@ -158,24 +131,13 @@ async def patch_guild_config(guild_id: int, **data):
 @utils.app_only
 async def delete_guild_config(guild_id: int):
     """Delete the Config for a guild"""
-    guild = await Guild.fetch(guild_id)
-    if guild is None:
-        return (
-            jsonify(
-                error="Not found", message=f"Guild with ID {guild_id} doesn't exist."
-            ),
-            404,
-        )
+    found, guild, response = await Guild.fetch_or_404(guild_id)
+    if not found:
+        return response
 
-    guild_config = await GuildConfig.fetch(guild_id)
-    if guild_config is None:
-        return (
-            jsonify(
-                error="Not found",
-                message=f"Guild with ID {guild_id} doesn't have a configuration.",
-            ),
-            404,
-        )
+    found, guild_config, response = await GuildConfig.fetch_or_404(guild.id)
+    if not found:
+        return response
 
     await guild_config.delete()
 

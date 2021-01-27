@@ -97,9 +97,7 @@ async def test_get_guild(app: QuartClient, db, guild: Guild):
 @pytest.mark.asyncio
 @pytest.mark.db
 async def test_get_guild_404(app: QuartClient, db):
-    response = await app.get(
-        "/guilds/523456202403"
-    )  # spamming random digits on keyboard
+    response = await app.get("/guilds/0")  # spamming random digits on keyboard
     assert response.status_code == 404
     assert response.content_type == "application/json"
 
