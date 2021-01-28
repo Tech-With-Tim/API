@@ -46,7 +46,7 @@ class Guild(Model):
         :param Union[str, int] guild_id: The guild's id.
         """
 
-        if (guild := await cls.fetch(id)) :
+        if guild := await cls.fetch(id):
             return guild
         else:
             http_status = HTTPStatus.NOT_FOUND
