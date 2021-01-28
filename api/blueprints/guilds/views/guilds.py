@@ -24,6 +24,7 @@ async def post_guild(
     icon_hash: Optional[str] = None,
 ):
     """Create a guild from the request body"""
+
     guild = await Guild.create(id, name, owner_id, icon_hash)
 
     if guild is None:
@@ -51,9 +52,8 @@ async def post_guild(
 @bp.route("/<int:guild_id>", methods=["GET"])
 async def get_guild(guild_id: int):
     """Get a guild from its ID"""
-    found, guild, response = await Guild.fetch_or_404(guild_id)
-    if not found:
-        return response
+
+    guild = await Guild.fetch_or_404(guild_id)
 
     return jsonify(
         id=str(guild.id),
@@ -72,10 +72,8 @@ async def get_guild(guild_id: int):
 )
 async def patch_guild(guild_id: int, **data):
     """Patch a guild from its ID"""
-    found, guild, response = await Guild.fetch_or_404(guild_id)
-    if not found:
-        return response
 
+    guild = await Guild.fetch_or_404(guild_id)
     await guild.update(**data)
 
     return jsonify(
@@ -90,10 +88,8 @@ async def patch_guild(guild_id: int, **data):
 @utils.app_only
 async def delete_guild(guild_id: int):
     """Delete a guild from its ID"""
-    found, guild, response = await Guild.fetch_or_404(guild_id)
-    if not found:
-        return response
 
+    guild = await Guild.fetch_or_404(guild_id)
     await guild.delete()
 
     return "", 204

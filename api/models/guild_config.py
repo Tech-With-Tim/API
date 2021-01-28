@@ -1,7 +1,8 @@
 from postDB import Model, Column, types
-from quart import jsonify, Response
-from typing import Optional, Tuple, Union, Literal
+from quart import exceptions
+from typing import Optional, Union, Literal
 from enum import Enum
+from http import HTTPStatus
 
 
 class VerificationTypes(Enum):
@@ -56,35 +57,21 @@ class GuildConfig(Model):
         return cls(**record)
 
     @classmethod
-    async def fetch_or_404(
-        cls, guild_id: Union[str, int]
-    ) -> Tuple[bool, Optional["GuildConfig"], Optional[Response]]:
-        """Fetch a guild configuration with the given ID or send a 404 error.
+    async def fetch_or_404(cls, guild_id: Union[str, int]) -> Optional["GuildConfig"]:
+        """
+        Fetch a guild configuration with the given ID or send a 404 error.
 
-        Args:
-            guild_id (Union[str, int]): the guild's id.
-
-        Returns:
-            bool: Whether the guild config is found.
-            Optional[Guild]: The guild config (if found).
-            Optional[Response]: The 404 response (if not found).
+        :param Union[str, int] guild_id: The guild's id.
         """
 
-        guild_config = await cls.fetch(id)
-        if guild_config:
-            return True, guild_config, None
+        if (guild_config := await cls.fetch(guild_id)) :
+            return guild_config
         else:
-            return (
-                False,
-                None,
-                (
-                    jsonify(
-                        error="Not found",
-                        message=f"Guild with ID {guild_id} doesn't have a configuration.",
-                    ),
-                    404,
-                ),
+            http_status = HTTPStatus.NOT_FOUND
+            http_status.description = (
+                f"Guild with ID {guild_id} doesn't have a configuration."
             )
+            raise exceptions.NotFound(http_status)
 
     @classmethod
     async def create(

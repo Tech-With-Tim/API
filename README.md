@@ -151,6 +151,6 @@ pipenv run pytest
 
 - [@SylteA](https://github.com/SylteA) - Most of the backend
 - [@Shubhaankar-sharma](https://github.com/Shubhaankar-sharma) - Docker deployment
-- [@takos22](https://github.com/takos22) - Markdown files
+- [@takos22](https://github.com/takos22) - /guilds endpoints and markdown files
 
 See also the list of [contributors](https://github.com/Tech-With-Tim/API/contributors) who participated in this project.

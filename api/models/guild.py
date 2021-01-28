@@ -1,7 +1,8 @@
 from postDB import Model, Column, types
-from quart import jsonify, Response
-from typing import Optional, Tuple, Union, Literal
+from quart import exceptions
+from typing import Optional, Union, Literal
 from datetime import datetime
+from http import HTTPStatus
 
 import utils
 
@@ -38,34 +39,19 @@ class Guild(Model):
         return cls(**record)
 
     @classmethod
-    async def fetch_or_404(
-        cls, id: Union[str, int]
-    ) -> Tuple[bool, Optional["Guild"], Optional[Response]]:
-        """Fetch a guild with the given ID or send a 404 error.
+    async def fetch_or_404(cls, id: Union[str, int]) -> Optional["Guild"]:
+        """
+        Fetch a guild with the given ID or send a 404 error.
 
-        Args:
-            id (Union[str, int]): the guild's id.
-
-        Returns:
-            bool: Whether the guild is found.
-            Optional[Guild]: The guild (if found).
-            Optional[Response]: The 404 response (if not found).
+        :param Union[str, int] guild_id: The guild's id.
         """
 
-        guild = await cls.fetch(id)
-        if guild:
-            return True, guild, None
+        if (guild := await cls.fetch(id)) :
+            return guild
         else:
-            return (
-                False,
-                None,
-                (
-                    jsonify(
-                        error="Not found", message=f"Guild with ID {id} doesn't exist."
-                    ),
-                    404,
-                ),
-            )
+            http_status = HTTPStatus.NOT_FOUND
+            http_status.description = f"Guild with ID {id} doesn't exist."
+            raise exceptions.NotFound(http_status)
 
     @classmethod
     async def create(
