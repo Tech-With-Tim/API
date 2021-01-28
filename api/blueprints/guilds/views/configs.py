@@ -69,7 +69,7 @@ async def get_guild_config(guild_id: int):
     """Get the Config for a guild"""
 
     guild = await Guild.fetch_or_404(guild_id)
-    guild_config = await Guild.fetch_or_404(guild.id)
+    guild_config = await GuildConfig.fetch_or_404(guild.id)
 
     return jsonify(
         {
@@ -106,7 +106,7 @@ async def patch_guild_config(guild_id: int, **data):
     """Patch the Config for a guild"""
 
     guild = await Guild.fetch_or_404(guild_id)
-    guild_config = await Guild.fetch_or_404(guild.id)
+    guild_config = await GuildConfig.fetch_or_404(guild.id)
 
     await guild_config.update(**data)
 
@@ -124,7 +124,7 @@ async def delete_guild_config(guild_id: int):
     """Delete the Config for a guild"""
 
     guild = await Guild.fetch_or_404(guild_id)
-    guild_config = await Guild.fetch_or_404(guild.id)
+    guild_config = await GuildConfig.fetch_or_404(guild.id)
 
     await guild_config.delete()
 

@@ -1,1 +1,1 @@
-from . import guilds  # noqa F401
+from . import guilds, configs  # noqa F401
