@@ -16,6 +16,7 @@ postdb = "*"
 pyjwt = "*"
 aiohttp = "*"
 uvloop = {markers = "platform_system == 'linux'", version = "*"}
+beautifulsoup4 = "*"
 
 [requires]
 python_version = "3.8"
