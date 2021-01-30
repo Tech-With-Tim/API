@@ -195,4 +195,4 @@ async def discord_oauth_callback():
         key=os.environ["SECRET_KEY"],
     )
 
-    return jsonify({"token": token, "exp": expires_at})
+    return jsonify(token=token, exp=expires_at)

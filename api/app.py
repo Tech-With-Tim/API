@@ -1,4 +1,4 @@
-from quart import Quart, exceptions, jsonify
+from quart import Quart, exceptions, jsonify, Response
 from datetime import datetime, date
 from aiohttp import ClientSession
 from typing import Any, Optional
@@ -9,7 +9,7 @@ import json
 import utils
 
 
-from api.blueprints import auth
+from api.blueprints import auth, guilds
 
 
 log = logging.getLogger()
@@ -35,6 +35,11 @@ class API(Quart):
         kwargs.setdefault("static_folder", None)
         super().__init__(*args, **kwargs)
 
+    async def handle_request(self, request: utils.Request) -> Response:
+        response = await super().handle_request(request)
+        log.info(f"{request.method} {request.base_url} {response.status_code}")
+        return response
+
     async def handle_http_exception(self, error: exceptions.HTTPException):
         """
         Returns errors as JSON instead of default HTML
@@ -50,7 +55,7 @@ class API(Quart):
         headers["Content-Type"] = "application/json"
 
         return (
-            jsonify({"error": error.name, "message": error.description}),
+            jsonify(error=error.name, message=error.description),
             error.status_code,
             headers,
         )
@@ -66,12 +71,13 @@ app.asgi_app = utils.TokenAuthMiddleware(app.asgi_app, app)
 app = cors(app, allow_origin="*")  # TODO: Restrict the origin(s) in production.
 # Set up blueprints
 auth.setup(app=app, url_prefix="/auth")
+guilds.setup(app=app, url_prefix="/guilds")
 
 
 @app.route("/")
 async def index():
     """Index endpoint used for testing."""
-    return jsonify({"status": "OK"})
+    return jsonify(status="OK")
 
 
 @app.errorhandler(500)
@@ -85,6 +91,6 @@ async def error_500(error: BaseException):
     )
 
     return (
-        jsonify({"error": "Internal Server Error - Server got itself in trouble"}),
+        jsonify(error="Internal Server Error", message="Server got itself in trouble"),
         500,
     )

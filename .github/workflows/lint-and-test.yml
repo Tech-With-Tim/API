@@ -17,6 +17,19 @@ jobs:
       PIPENV_HIDE_EMOJIS: 1
       PIPENV_NOSPIN: 1
 
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: api
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -51,3 +64,7 @@ jobs:
       - name: Run pytest
         run: |
           pytest
+        env:
+          TEST_DB_URI: postgresql://postgres:postgres@localhost:5432/api
+          # This isn't the real SECRET_KEY but the one used for testing
+          SECRET_KEY: nqk8umrpc4f968_2%jz_%r-r2o@v4!21#%)h&-s_7qm150=o@6

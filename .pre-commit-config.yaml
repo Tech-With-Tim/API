@@ -21,7 +21,5 @@ repos:
       - id: check-yaml
       - id: end-of-file-fixer
       - id: check-merge-conflict
-      - id: mixed-line-ending
-        args: [--fix=lf]
       - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
