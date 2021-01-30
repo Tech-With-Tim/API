@@ -15,10 +15,10 @@ class Guild(Model):
     """
     Guild model for storing information about discord guilds.
 
-    :param int id:          The guilds id.
-    :param str name:        The guilds name.
-    :param int owner_id:    The guilds owner id.
-    :param str icon_hash:   The guilds icon hash.
+    :param int id:                  The guilds id.
+    :param str name:                The guilds name.
+    :param int owner_id:            The guilds owner id.
+    :param Optional[str] icon_hash: The guilds icon hash.
 
     """
 
@@ -48,10 +48,10 @@ class Guild(Model):
 
         if guild := await cls.fetch(id):
             return guild
-        else:
-            http_status = HTTPStatus.NOT_FOUND
-            http_status.description = f"Guild with ID {id} doesn't exist."
-            raise exceptions.NotFound(http_status)
+
+        http_status = HTTPStatus.NOT_FOUND
+        http_status.description = f"Guild with ID {id} doesn't exist."
+        raise exceptions.NotFound(http_status)
 
     @classmethod
     async def create(

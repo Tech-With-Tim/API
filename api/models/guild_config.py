@@ -66,12 +66,12 @@ class GuildConfig(Model):
 
         if guild_config := await cls.fetch(guild_id):
             return guild_config
-        else:
-            http_status = HTTPStatus.NOT_FOUND
-            http_status.description = (
-                f"Guild with ID {guild_id} doesn't have a configuration."
-            )
-            raise exceptions.NotFound(http_status)
+
+        http_status = HTTPStatus.NOT_FOUND
+        http_status.description = (
+            f"Guild with ID {guild_id} doesn't exist or doesn't have a configuration."
+        )
+        raise exceptions.NotFound(http_status)
 
     @classmethod
     async def create(
