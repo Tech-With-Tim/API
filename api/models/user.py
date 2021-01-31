@@ -26,8 +26,8 @@ class User(Model):
     id = Column(types.Integer(big=True), primary_key=True)
     # Store the ID as a BIGINT even though it's transferred as a string.
     # This is due to a substantial difference in index time and storage space
-    username = Column(types.String(length=32), unique=True)
-    discriminator = Column(types.String(length=4), unique=True)
+    username = Column(types.String(length=32))
+    discriminator = Column(types.String(length=4))
     avatar = Column(types.String(), nullable=True)
     type = Column(types.String(), default="USER")
 
