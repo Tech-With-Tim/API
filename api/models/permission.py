@@ -28,11 +28,13 @@ class Permission(Model):
     help_text = Column(types.String())
 
     def __repr__(self):
-        return "<Permission name=\"{0.name}\" value=\"{0.value}\" help=\"{0.help_text}\">".format(self)
+        return '<Permission name="{0.name}" value="{0.value}" help="{0.help_text}">'.format(
+            self
+        )
 
     @classmethod
     async def create(
-            cls, name: str, value: int, help_text: str, public: bool = True
+        cls, name: str, value: int, help_text: str, public: bool = True
     ) -> "Permission":
         """Create a new permission, if one does not already exist."""
         query = """
@@ -55,7 +57,7 @@ class Permission(Model):
                 "value": cls.ADMINISTRATOR,
                 "public": False,
                 "help_text": "Users with this permission will have every permission"
-                             " and will also bypass all channel specific permissions or restrictions.",
+                " and will also bypass all channel specific permissions or restrictions.",
             },
             {
                 "name": "Manage Global Roles",
@@ -67,34 +69,34 @@ class Permission(Model):
                 "name": "Create Timathon",
                 "value": cls.CREATE_TIMATHON,
                 "public": False,
-                "help_text": "Users with this permission will be able to create a new Timathon"
+                "help_text": "Users with this permission will be able to create a new Timathon",
             },
             {
                 "name": "View Timathon Submissions",
                 "value": cls.VIEW_TIMATHON_SUBMISSIONS,
                 "public": False,
-                "help_text": "Users with this permission will be able to view Timathon Submissions"
+                "help_text": "Users with this permission will be able to view Timathon Submissions",
             },
             {
                 "name": "Kick Timathon Participants",
                 "value": cls.KICK_TIMATHON_PARTICIPANTS,
                 "public": False,
-                "help_text": "Users with this permission will be able to kick timathon participants"
+                "help_text": "Users with this permission will be able to kick timathon participants",
             },
             {
                 "name": "Ban Timathon Participants",
                 "value": cls.BAN_TIMATHON,
                 "public": False,
                 "help_text": "Users with this permission will be able to ban people "
-                             "from participating in timathon"
+                "from participating in timathon",
             },
             {
                 "name": "Manage Timathon",
                 "value": cls.MANAGE_TIMATHON,
                 "public": False,
                 "help_text": "Users with this permission will be able to: "
-                             "start voting, close timathon...etc"
-            }
+                "start voting, close timathon...etc",
+            },
         ]
 
         ret = []

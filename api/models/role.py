@@ -31,16 +31,18 @@ class Role(Model):
     permissions = Column(types.Integer())
 
     def __repr__(self):
-        return "<Role id=\"{0.id}\" name=\"{0.name}\" " \
-               "permissions=\"{0.permissions}\" position=\"{0.position}\">".format(self)
+        return (
+            '<Role id="{0.id}" name="{0.name}" '
+            'permissions="{0.permissions}" position="{0.position}">'.format(self)
+        )
 
     @classmethod
     async def create(
-            cls,
-            name: str,
-            position: int,
-            color: int,
-            permissions: int,
+        cls,
+        name: str,
+        position: int,
+        color: int,
+        permissions: int,
     ):
         """Create a new Role, if one does not already exist."""
         query = """
@@ -49,9 +51,7 @@ class Role(Model):
             RETURNING *;
         """
 
-        record = await cls.pool.fetchrow(
-            query, name, position, color, permissions
-        )
+        record = await cls.pool.fetchrow(query, name, position, color, permissions)
 
         return cls(**record)
 
@@ -75,7 +75,9 @@ class Role(Model):
         if not isinstance(permission, Permission):
             return False
 
-        if self.permissions & (1 << Permission.ADMINISTRATOR) == (1 << Permission.ADMINISTRATOR):
+        if self.permissions & (1 << Permission.ADMINISTRATOR) == (
+            1 << Permission.ADMINISTRATOR
+        ):
             return True  # Admins have all perms
 
         return (self.permissions & (1 << permission.value)) == (1 << permission.value)
@@ -88,7 +90,7 @@ class Role(Model):
             {
                 "name": "Admin",
                 "position": 1,
-                "color": 0x31d5cf,
+                "color": 0x31D5CF,
                 "permissions": 1 << Permission.ADMINISTRATOR,
             },
             {
@@ -101,10 +103,12 @@ class Role(Model):
                 "name": "Timathon Host",
                 "position": 3,
                 "color": 0,
-                "permissions": 1 << Permission.MANAGE_TIMATHON | 1 << Permission.BAN_TIMATHON |
-                        1 << Permission.KICK_TIMATHON_PARTICIPANTS | 1 << Permission.CREATE_TIMATHON |
-                        1 << Permission.VIEW_TIMATHON_SUBMISSIONS
-            }
+                "permissions": 1 << Permission.MANAGE_TIMATHON
+                | 1 << Permission.BAN_TIMATHON
+                | 1 << Permission.KICK_TIMATHON_PARTICIPANTS
+                | 1 << Permission.CREATE_TIMATHON
+                | 1 << Permission.VIEW_TIMATHON_SUBMISSIONS,
+            },
         ]
 
         ret = []
