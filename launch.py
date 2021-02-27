@@ -132,13 +132,42 @@ async def safe_create_tables(verbose: bool = False) -> None:
     :param verbose:     Whether or not to print the postgres statements being executed.
     """
     log = logging.getLogger("DB")
-    from api.models import models_ordered
+    from api.models import models_ordered, Role, Permission
+
+    log.info("Creating Snowflake functions")
+    with open("snowflake.sql", "r") as f:
+        query = f.read()
+
+    if verbose:
+        print(query)
+
+    await Model.pool.execute(query)
+    log.info("Snowflake function created")
 
     log.info("Attempting to create %s tables." % len(models_ordered))
 
     for model in models_ordered:
         await model.create_table(verbose=verbose)
         log.info("Created table %s" % model.__tablename__)
+
+    log.info("Created %s tables" % len(models_ordered))
+
+    log.info("Attempting to create Permissions Functions")
+    with open("permissions.sql", "r") as f:
+        query = f.read()
+
+    if verbose:
+        print(query)
+
+    await Model.pool.execute(query)
+    log.info("Permissions Functions Created")
+
+    log.info("Attempting to create `Permission`s and `Role`s")
+
+    await Permission.create_all(verbose=verbose)
+    await Role.create_all(verbose=verbose)
+
+    log.info("Created Permissions and Roles")
 
 
 async def delete_tables(verbose: bool = False):
