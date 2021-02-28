@@ -4,6 +4,8 @@ from postDB import Model
 
 from .token import Token
 from .user import User
+from .guild import Guild
+from .guild_config import GuildConfig
 
 
-models_ordered: List[Type[Model]] = [User, Token]
+models_ordered: List[Type[Model]] = [User, Token, Guild, GuildConfig]

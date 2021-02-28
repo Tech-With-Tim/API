@@ -30,8 +30,14 @@ class Token(Model):
                     expires_at = $2,
                     token = $3,
                     data = $4
+                RETURNING *
             """
 
-        return await self.pool.execute(
+        record = await self.pool.fetchrow(
             query, self.user_id, self.expires_at, self.token, self.data
         )
+
+        for field, value in record.items():
+            setattr(self, field, value)
+
+        return self

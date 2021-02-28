@@ -8,7 +8,7 @@ import json
 
 import utils
 
-from api.blueprints import auth, users
+from api.blueprints import auth, guilds, user
 
 
 log = logging.getLogger()
@@ -71,6 +71,7 @@ app = cors(app, allow_origin="*")  # TODO: Restrict the origin(s) in production.
 # Set up blueprints
 auth.setup(app=app, url_prefix="/auth")
 users.setup(app=app, url_prefix="/users")
+guilds.setup(app=app, url_prefix="/guilds")
 
 
 @app.route("/")
