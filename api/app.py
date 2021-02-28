@@ -1,4 +1,4 @@
-from quart import Quart, exceptions, jsonify
+from quart import Quart, Response, exceptions, jsonify
 from datetime import datetime, date
 from aiohttp import ClientSession
 from typing import Any, Optional
@@ -33,6 +33,11 @@ class API(Quart):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault("static_folder", None)
         super().__init__(*args, **kwargs)
+
+    async def handle_request(self, request: utils.Request) -> Response:
+        response = await super().handle_request(request)
+        log.info(f"{request.method} @ {request.base_url} -> {response.status_code}")
+        return response
 
     async def handle_http_exception(self, error: exceptions.HTTPException):
         """

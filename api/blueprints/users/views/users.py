@@ -1,4 +1,5 @@
 from quart import request, jsonify
+import time
 
 from api.models import User
 from .. import bp
@@ -8,8 +9,8 @@ import utils
 request: utils.Request
 
 
-@bp.route("/", methods=["GET"])
-@utils.app_only
+@bp.route("", methods=["GET"])
+@utils.auth_required
 async def bulk_get_users():
     """GET `User` objects by bulk.
 
@@ -20,6 +21,7 @@ async def bulk_get_users():
      page:          Pagination page.
      limit:         max number of records to return.
     """
+    start = time.perf_counter()
 
     qs = {
         "type": request.args.get("type"),
@@ -70,4 +72,26 @@ async def bulk_get_users():
     records = await User.pool.fetchval(query, *args)
     records = records or []
 
-    return jsonify(records)
+    return jsonify(
+        page=page, limit=limit, users=records, time=time.perf_counter() - start
+    )
+
+
+@bp.route("/@me", methods=["GET"])
+@utils.auth_required
+async def get_user_info():
+    """GET authorized User object."""
+    query = """
+    SELECT
+        id::TEXT,
+        username,
+        discriminator,
+        avatar,
+        type
+    FROM users
+    WHERE id = $1;
+    """
+
+    user = await User.pool.fetchrow(query, request.user_id)
+
+    return jsonify(**user)
