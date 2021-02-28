@@ -8,7 +8,7 @@ import json
 
 import utils
 
-from api.blueprints import auth, guilds, user
+from api.blueprints import auth, guilds, users
 
 
 log = logging.getLogger()

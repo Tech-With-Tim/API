@@ -95,3 +95,33 @@ async def get_user_info():
     user = await User.pool.fetchrow(query, request.user_id)
 
     return jsonify(**user)
+
+
+@bp.route("/<int:user_id>", methods=["GET"])
+@utils.auth_required
+async def get_specific_user_info(user_id: int):
+    """GET specific User object."""
+
+    query = """
+    SELECT
+        id::TEXT,
+        username,
+        discriminator,
+        avatar,
+        type
+    FROM users
+    WHERE id = $1;
+    """
+
+    user = await User.pool.fetchrow(query, user_id)
+
+    if user is None:
+        return (
+            jsonify(
+                error="NotFound",
+                message="Could not find the requested user in our database.",
+            ),
+            400,
+        )
+
+    return jsonify(**user)

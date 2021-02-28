@@ -5,6 +5,7 @@
 - [CLI docs](./cli.md)
 - [`/auth`](./auth.md)
 - [`/guilds`](./guilds.md)
+- [`/users`](./users.md)
 
 ## 📚 Writing your own docs
 

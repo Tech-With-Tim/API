@@ -29,6 +29,7 @@ def app(event_loop) -> QuartClient:
 async def auth_app(event_loop, db) -> QuartClient:
     auth_client = quart_app.test_client()
     user = await User.create(1, "test", "0000", type="APP")
+    auth_client.user = user
     auth_client.token = jwt.encode(
         {
             "uid": user.id,
