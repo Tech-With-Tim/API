@@ -56,43 +56,42 @@ class Permission(Model):
                 "name": "Administrator",
                 "value": cls.ADMINISTRATOR,
                 "public": False,
-                "help_text": "Users with this permission will have every permission"
-                " and will also bypass all channel specific permissions or restrictions.",
+                "help_text": "Users with this permission will have every permission",
             },
             {
-                "name": "Manage Global Roles",
+                "name": "Manage Roles",
                 "value": cls.MANAGE_ROLES,
                 "public": False,
-                "help_text": "Allows management and editing of global roles.",
+                "help_text": "Allows management and editing of roles.",
             },
             {
-                "name": "Create Timathon",
-                "value": cls.CREATE_TIMATHON,
+                "name": "Create Challenge",
+                "value": cls.CREATE_CHALLENGE,
                 "public": False,
-                "help_text": "Users with this permission will be able to create a new Timathon",
+                "help_text": "Users with this permission will be able to create new Challenges",
             },
             {
-                "name": "View Timathon Submissions",
-                "value": cls.VIEW_TIMATHON_SUBMISSIONS,
+                "name": "View Challenge Submissions",
+                "value": cls.VIEW_CHALLENGE_SUBMISSIONS,
                 "public": False,
-                "help_text": "Users with this permission will be able to view Timathon Submissions",
+                "help_text": "Users with this permission will be able to view challenge submissions",
             },
             {
-                "name": "Kick Timathon Participants",
-                "value": cls.KICK_TIMATHON_PARTICIPANTS,
+                "name": "Kick Challenge Participants",
+                "value": cls.KICK_CHALLENGE_PARTICIPANTS,
                 "public": False,
-                "help_text": "Users with this permission will be able to kick timathon participants",
+                "help_text": "Users with this permission will be able to kick challenge participants",
             },
             {
-                "name": "Ban Timathon Participants",
-                "value": cls.BAN_TIMATHON,
+                "name": "Ban Challenge Participants",
+                "value": cls.BAN_CHALLENGE,
                 "public": False,
                 "help_text": "Users with this permission will be able to ban people "
-                "from participating in timathon",
+                "from participating in challenges",
             },
             {
-                "name": "Manage Timathon",
-                "value": cls.MANAGE_TIMATHON,
+                "name": "Manage Challenges",
+                "value": cls.MANAGE_CHALLENGE,
                 "public": False,
                 "help_text": "Users with this permission will be able to: "
                 "start voting, close timathon...etc",
@@ -119,9 +118,9 @@ class Permission(Model):
     ADMINISTRATOR = 0
     MANAGE_ROLES = 1
 
-    # Timathon Related Permissions
-    CREATE_TIMATHON = 2
-    VIEW_TIMATHON_SUBMISSIONS = 3
-    KICK_TIMATHON_PARTICIPANTS = 4
-    BAN_TIMATHON = 5
-    MANAGE_TIMATHON = 6
+    # Challenges Related Permissions
+    CREATE_CHALLENGE = 2
+    VIEW_CHALLENGE_SUBMISSIONS = 3
+    KICK_CHALLENGE_PARTICIPANTS = 4
+    BAN_CHALLENGE = 5
+    MANAGE_CHALLENGE = 6

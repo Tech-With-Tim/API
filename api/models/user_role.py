@@ -1,4 +1,9 @@
+from http import HTTPStatus
+from typing import Optional
+
+import asyncpg
 from postDB import Model, Column, types
+from quart import exceptions
 
 
 class UserRole(Model):
@@ -20,19 +25,27 @@ class UserRole(Model):
     )
 
     @classmethod
-    async def insert(cls, user_id: int, role_id: int):
-        query = """
-        INSERT INTO userroles (user_id, role_id)
-            VALUES ($1, $2)
-            ON CONFLICT (user_id, role_id) DO NOTHING;
-        """
+    async def insert(cls, member_id: int, role_id: int, *, user_id: Optional[int] = None):
+        query = """SELECT * FROM add_role_to_member($1, $2, $3)"""
 
-        return await cls.pool.execute(query, user_id, role_id)
+        try:
+            await cls.pool.execute(query, role_id, member_id, user_id)
+        except asyncpg.exceptions.DataError:
+            http_status = HTTPStatus.FORBIDDEN
+            http_status.description = "Missing Permissions"
+            raise exceptions.Forbidden(http_status)
+        except asyncpg.exceptions.UniqueViolationError:
+            http_status = HTTPStatus.BAD_REQUEST
+            http_status.description = "User already has that role"
+            raise exceptions.BadRequest(http_status)
 
     @classmethod
-    async def delete(cls, user_id: int, role_id: int):
-        query = """
-        DELETE FROM userroles WHERE user_id = $1 AND role_id = $2;
-        """
+    async def delete(cls, member_id: int, role_id: int, *, user_id: Optional[int] = None):
+        query = """SELECT * FROM remove_role_from_member($1, $2, $3)"""
 
-        return await cls.pool.execute(query, user_id, role_id)
+        try:
+            await cls.pool.execute(query, role_id, member_id, user_id)
+        except asyncpg.exceptions.DataError:
+            http_status = HTTPStatus.FORBIDDEN
+            http_status.description = "Missing Permissions"
+            raise exceptions.Forbidden(http_status)
