@@ -29,8 +29,8 @@ class Role(Model):
     id = Column(types.Integer(big=True), unique=True)
     name = Column(types.String(length=32))
     position = Column(types.Integer(), unique=True)
-    color = Column(types.Integer())
-    permissions = Column(types.Integer())
+    color = Column(types.Integer(), default=0)
+    permissions = Column(types.Integer(), default=0)
     base = Column(types.Boolean(), default=False)
 
     def __repr__(self):
@@ -41,17 +41,13 @@ class Role(Model):
 
     @classmethod
     async def create(
-            cls,
-            name: str,
-            color: int,
-            permissions: int,
-            base: Optional[bool] = False
+        cls, name: str, color: int, permissions: int, base: Optional[bool] = False
     ):
         """Create a new Role, if one does not already exist."""
         query = """
         INSERT INTO roles (id, name, position, color, permissions, base)
             VALUES (
-                create_snowflake(), 
+                create_snowflake(),
                 $1,
                 ((SELECT COUNT(*) FROM roles) + 1),
                 $2,
@@ -69,14 +65,19 @@ class Role(Model):
         """Update Role Data"""
         update_query = ["UPDATE roles SET"]
 
-        fields = ("name", "color", "permissions",)
-        new_data = {
-            field: data[field]
-            for field in fields if field in data.keys()
-        }
+        fields = (
+            "name",
+            "color",
+            "permissions",
+        )
+        new_data = {field: data[field] for field in fields if field in data.keys()}
 
         if len(new_data) > 0:
-            update_query.append(", ".join("%s = $%d" % (key, i) for i, key in enumerate(new_data.keys(), 2)))
+            update_query.append(
+                ", ".join(
+                    "%s = $%d" % (key, i) for i, key in enumerate(new_data.keys(), 2)
+                )
+            )
 
             update_query.append("WHERE roles.id = $1 RETURNING *, id::TEXT")
 
@@ -121,7 +122,7 @@ class Role(Model):
     async def fetch(cls, id: Union[str, int]) -> Optional["Role"]:
         """Fetch a role with the given ID."""
         query = """
-        SELECT 
+        SELECT
             id::TEXT,
             name,
             position,
@@ -146,7 +147,7 @@ class Role(Model):
             return False
 
         if self.permissions & (1 << Permission.ADMINISTRATOR) == (
-                1 << Permission.ADMINISTRATOR
+            1 << Permission.ADMINISTRATOR
         ):
             return True  # Admins have all perms
 

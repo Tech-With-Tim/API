@@ -30,15 +30,11 @@ async def get_role(role_id: int):
 async def create_role(
     name: Optional[str] = "new role",
     color: Optional[int] = 0,
-    permissions: Optional[int] = 0
+    permissions: Optional[int] = 0,
 ):
     role = await Role.create(name, color, permissions)
 
-    return (
-        jsonify(role.to_dict()),
-        201,
-        {"Location": "/roles/%s" % role.id}
-    )
+    return (jsonify(role.to_dict()), 201, {"Location": "/roles/%s" % role.id})
 
 
 @bp.route("/<int:role_id>/", methods=["DELETE"])
@@ -62,10 +58,7 @@ async def update_role(role_id: int, **data):
     role = await Role.fetch_or_404(role_id)
     await role.update(user_id=request.user_id, **data)
 
-    return (
-        jsonify(role.to_dict()),
-        200
-    )
+    return (jsonify(role.to_dict()), 200)
 
 
 @bp.route("/<int:role_id>/members/<int:member_id>/", methods=["PUT"])

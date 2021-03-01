@@ -25,7 +25,9 @@ class UserRole(Model):
     )
 
     @classmethod
-    async def insert(cls, member_id: int, role_id: int, *, user_id: Optional[int] = None):
+    async def insert(
+        cls, member_id: int, role_id: int, *, user_id: Optional[int] = None
+    ):
         query = """SELECT * FROM add_role_to_member($1, $2, $3)"""
 
         try:
@@ -40,7 +42,9 @@ class UserRole(Model):
             raise exceptions.BadRequest(http_status)
 
     @classmethod
-    async def delete(cls, member_id: int, role_id: int, *, user_id: Optional[int] = None):
+    async def delete(
+        cls, member_id: int, role_id: int, *, user_id: Optional[int] = None
+    ):
         query = """SELECT * FROM remove_role_from_member($1, $2, $3)"""
 
         try:

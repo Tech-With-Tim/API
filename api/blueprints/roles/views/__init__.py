@@ -1,1 +1,1 @@
-from . import roles
+from . import roles  # noqa F401
