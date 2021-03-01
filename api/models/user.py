@@ -28,8 +28,8 @@ class User(Model):
     # This is due to a substantial difference in index time and storage space
     username = Column(types.String(length=32), primary_key=True)
     discriminator = Column(types.String(length=4), primary_key=True)
-    avatar = Column(types.String(), nullable=True)
-    type = Column(types.String(), default="USER")
+    avatar = Column(types.String, nullable=True)
+    type = Column(types.String, default="USER")
 
     @classmethod
     async def fetch(cls, id: Union[str, int]) -> Optional["User"]:
