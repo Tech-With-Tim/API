@@ -23,11 +23,11 @@ class User(Model):
         :param str type:            The type of User this is.  USER|APP
     """
 
-    id = Column(types.Integer(big=True), primary_key=True)
+    id = Column(types.Integer(big=True), unique=True)
     # Store the ID as a BIGINT even though it's transferred as a string.
     # This is due to a substantial difference in index time and storage space
-    username = Column(types.String(length=32), unique=True)
-    discriminator = Column(types.String(length=4), unique=True)
+    username = Column(types.String(length=32), primary_key=True)
+    discriminator = Column(types.String(length=4), primary_key=True)
     avatar = Column(types.String, nullable=True)
     type = Column(types.String, default="USER")
 
