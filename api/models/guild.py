@@ -23,9 +23,9 @@ class Guild(Model):
     """
 
     id = Column(types.Integer(big=True), primary_key=True)
-    name = Column(types.String())
+    name = Column(types.String)
     owner_id = Column(types.Integer(big=True))
-    icon_hash = Column(types.String(), nullable=True)
+    icon_hash = Column(types.String, nullable=True)
 
     @classmethod
     async def fetch(cls, id: Union[str, int]) -> Optional["Guild"]:
@@ -139,7 +139,7 @@ class Guild(Model):
     @property
     def created_at(self) -> datetime:
         """Returns datetime of the guild creation."""
-        return utils.snowflake_time(self.id)
+        return utils.snowflake_time(self.id, internal=False)
 
     def is_icon_animated(self) -> bool:
         """Indicates if the guild has an animated icon."""

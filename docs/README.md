@@ -6,6 +6,7 @@
 - [`/auth`](./auth.md)
 - [`/guilds`](./guilds.md)
 - [`/users`](./users.md)
+- [`/roles`](./roles.md)
 
 ## 📚 Writing your own docs
 

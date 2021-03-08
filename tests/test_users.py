@@ -94,7 +94,7 @@ async def test_users_bulk(auth_app: QuartClient):
 
     time = data.pop("time")
 
-    assert (await response.json) == {
+    assert data == {
         "limit": 100,
         "page": 0,
         "users": [

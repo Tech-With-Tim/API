@@ -1,1 +1,1 @@
-from . import users  # noqa F401
+from . import users, roles  # noqa F401

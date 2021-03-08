@@ -125,14 +125,25 @@ async def prepare_postgres(
     return True
 
 
-async def safe_create_tables(verbose: bool = False) -> None:
+async def __initdb(verbose: bool = False) -> None:
     """
     Safely create all tables using the specified order in `~/api/models/__init__.py`.
 
     :param verbose:     Whether or not to print the postgres statements being executed.
     """
+    from api.models import models_ordered, Role, Permission
+
     log = logging.getLogger("DB")
-    from api.models import models_ordered
+
+    log.info("Creating Snowflake functions")
+    with open("snowflake.sql", "r") as f:
+        query = f.read()
+
+    if verbose:
+        print(query)
+
+    await Model.pool.execute(query)
+    log.info("Snowflake function created")
 
     log.info("Attempting to create %s tables." % len(models_ordered))
 
@@ -140,8 +151,27 @@ async def safe_create_tables(verbose: bool = False) -> None:
         await model.create_table(verbose=verbose)
         log.info("Created table %s" % model.__tablename__)
 
+    log.info("Created %s tables" % len(models_ordered))
 
-async def delete_tables(verbose: bool = False):
+    log.info("Attempting to create Permissions Functions")
+    with open("permissions.sql", "r") as f:
+        query = f.read()
+
+    if verbose:
+        print(query)
+
+    await Model.pool.execute(query)
+    log.info("Permissions Functions Created")
+
+    log.info("Attempting to create `Permission`s and `Role`s")
+
+    await Permission.create_all(verbose=verbose)
+    await Role.create_all(verbose=verbose)
+
+    log.info("Created Permissions and Roles")
+
+
+async def __dropdb(verbose: bool = False):
     """
     Delete all tables.
 
@@ -152,7 +182,17 @@ async def delete_tables(verbose: bool = False):
 
     for model in Model.all_models():
         await model.drop_table(verbose=verbose)
-        log.info("Dropped table %s" % type(model).__tablename__)
+        log.info("Dropped table %s" % model.__tablename__)
+
+    log.info("Dropping functions and sequences.")
+    await Model.pool.execute("DROP FUNCTION IF EXISTS create_snowflake")
+    await Model.pool.execute("DROP SEQUENCE IF EXISTS global_snowflake_id_seq")
+    await Model.pool.execute("DROP FUNCTION IF EXISTS has_permissions")
+    await Model.pool.execute("DROP FUNCTION IF EXISTS move_roles")
+    await Model.pool.execute("DROP FUNCTION IF EXISTS add_role_to_member")
+    await Model.pool.execute("DROP FUNCTION IF EXISTS remove_role_from_member")
+    await Model.pool.execute("DROP FUNCTION IF EXISTS delete_role")
+    log.info("Dropped functions and sequences.")
 
 
 @app.cli.command(name="initdb")
@@ -168,7 +208,7 @@ def _initdb(verbose: bool):
     ):
         exit(1)  # Connecting to our postgres server failed.
 
-    run_async(safe_create_tables(verbose=verbose))
+    run_async(__initdb(verbose=verbose))
 
 
 @app.cli.command()
@@ -184,7 +224,7 @@ def dropdb(verbose: bool):
     ):
         exit(1)  # Connecting to our postgres server failed.
 
-    run_async(delete_tables(verbose=verbose))
+    run_async(__dropdb(verbose=verbose))
 
 
 @app.cli.command()
@@ -213,7 +253,7 @@ def runserver(host: str, port: str, debug: bool, initdb: bool, verbose: bool):
         exit(1)  # Connecting to our postgres server failed.
 
     if initdb:
-        run_async(safe_create_tables(verbose=verbose))
+        run_async(__initdb(verbose=verbose))
 
     app.debug = debug
 
