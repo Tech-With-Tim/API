@@ -1,12 +1,12 @@
+from launch import load_env, prepare_postgres, __initdb, __dropdb
+from api.models import User, Role
 from api import app as quart_app
-from api.models import User
-from launch import load_env, prepare_postgres, safe_create_tables, delete_tables
 
 from quart.testing import QuartClient
 from postDB import Model
-import pytest
-import asyncio
 import datetime
+import asyncio
+import pytest
 import jwt
 import os
 
@@ -45,9 +45,18 @@ async def auth_app(event_loop, db) -> QuartClient:
 async def db(event_loop) -> bool:
     env = load_env("./local.env", ("TEST_DB_URI",))
     assert await prepare_postgres(db_uri=env["TEST_DB_URI"], loop=event_loop)
-    await safe_create_tables()
+    await __dropdb()
+    await __initdb()
     yield Model.pool
-    await delete_tables()
+    await __dropdb()
+
+
+@pytest.fixture(scope="function")
+async def roles(event_loop, db):
+    query = "SELECT * FROM roles;"
+    records = await Role.pool.fetch(query)
+
+    return {record["name"]: Role(**record) for record in records}
 
 
 def pytest_addoption(parser):

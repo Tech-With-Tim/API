@@ -1,4 +1,4 @@
-from quart import Quart, exceptions, jsonify, Response
+from quart import Quart, Response, exceptions, jsonify
 from datetime import datetime, date
 from aiohttp import ClientSession
 from typing import Any, Optional
@@ -37,7 +37,7 @@ class API(Quart):
 
     async def handle_request(self, request: utils.Request) -> Response:
         response = await super().handle_request(request)
-        log.info(f"{request.method} {request.base_url} {response.status_code}")
+        log.info(f"{request.method} @ {request.base_url} -> {response.status_code}")
         return response
 
     async def handle_http_exception(self, error: exceptions.HTTPException):
@@ -71,9 +71,9 @@ app.asgi_app = utils.TokenAuthMiddleware(app.asgi_app, app)
 app = cors(app, allow_origin="*")  # TODO: Restrict the origin(s) in production.
 # Set up blueprints
 auth.setup(app=app, url_prefix="/auth")
-guilds.setup(app=app, url_prefix="/guilds")
 users.setup(app=app, url_prefix="/users")
 roles.setup(app=app, url_prefix="/roles")
+guilds.setup(app=app, url_prefix="/guilds")
 
 
 @app.route("/")

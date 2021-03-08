@@ -76,7 +76,7 @@ class User(Model):
     @property
     def created_at(self) -> datetime:
         """Returns """
-        return utils.snowflake_time(self.id)
+        return utils.snowflake_time(self.id, internal=False)
 
     def is_avatar_animated(self) -> bool:
         """Indicates if the user has an animated avatar."""

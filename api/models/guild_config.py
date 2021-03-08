@@ -35,14 +35,14 @@ class GuildConfig(Model):
         types.ForeignKey("guilds", "id", sql_type=types.Integer(big=True)),
         primary_key=True,
     )
-    xp_enabled = Column(types.Boolean())
-    xp_multiplier = Column(types.Real())
-    eco_enabled = Column(types.Boolean())
+    xp_enabled = Column(types.Boolean)
+    xp_multiplier = Column(types.Real)
+    eco_enabled = Column(types.Boolean)
     muted_role_id = Column(types.Integer(big=True), nullable=True)
-    do_logging = Column(types.Boolean())
+    do_logging = Column(types.Boolean)
     log_channel_id = Column(types.Integer(big=True), nullable=True)
-    do_verification = Column(types.Boolean())
-    verification_type = Column(types.String())  # enum
+    do_verification = Column(types.Boolean)
+    verification_type = Column(types.String)  # enum
     verification_channel_id = Column(types.Integer(big=True), nullable=True)
 
     @classmethod

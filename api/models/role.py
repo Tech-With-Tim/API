@@ -1,13 +1,15 @@
 from postDB import Model, Column, types
-from quart import exceptions
+
 from typing import Optional, List, Union
-from datetime import datetime  # noqa f401
+from datetime import datetime  # noqa F401 - Used in docstring.
+from quart import exceptions
 from http import HTTPStatus
 import logging
 import asyncpg
 
 from .permission import Permission
 import utils
+
 
 log = logging.getLogger("Roles")
 
@@ -28,10 +30,10 @@ class Role(Model):
 
     id = Column(types.Integer(big=True), unique=True)
     name = Column(types.String(length=32))
-    position = Column(types.Integer(), unique=True)
-    color = Column(types.Integer(), default=0)
-    permissions = Column(types.Integer(), default=0)
-    base = Column(types.Boolean(), default=False)
+    position = Column(types.Integer, unique=True)
+    color = Column(types.Integer, default=0xABCDEF)
+    permissions = Column(types.Integer, default=0)
+    base = Column(types.Boolean, default=False)
 
     def __repr__(self):
         return (
@@ -41,21 +43,27 @@ class Role(Model):
 
     @classmethod
     async def create(
-        cls, name: str, color: int, permissions: int, base: Optional[bool] = False
+        cls,
+        name: str,
+        permissions: int,
+        color: Optional[int] = None,
+        base: Optional[bool] = False,
     ):
         """Create a new Role, if one does not already exist."""
         query = """
-        INSERT INTO roles (id, name, position, color, permissions, base)
+        INSERT INTO roles (id, position, name, color, permissions, base)
             VALUES (
                 create_snowflake(),
-                $1,
                 ((SELECT COUNT(*) FROM roles) + 1),
+                $1,
                 $2,
                 $3,
                 $4
             )
             RETURNING *;
         """
+
+        color = color or cls.color.default
 
         record = await cls.pool.fetchrow(query, name, color, permissions, base)
 
@@ -139,7 +147,7 @@ class Role(Model):
 
     @property
     def created_at(self):
-        return utils.internal_snowflake_time(self.id)
+        return utils.snowflake_time(self.id)
 
     def has_permission(self, permission: "Permission") -> bool:
         """Returns `True` if this Role has said `Permission`"""
@@ -212,36 +220,11 @@ class Role(Model):
         return ret
 
     @classmethod
-    async def fetch_or_404(cls, id: Union[str, int]) -> Optional["Role"]:
-        """
-        Fetch a role with the given ID or send a 404 error.
-
-        :param Union[str, int] id: The role's id.
-        """
-
-        if role := await cls.fetch(id):
-            return role
-
-        http_status = HTTPStatus.NOT_FOUND
-        http_status.description = f"Role with ID {id} doesn't exist."
-        raise exceptions.NotFound(http_status)
-
-    @classmethod
     async def delete(cls, id: Union[str, int], *, user_id: Optional[int] = None):
         try:
             query = """SELECT * FROM delete_role($1, $2)"""
-            print(user_id)
-            await cls.pool.execute(query, id, user_id)
+            return await cls.pool.execute(query, id, user_id)
         except asyncpg.exceptions.DataError:
             http_status = HTTPStatus.FORBIDDEN
             http_status.description = "You don't have permission to delete that role"
             raise exceptions.Forbidden(http_status)
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "color": self.color,
-            "position": self.position,
-            "permissions": self.permissions,
-        }

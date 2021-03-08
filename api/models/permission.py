@@ -20,12 +20,12 @@ class Permission(Model):
         :param str help_text:       Text displayed next to the permission when managing roles.
     """
 
-    id = Column(types.Serial(), unique=True)
+    id = Column(types.Serial, unique=True)
     name = Column(types.String(length=32), primary_key=True)
-    value = Column(types.Integer(), unique=True)
+    value = Column(types.Integer, unique=True)
 
-    public = Column(types.Boolean(), default=True)
-    help_text = Column(types.String())
+    public = Column(types.Boolean, default=True)
+    help_text = Column(types.String)
 
     def __repr__(self):
         return '<Permission name="{0.name}" value="{0.value}" help="{0.help_text}">'.format(

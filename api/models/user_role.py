@@ -1,9 +1,9 @@
+from postDB import Model, Column, types
+
+from quart import exceptions
 from http import HTTPStatus
 from typing import Optional
-
 import asyncpg
-from postDB import Model, Column, types
-from quart import exceptions
 
 
 class UserRole(Model):

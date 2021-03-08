@@ -1,9 +1,8 @@
-from http import HTTPStatus
-
-from postDB import Model
 from quart import request, Request, exceptions
 from typing import Callable, Any
 from functools import wraps
+from http import HTTPStatus
+from postDB import Model
 
 
 request: Request
@@ -53,12 +52,12 @@ def requires_perms(*permissions: int):
             for perm in permissions:
                 perms |= 1 << perm
 
-            query = """SELECT * FROM has_global_permission($1, $2);"""
+            query = """SELECT * FROM has_permissions($1, $2);"""
             record = await Model.pool.fetchrow(query, request.user_id, perms)
 
-            if not record["has_global_permission"]:
+            if not record["has_permissions"]:
                 http_status = HTTPStatus.FORBIDDEN
-                http_status.description = "Missing Permissions"
+                http_status.description = "Missing Permissions."
                 raise exceptions.Forbidden(http_status)
 
             return await func(*args, **kwargs)
