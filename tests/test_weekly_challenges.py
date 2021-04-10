@@ -80,7 +80,7 @@ async def test_create_weekly_challenge(
     auth_app: QuartClient, db, data: dict, status_code: int
 ):
     response = await auth_app.post(
-        "/wkc", json=data, headers={"authorization": auth_app.token}
+        "/", json=data, headers={"authorization": auth_app.token}
     )
     assert response.content_type == "application/json"
     assert response.status_code == status_code
@@ -97,7 +97,7 @@ async def test_create_weekly_challenge(
                 "difficulty",
             )
         }
-        assert response.headers["Location"] == f"/guilds/{data['id']}"
+        assert response.headers["Location"] == f"/wkc/{data['id']}"
 
 
 @pytest.mark.asyncio
