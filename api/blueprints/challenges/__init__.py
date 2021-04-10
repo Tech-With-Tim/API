@@ -1,7 +1,7 @@
 from quart import Quart, Blueprint
 
 
-bp: Blueprint = Blueprint("weekly_challenges", __name__)
+bp: Blueprint = Blueprint("challenges", __name__)
 
 
 def setup(app: Quart, url_prefix: str) -> None:

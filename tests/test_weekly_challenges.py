@@ -75,7 +75,7 @@ async def _challenge():
 async def test_create_weekly_challenge(
     app: QuartClient, db, data: dict, status_code: int
 ):
-    response = await app.post("/wkc/", json=data)
+    response = await app.post("/challenges/weekly", json=data)
     assert response.content_type == "application/json"
     assert response.status_code == status_code
     if status_code == 201:
@@ -96,7 +96,7 @@ async def test_create_weekly_challenge(
 @pytest.mark.asyncio
 @pytest.mark.db
 async def test_get_weekly_challenge(app: QuartClient, db, challenge: Challenge):
-    response = await app.get("/wkc/1")
+    response = await app.get("/challenges/weekly/1")
     assert response.status_code == 200
     assert response.content_type == "application/json"
     assert (await response.json) == {
@@ -113,7 +113,9 @@ async def test_get_weekly_challenge(app: QuartClient, db, challenge: Challenge):
 @pytest.mark.asyncio
 @pytest.mark.db
 async def test_get_weekly_challenge_404(app: QuartClient, db):
-    response = await app.get("/wkc/0")  # spamming random digits on keyboard
+    response = await app.get(
+        "/challenges/weekly/0"
+    )  # spamming random digits on keyboard
     assert response.status_code == 404
     assert response.content_type == "application/json"
 
@@ -122,7 +124,7 @@ async def test_get_weekly_challenge_404(app: QuartClient, db):
 @pytest.mark.db
 async def test_patch_challenge(app: QuartClient, db):
     response = await app.patch(
-        "/wkc/1",
+        "/challenges/weekly/1",
         json={
             "title": "changed",
             "description": "this is a test",
@@ -143,7 +145,7 @@ async def test_patch_challenge(app: QuartClient, db):
 @pytest.mark.asyncio
 @pytest.mark.db
 async def test_delete_weekly_challenge(app: QuartClient, db):
-    response = await app.delete("/wkc/1")
+    response = await app.delete("/challenges/weekly/1")
     assert response.status_code == 200
     challenge = await Challenge.fetch(
         "1"

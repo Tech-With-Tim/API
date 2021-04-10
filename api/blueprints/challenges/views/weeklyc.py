@@ -7,7 +7,7 @@ from typing import Union
 request: utils.Request
 
 
-@bp.route("/", methods=["POST"])
+@bp.route("/weekly", methods=["POST"])
 @utils.expects_data(
     id=Union[str, int],
     title=str,
@@ -53,11 +53,11 @@ async def post_challenge(
             difficulty=challenge.difficulty,
         ),
         201,
-        {"Location": f"/{challenge.id}"},
+        {"Location": f"/challenges/weekly/{challenge.id}"},
     )
 
 
-@bp.route("/<int:weekly_challenge_id>", methods=["GET"])
+@bp.route("/weekly/<int:weekly_challenge_id>", methods=["GET"])
 async def get_challenge(weekly_challenge_id: int):
     """Gets the Weekly Challenge"""
 
@@ -74,7 +74,7 @@ async def get_challenge(weekly_challenge_id: int):
     )
 
 
-@bp.route("/<int:weekly_challenge_id>", methods=["PATCH"])
+@bp.route("/weekly/<int:weekly_challenge_id>", methods=["PATCH"])
 async def update_challenge(weekly_challenge_id: int, **data):
     """Update a weekly challenge from its ID"""
 
@@ -92,7 +92,7 @@ async def update_challenge(weekly_challenge_id: int, **data):
     )
 
 
-@bp.route("/<int:weekly_challenge_id>", methods=["DELETE"])
+@bp.route("/weekly/<int:weekly_challenge_id>", methods=["DELETE"])
 async def delete_challenge(weekly_challenge_id: int):
     """Deletes a challenge from its ID"""
 

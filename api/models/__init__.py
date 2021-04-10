@@ -6,7 +6,7 @@ from .token import Token
 from .user import User
 from .guild import Guild
 from .guild_config import GuildConfig
-from .weekly_challenge import Challenge
+from .weekly import Challenge
 
 
 models_ordered: List[Type[Model]] = [User, Token, Guild, GuildConfig, Challenge]

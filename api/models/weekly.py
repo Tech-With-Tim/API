@@ -155,5 +155,4 @@ class Challenge(Model):
 
     @property
     def created_at(self) -> datetime:
-        """Returns """
         return utils.snowflake_time(self.id)
