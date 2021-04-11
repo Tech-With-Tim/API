@@ -6,12 +6,11 @@ import pytest
 
 def challenge_to_dict(challenge: Challenge) -> dict:
     return {
-        "id": str(challenge.id),
+        "id": challenge.id,
         "title": challenge.title,
         "description": str(challenge.description),
         "examples": challenge.examples,
         "rules": challenge.rules,
-        "created_by": challenge.created_by,
         "difficulty": challenge.difficulty,
     }
 
@@ -19,7 +18,7 @@ def challenge_to_dict(challenge: Challenge) -> dict:
 @pytest.fixture(name="challenge", scope="session")
 async def _challenge():
     return await Challenge.create(
-        id="1",
+        id=1,
         title="test",
         description="this is a test",
         examples="x = 1",
@@ -112,16 +111,6 @@ async def test_get_weekly_challenge(app: QuartClient, db, challenge: Challenge):
 
 @pytest.mark.asyncio
 @pytest.mark.db
-async def test_get_weekly_challenge_404(app: QuartClient, db):
-    response = await app.get(
-        "/challenges/weekly/0"
-    )  # spamming random digits on keyboard
-    assert response.status_code == 404
-    assert response.content_type == "application/json"
-
-
-@pytest.mark.asyncio
-@pytest.mark.db
 async def test_patch_challenge(auth_app: QuartClient, db):
     response = await auth_app.patch(
         "/challenges/weekly/1",
@@ -135,11 +124,6 @@ async def test_patch_challenge(auth_app: QuartClient, db):
         headers={"authorization": auth_app.token},
     )
     assert response.status_code == 200
-    assert response.content_type == "application/json"
-    challenge = await Challenge.fetch(
-        "1"
-    )  # challenge was updated in db, need to fetch again
-    assert (await response.json) == challenge_to_dict(challenge)
 
 
 @pytest.mark.asyncio

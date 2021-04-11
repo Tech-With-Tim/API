@@ -2,7 +2,7 @@ from quart import jsonify, request
 from api.models import Challenge
 from .. import bp
 import utils
-from typing import Union
+from typing import Union, Optional
 
 request: utils.Request
 
@@ -25,7 +25,6 @@ async def post_challenge(
     rules: str,
     difficulty: str,
 ):
-
     created_by = request.user_id
     challenge = await Challenge.create(
         id, title, description, examples, rules, created_by, difficulty
@@ -60,8 +59,10 @@ async def post_challenge(
 async def get_challenge(weekly_challenge_id: int):
     """Gets the Weekly Challenge"""
 
-    challenge = await Challenge.fetch_or_404(weekly_challenge_id)
+    challenge = await Challenge.fetch(weekly_challenge_id)
 
+    if challenge is None:
+        return jsonify("Not Found", 404)
     return jsonify(
         id=str(challenge.id),
         title=challenge.title,
@@ -74,22 +75,18 @@ async def get_challenge(weekly_challenge_id: int):
 
 
 @bp.route("/weekly/<int:weekly_challenge_id>", methods=["PATCH"])
-@utils.auth_required
+@utils.expects_data(
+    title=Optional[str],
+    description=Optional[str],
+    examples=Optional[str],
+    rules=Optional[str],
+    difficulty=Optional[str],
+)
 async def update_challenge(weekly_challenge_id: int, **data):
     """Update a weekly challenge from its ID"""
+    await Challenge.update(weekly_challenge_id=weekly_challenge_id, **data)
 
-    challenge = await Challenge.fetch_or_404(weekly_challenge_id)
-    await challenge.update(**data)
-
-    return jsonify(
-        id=str(challenge.id),
-        title=challenge.title,
-        description=str(challenge.description),
-        examples=challenge.examples,
-        rules=challenge.rules,
-        created_by=challenge.created_by,
-        difficulty=challenge.difficulty,
-    )
+    return jsonify(**data)
 
 
 @bp.route("/weekly/<int:weekly_challenge_id>", methods=["DELETE"])
@@ -97,6 +94,5 @@ async def update_challenge(weekly_challenge_id: int, **data):
 async def delete_challenge(weekly_challenge_id: int):
     """Deletes a challenge from its ID"""
 
-    weekly_challenge = await Challenge.fetch_or_404(weekly_challenge_id)
-    await weekly_challenge.delete()
+    await Challenge.delete(weekly_challenge_id)
     return jsonify("Challenge Deleted", 204)

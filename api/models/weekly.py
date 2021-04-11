@@ -1,7 +1,5 @@
 from postDB import Model, Column, types
 from typing import Optional, Union
-from http import HTTPStatus
-from quart import exceptions
 from datetime import datetime
 import utils
 
@@ -74,70 +72,45 @@ class Challenge(Model):
         return cls(**record)
 
     @classmethod
-    async def fetch_or_404(cls, id: Union[str, int]) -> Optional["Challenge"]:
-        """
-        Fetch a weekly challenge with the given ID or send a 404 error.
+    async def update(cls, weekly_challenge_id: int = None, **data):
+        """Update Role Data"""
+        update_query = ["UPDATE challenges SET"]
 
-        :param Union[str, int] weekly_challenge: The weekly challenge's id.
-        """
-
-        if challenge := await cls.fetch(id):
-            return challenge
-
-        http_status = HTTPStatus.NOT_FOUND
-        http_status.description = f"The weekly challenge with ID {id} doesn't exist."
-        raise exceptions.NotFound(http_status)
-
-    async def update(self, **fields) -> Optional["Challenge"]:
-        """Update the Challenge with the given arguments."""
-
-        if not fields:
-            return self
-
-        allowed_fields = (
+        fields = (
             "title",
             "description",
             "examples",
             "rules",
-            "created_by",
             "difficulty",
         )
-        fields = {
-            name: fields.get(name, getattr(self, name)) for name in allowed_fields
-        }
+        new_data = {field: data[field] for field in fields if field in data.keys()}
 
-        query = """
-           UPDATE challenges
-           SET
-               title = $2,
-               description = $3,
-               examples = $4,
-               rules = $5,
-               created_by = $6,
-               difficulty = $7
-           WHERE id = $1
-           RETURNING *;
-           """
-        record = await self.pool.fetchrow(
-            query,
-            int(self.id),
-            fields["title"],
-            fields["description"],
-            fields["examples"],
-            fields["rules"],
-            fields["created_by"],
-            fields["difficulty"],
-        )
+        if len(new_data) > 0:
+            update_query.append(
+                ", ".join(
+                    "%s = $%d" % (key, i) for i, key in enumerate(new_data.keys(), 2)
+                )
+            )
 
-        if record is None:
-            return None
+            update_query.append("WHERE challenges.id = $1 RETURNING *;")
 
-        for field, value in record.items():
-            setattr(self, field, value)
+            query = " ".join(update_query)
+            record = await cls.pool.fetchrow(
+                query,
+                int(weekly_challenge_id),
+                *new_data.values(),
+            )
 
-        return self
+            if record is None:
+                return None
 
-    async def delete(self) -> Optional["Challenge"]:
+            for field, value in record.items():
+                setattr(cls, field, value)
+
+        return cls
+
+    @classmethod
+    async def delete(cls, id) -> Optional["Challenge"]:
         """Deletes the Challenge."""
 
         query = """
@@ -145,13 +118,13 @@ class Challenge(Model):
         WHERE id = $1
         RETURNING *;
         """
-        record = await self.pool.fetchrow(query, int(self.id))
+        record = await cls.pool.fetchrow(query, int(id))
 
         if record is None:
             return None
 
         for field, value in record.items():
-            setattr(self, field, value)
+            setattr(cls, field, value)
 
     @property
     def created_at(self) -> datetime:
