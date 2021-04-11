@@ -24,7 +24,7 @@ async def _challenge():
         description="this is a test",
         examples="x = 1",
         rules="work",
-        created_by="sarzz",
+        created_by=1,
         difficulty="easy",
     )
 
@@ -37,11 +37,10 @@ async def _challenge():
         (
             {
                 "id": "1",
-                "title": "changed",
+                "title": "test",
                 "description": "this is a test",
                 "examples": "x = 1",
                 "rules": "work",
-                "created_by": "sarzz",
                 "difficulty": "easy",
             },
             201,
@@ -49,11 +48,10 @@ async def _challenge():
         (
             {
                 "id": 2,
-                "title": "changed",
+                "title": "test",
                 "description": "this is a test",
                 "examples": "x = 1",
                 "rules": "work",
-                "created_by": "sarzz",
                 "difficulty": "easy",
             },
             201,
@@ -73,14 +71,16 @@ async def _challenge():
     ],
 )
 async def test_create_weekly_challenge(
-    app: QuartClient, db, data: dict, status_code: int
+    auth_app: QuartClient, db, data: dict, status_code: int
 ):
-    response = await app.post("/challenges/weekly", json=data)
+    response = await auth_app.post(
+        "/challenges/weekly", json=data, headers={"authorization": auth_app.token}
+    )
     assert response.content_type == "application/json"
     assert response.status_code == status_code
     if status_code == 201:
         assert (await response.json) == {
-            n: str(data.get(n, "")) or None
+            n: str(data.get(n, "")) or 1
             for n in (
                 "id",
                 "title",
@@ -101,11 +101,11 @@ async def test_get_weekly_challenge(app: QuartClient, db, challenge: Challenge):
     assert response.content_type == "application/json"
     assert (await response.json) == {
         "id": "1",
-        "title": "changed",
+        "title": "test",
         "description": "this is a test",
         "examples": "x = 1",
         "rules": "work",
-        "created_by": "sarzz",
+        "created_by": "1",
         "difficulty": "easy",
     }
 
@@ -122,17 +122,17 @@ async def test_get_weekly_challenge_404(app: QuartClient, db):
 
 @pytest.mark.asyncio
 @pytest.mark.db
-async def test_patch_challenge(app: QuartClient, db):
-    response = await app.patch(
+async def test_patch_challenge(auth_app: QuartClient, db):
+    response = await auth_app.patch(
         "/challenges/weekly/1",
         json={
             "title": "changed",
             "description": "this is a test",
             "examples": "x = 1",
             "rules": "work",
-            "created_by": "sarzzz",
             "difficulty": "easy",
         },
+        headers={"authorization": auth_app.token},
     )
     assert response.status_code == 200
     assert response.content_type == "application/json"
@@ -144,8 +144,10 @@ async def test_patch_challenge(app: QuartClient, db):
 
 @pytest.mark.asyncio
 @pytest.mark.db
-async def test_delete_weekly_challenge(app: QuartClient, db):
-    response = await app.delete("/challenges/weekly/1")
+async def test_delete_weekly_challenge(auth_app: QuartClient, db):
+    response = await auth_app.delete(
+        "/challenges/weekly/1", headers={"authorization": auth_app.token}
+    )
     assert response.status_code == 200
     challenge = await Challenge.fetch(
         "1"
