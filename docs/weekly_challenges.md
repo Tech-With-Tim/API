@@ -1,12 +1,12 @@
-# ``/wkc``
+# ``/challenges/weekly``
 
-- [POST ``/wkc``](#post-new-weekly-challenge)
-- [GET ``/wkc/<id>``](#get-weekly-challengeid)
-- [PATCH ``/wkc/<id>``](#patch-weekly-challengeid)
-- [DELETE ``/wkc/<id>``](#delete-weekly-challengeid)
+- [POST ``/challenges/weekly``](#post-new-weekly-challenge)
+- [GET ``/challenges/weekly/<id>``](#get-weekly-challengeid)
+- [PATCH ``/challenges/weekly/<id>``](#patch-weekly-challengeid)
+- [DELETE ``/challenges/weekly/<id>``](#delete-weekly-challengeid)
 
 
-## POST ``/wkc``
+## POST ``/challenges/weekly``
 
 Create a weekly challenge from the request body.
 
@@ -21,7 +21,6 @@ title | ``str`` | The challenge's name
 description | ``str`` | The challenge's description
 examples | ``str`` | The challenge's examples
 rules |  ``str`` | The challenge's rules
-created_by |  ``str`` | The author of the challenge
 difficulty |  ``str`` | Difficulty of the challenge
 
 #### Example request data
@@ -33,7 +32,6 @@ difficulty |  ``str`` | Difficulty of the challenge
         "description": "this is a test",
         "examples": "x = 1",
         "rules": "work",
-        "created_by": "sarzz",
         "difficulty": "easy"
     }
 ```
@@ -56,7 +54,7 @@ difficulty |  ``str`` | Difficulty of the challenge
 
 ```json
 {
-    "created_by": "sarzz",
+    "created_by": "576760984576983060",
     "description": "this is a test",
     "difficulty": "easy",
     "examples": "x = 1",
@@ -77,7 +75,7 @@ difficulty |  ``str`` | Difficulty of the challenge
 - ``409`` Conflict  
   A weekly challenge with the provided ID already exists.
 
-## GET ``/wkc/<id>``
+## GET ``/challenges/weekly/<id>``
 
 Gets a weekly challenge from its ID.
 
@@ -92,7 +90,7 @@ id | ``int`` | The weekly challenge's ID
 #### Example request data
 
 ```http
-/wkc/1
+/challenges/weekly/1
 ```
 
 ### Returned data
@@ -113,7 +111,7 @@ difficulty |  ``str`` | Difficulty of the challenge
 
 ```json
 {
-    "created_by": "sarzz",
+    "created_by": "576760984576983060",
     "description": "this is a test",
     "difficulty": "easy",
     "examples": "x = 1",
@@ -131,7 +129,7 @@ difficulty |  ``str`` | Difficulty of the challenge
 - ``404`` Not found  
   Weekly challenge with provided ID doesn't exist.
 
-## PATCH ``/wkc/<id>``
+## PATCH ``/challenges/weekly/<id>``
 
 Update elements of a weekly challenge from the request body.
 
@@ -151,17 +149,15 @@ title | ``str`` | The challenge's name
 description | ``str`` | The challenge's description
 examples | ``str`` | The challenge's examples
 rules |  ``str`` | The challenge's rules
-created_by |  ``str`` | The author of the challenge
 difficulty |  ``str`` | Difficulty of the challenge
 #### Example request data
 
 ```http
-/wkc/1
+/challenges/weekly/1
 ```
 
 ```json
  {
-    "created_by": "sarzz",
     "description": "this is a test",
     "difficulty": "medium",
     "examples": "x = 1",
@@ -203,7 +199,7 @@ difficulty |  ``str`` | Difficulty of the challenge
 - ``404`` Not found  
   Weekly challenge with provided ID doesn't exist.
 
-## DELETE ``/wkc/<id>``
+## DELETE ``/challenges/weekly/<id>``
 
 Deletes a weekly challenge from its ID.
 
@@ -218,7 +214,7 @@ id | ``int`` | The weekly challenge's ID
 #### Example request data
 
 ```http
-/wkc/1
+/challenges/weekly/1
 ```
 
 
