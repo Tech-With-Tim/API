@@ -62,7 +62,13 @@ async def get_challenge(weekly_challenge_id: int):
     challenge = await Challenge.fetch(weekly_challenge_id)
 
     if challenge is None:
-        return jsonify("Not Found", 404)
+        return (
+            jsonify(
+                error="Not Found",
+                message=f"Challenge with ID {int(weekly_challenge_id)} doesn't exists.",
+            ),
+            404,
+        )
     return jsonify(
         id=str(challenge.id),
         title=challenge.title,
