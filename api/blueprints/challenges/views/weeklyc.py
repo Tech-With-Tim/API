@@ -1,4 +1,4 @@
-from quart import jsonify
+from quart import jsonify, request
 from api.models import Challenge
 from .. import bp
 import utils
@@ -8,13 +8,13 @@ request: utils.Request
 
 
 @bp.route("/weekly", methods=["POST"])
+@utils.auth_required
 @utils.expects_data(
     id=Union[str, int],
     title=str,
     description=str,
     examples=str,
     rules=str,
-    created_by=str,
     difficulty=str,
 )
 async def post_challenge(
@@ -23,11 +23,10 @@ async def post_challenge(
     description: str,
     examples: str,
     rules: str,
-    created_by: str,
     difficulty: str,
 ):
-    """Create a weekly challenge from the request body"""
 
+    created_by = request.user_id
     challenge = await Challenge.create(
         id, title, description, examples, rules, created_by, difficulty
     )
@@ -69,12 +68,13 @@ async def get_challenge(weekly_challenge_id: int):
         description=str(challenge.description),
         examples=challenge.examples,
         rules=challenge.rules,
-        created_by=challenge.created_by,
+        created_by=str(challenge.created_by),
         difficulty=challenge.difficulty,
     )
 
 
 @bp.route("/weekly/<int:weekly_challenge_id>", methods=["PATCH"])
+@utils.auth_required
 async def update_challenge(weekly_challenge_id: int, **data):
     """Update a weekly challenge from its ID"""
 
@@ -93,6 +93,7 @@ async def update_challenge(weekly_challenge_id: int, **data):
 
 
 @bp.route("/weekly/<int:weekly_challenge_id>", methods=["DELETE"])
+@utils.auth_required
 async def delete_challenge(weekly_challenge_id: int):
     """Deletes a challenge from its ID"""
 

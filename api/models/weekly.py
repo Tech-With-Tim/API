@@ -24,7 +24,9 @@ class Challenge(Model):
     description = Column(types.String())
     examples = Column(types.String())
     rules = Column(types.String())
-    created_by = Column(types.String())
+    created_by = Column(
+        types.ForeignKey("users", "id", sql_type=types.Integer(big=True))
+    )
     difficulty = Column(types.String())
 
     @classmethod
@@ -150,8 +152,6 @@ class Challenge(Model):
 
         for field, value in record.items():
             setattr(self, field, value)
-
-        return self
 
     @property
     def created_at(self) -> datetime:
