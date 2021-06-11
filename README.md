@@ -14,7 +14,7 @@
 
 </div>
 
-API for the Tech With Tim website using [Quart](https://pgjones.gitlab.io/quart/).
+API for the Tech With Tim website using [FastAPI](https://fastapi.tiangolo.com/).
 
 ## 📝 Table of Contents
 
@@ -93,10 +93,10 @@ And fill in the variables with the values below:
 Run the API and initialise the database:
 
 ```sh
-pipenv run python launch.py runserver --initdb
+uvicorn api.main:app --reload
 ```
 
-The API should run at [http://127.0.0.1:5000](http://127.0.0.1:5000). For more information about the CLI, check the docs [here](/docs/cli.md).
+The API should run at [http://127.0.0.1:8000](http://127.0.0.1:5000). For more uvicorn options, check the docs [here](https://www.uvicorn.org/settings/).
 
 ## 🐳 Running with Docker
 
@@ -135,7 +135,7 @@ To test the API, we use the [pytest](https://docs.pytest.org/en/stable/) framewo
 Run the tests:
 
 ```sh
-pipenv run pytest
+pipenv run test
 ```
 
 **When you contribute, you need to add tests on the features you add.** An example can be seen in [tests/test_index.py](/tests/test_index.py).
@@ -143,14 +143,8 @@ pipenv run pytest
 ## ⛏️ Built Using
 
 - [Python](https://www.python.org/) - Language
-- [Quart](https://pgjones.gitlab.io/quart/) - Backend module
+- [FastAPI](https://fastapi.tiangolo.com/) - Backend module
+- [Uvicorn](https://www.uvicorn.org/) - Web server
 - [PostDB](https://github.com/SylteA/postDB) - Database module
-- [pytest-asyncio](https://github.com/pytest-dev/pytest-asyncio) - Test framework (asynchronous version of [pytest](https://docs.pytest.org/en/stable/))
-
-## ✍️ Authors
-
-- [@SylteA](https://github.com/SylteA) - Most of the backend
-- [@Shubhaankar-sharma](https://github.com/Shubhaankar-sharma) - Docker deployment
-- [@takos22](https://github.com/takos22) - Some endpoints and markdown files
-
-See also the list of [contributors](https://github.com/Tech-With-Tim/API/contributors) who participated in this project.
+- [pytest](https://github.com/pytest-dev/pytest) - Test framework
+- [pytest-asyncio](https://github.com/pytest-dev/pytest-asyncio) - Support for asynchronous tests

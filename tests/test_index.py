@@ -1,10 +1,11 @@
-from quart.testing import QuartClient
-import pytest
+from fastapi.testclient import TestClient
+
+from api import app
+
+client = TestClient(app)
 
 
-@pytest.mark.asyncio
-async def test_index(app: QuartClient):
-    response = await app.get("/")
+def test_read_main():
+    response = client.get("/")
     assert response.status_code == 200
-    assert response.content_type == "application/json"
-    assert await response.get_json() == {"status": "OK"}
+    assert response.json() == {"msg": "Hello World"}

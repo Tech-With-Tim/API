@@ -1,21 +1,20 @@
 [[source]]
-name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
-
-[dev-packages]
-black = "*"
-flake8 = "*"
-pre-commit = "*"
-pytest-asyncio = "*"
+name = "pypi"
 
 [packages]
-quart = "*"
-quart-cors = "*"
-postdb = "*"
-pyjwt = "*"
-aiohttp = "*"
-uvloop = {markers = "platform_system == 'linux'", version = "*"}
+fastapi = "*"
+uvicorn = {version = "*", extras = ["standard"]}
+requests = "*"
+
+[dev-packages]
+pre-commit = "*"
+flake8 = "*"
+black = "*"
+isort = "*"
+pytest = "*"
+pytest-asyncio = "*"
 
 [requires]
 python_version = "3.8"
@@ -25,3 +24,4 @@ allow_prereleases = true
 
 [scripts]
 lint = "pre-commit run --all-files"
+test = "pytest"

@@ -3,13 +3,20 @@ repos:
     hooks:
       - id: black
         name: black
-        entry: black --check .
+        entry: black --check . --line-length 80
         language: system
         types: [python]
 
       - id: flake8
         name: Flake8
         entry: flake8
+        language: system
+        types: [python]
+        require_serial: true
+
+      - id: isort
+        name: Import sort
+        entry: isort --check-only
         language: system
         types: [python]
         require_serial: true
