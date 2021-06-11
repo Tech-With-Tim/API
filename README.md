@@ -93,10 +93,10 @@ And fill in the variables with the values below:
 Run the API and initialise the database:
 
 ```sh
-pipenv run python launch.py runserver --initdb
+uvicorn app.main:app --reload
 ```
 
-The API should run at [http://127.0.0.1:5000](http://127.0.0.1:5000). For more information about the CLI, check the docs [here](/docs/cli.md).
+The API should run at [http://127.0.0.1:8000](http://127.0.0.1:5000). For more information about the CLI, check the docs [here](/docs/cli.md).
 
 ## 🐳 Running with Docker
 
@@ -143,7 +143,7 @@ pipenv run pytest
 ## ⛏️ Built Using
 
 - [Python](https://www.python.org/) - Language
-- [Quart](https://pgjones.gitlab.io/quart/) - Backend module
+- [fastAPI](https://fastapi.tiangolo.com/) - Backend module
 - [PostDB](https://github.com/SylteA/postDB) - Database module
 - [pytest-asyncio](https://github.com/pytest-dev/pytest-asyncio) - Test framework (asynchronous version of [pytest](https://docs.pytest.org/en/stable/))
 
