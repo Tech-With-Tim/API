@@ -10,12 +10,13 @@ pre-commit = "*"
 pytest-asyncio = "*"
 
 [packages]
-quart = "*"
-quart-cors = "*"
 postdb = "*"
 pyjwt = "*"
 aiohttp = "*"
 uvloop = {markers = "platform_system == 'linux'", version = "*"}
+fastapi = "*"
+uvicorn = "*"
+requests = "*"
 
 [requires]
 python_version = "3.8"
