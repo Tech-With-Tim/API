@@ -3,7 +3,7 @@ repos:
     hooks:
       - id: black
         name: black
-        entry: black --check . --line-length 80
+        entry: black --check .
         language: system
         types: [python]
 

@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.gzip import GZipMiddleware
 
 app = FastAPI()
 
@@ -12,7 +11,6 @@ app.add_middleware(
     allow_headers=["*"],
     allow_credentials=True,
 )
-app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 
 @app.get("/")

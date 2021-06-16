@@ -6,7 +6,7 @@ name = "pypi"
 [packages]
 fastapi = "*"
 uvicorn = {version = "*", extras = ["standard"]}
-requests = "*"
+postdb = "*"
 
 [dev-packages]
 pre-commit = "*"
@@ -15,6 +15,7 @@ black = "*"
 isort = "*"
 pytest = "*"
 pytest-asyncio = "*"
+requests = "*"
 
 [requires]
 python_version = "3.8"
