@@ -134,6 +134,14 @@ async def safe_create_tables(verbose: bool = False) -> None:
 
     log.info("Attempting to create %s tables." % len(models_ordered))
 
+    with open("snowflake.sql") as f:
+        query = f.read()
+
+        if verbose:
+            print(query)
+
+        await Model.pool.execute(query)
+
     for model in models_ordered:
         await model.create_table(verbose=verbose)
         log.info("Created table %s" % model.__tablename__)
