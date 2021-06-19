@@ -1,14 +1,10 @@
-from api import app as quart_app
-from api.models import User
 from launch import load_env, prepare_postgres, safe_create_tables, delete_tables
+from api import app as fastapi_app
 
-from quart.testing import QuartClient
+from fastapi.testclient import TestClient
 from postDB import Model
-import pytest
 import asyncio
-import datetime
-import jwt
-import os
+import pytest
 
 
 @pytest.fixture(scope="session")
@@ -21,24 +17,8 @@ def event_loop():
 
 
 @pytest.fixture(scope="session")
-def app(event_loop) -> QuartClient:
-    return quart_app.test_client()
-
-
-@pytest.fixture(scope="session")
-async def auth_app(event_loop, db) -> QuartClient:
-    auth_client = quart_app.test_client()
-    user = await User.create(1, "test", "0000", type="APP")
-    auth_client.user = user
-    auth_client.token = jwt.encode(
-        {
-            "uid": user.id,
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1),
-            "iat": datetime.datetime.utcnow(),
-        },
-        key=os.environ["SECRET_KEY"],
-    )
-    return auth_client
+def app(event_loop) -> TestClient:
+    return TestClient(fastapi_app)
 
 
 @pytest.fixture(scope="session")

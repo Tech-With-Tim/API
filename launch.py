@@ -1,8 +1,6 @@
-from api import app
-
+from uvicorn.supervisors import ChangeReload
 from typing import Any, Coroutine, Iterable
-from hypercorn.asyncio import serve
-from hypercorn.config import Config
+from uvicorn import Config, Server
 from postDB import Model
 import logging
 import asyncio
@@ -154,8 +152,16 @@ async def delete_tables(verbose: bool = False):
         await model.drop_table(verbose=verbose)
         log.info("Dropped table %s" % type(model).__tablename__)
 
+    await Model.pool.execute("DROP FUNCTION IF EXISTS create_snowflake")
+    await Model.pool.execute("DROP SEQUENCE IF EXISTS global_snowflake_id_seq")
 
-@app.cli.command(name="initdb")
+
+@click.group()
+def cli():
+    pass
+
+
+@cli.command(name="initdb")
 @click.option("-v", "--verbose", default=False, is_flag=True)
 def _initdb(verbose: bool):
     """
@@ -171,9 +177,9 @@ def _initdb(verbose: bool):
     run_async(safe_create_tables(verbose=verbose))
 
 
-@app.cli.command()
+@cli.command()
 @click.option("-v", "--verbose", default=False, is_flag=True)
-def dropdb(verbose: bool):
+def _dropdb(verbose: bool):
     """
     Drops all tables defined in the app.
 
@@ -187,13 +193,14 @@ def dropdb(verbose: bool):
     run_async(delete_tables(verbose=verbose))
 
 
-@app.cli.command()
+@cli.command()
+@click.option("-p", "--port", default=5000)
 @click.option("-h", "--host", default="127.0.0.1")
-@click.option("-p", "--port", default="5000")
 @click.option("-d", "--debug", default=False, is_flag=True)
 @click.option("-i", "--initdb", default=False, is_flag=True)
+@click.option("-r", "--reload", default=False, is_flag=True)
 @click.option("-v", "--verbose", default=False, is_flag=True)
-def runserver(host: str, port: str, debug: bool, initdb: bool, verbose: bool):
+def runserver(host: str, port: str, debug: bool, initdb: bool, verbose: bool, reload: bool):
     """
     Run the Quart app.
 
@@ -215,11 +222,14 @@ def runserver(host: str, port: str, debug: bool, initdb: bool, verbose: bool):
     if initdb:
         run_async(safe_create_tables(verbose=verbose))
 
-    app.debug = debug
+    config = Config("api.app:app", reload=reload, host=host, port=port, debug=debug)
+    server = Server(config=config)
 
-    config = Config()
-    config.bind = [host + ":" + port]
-    run_async(serve(app, config))
+    if reload:
+        sock = config.bind_socket()
+        ChangeReload(config, target=server.run, sockets=[sock]).run()
+    else:
+        server.run()
 
 
 if __name__ == "__main__":
@@ -227,6 +237,5 @@ if __name__ == "__main__":
         fp="./local.env",
         args=("SECRET_KEY", "DB_URI", "DISCORD_CLIENT_ID", "DISCORD_CLIENT_SECRET"),
     )
-    app.config.from_mapping(mapping=ENV)
 
-    app.cli()
+    cli()
