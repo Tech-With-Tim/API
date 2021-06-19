@@ -1,15 +1,23 @@
 FROM python:3.8-slim
 
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONFAULTHANDLER 1
+
 # Let service stop gracefully
 STOPSIGNAL SIGQUIT
 
 # Copy project files into working directory
 WORKDIR /app
+
+RUN apt-get update && apt-get install gcc -y
+
+COPY Pipfile Pipfile
+COPY Pipfile.lock Pipfile.lock
+
+RUN pip install pipenv
+RUN pipenv install --deploy --system
+
 ADD . /app
 
-# Install project dependencies
-RUN pip install -U pipenv
-RUN pipenv install --system --deploy
-
 # Run the API.
-CMD python launch.py runserver --host 0.0.0.0 --port 5000 --initdb --debug
+CMD python launch.py runserver --initdb --verbose
