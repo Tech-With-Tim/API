@@ -8,6 +8,7 @@ log = logging.getLogger()
 
 class API(FastAPI):
     """FastAPI subclass to implement more API like handling."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -33,7 +34,7 @@ class API(FastAPI):
         return JSONResponse(
             headers=headers,
             status_code=error.status_code,
-            content={"error": error.name, "message": error.description}
+            content={"error": error.name, "message": error.description},
         )
 
 
@@ -60,5 +61,8 @@ async def error_500(request, error: HTTPException):
 
     return JSONResponse(
         status_code=500,
-        content={"error": "Internal Server Error", "message": "Server got itself in trouble"}
+        content={
+            "error": "Internal Server Error",
+            "message": "Server got itself in trouble",
+        },
     )

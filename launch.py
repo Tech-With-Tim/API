@@ -200,7 +200,9 @@ def _dropdb(verbose: bool):
 @click.option("-i", "--initdb", default=False, is_flag=True)
 @click.option("-r", "--reload", default=False, is_flag=True)
 @click.option("-v", "--verbose", default=False, is_flag=True)
-def runserver(host: str, port: str, debug: bool, initdb: bool, verbose: bool, reload: bool):
+def runserver(
+    host: str, port: str, debug: bool, initdb: bool, verbose: bool, reload: bool
+):
     """
     Run the Quart app.
 
