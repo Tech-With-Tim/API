@@ -83,7 +83,7 @@ DISCORD_CLIENT_SECRET=
 
 And fill in the variables with the values below:
 
-- `SECRET_KEY` is the key used for the JWT token encoding.
+- `SECRET_KEY` is the key used for JWT token encoding.
 - `DB_URI` is the PostgreSQL database URI.
 - `DISCORD_CLIENT_ID` is the Discord application ID. Copy it from your Discord application page (see below).
 - `DISCORD_CLIENT_SECRET` is the Discord application secret. Copy it from your Discord application page (see below).
@@ -140,14 +140,15 @@ Run the tests:
 pipenv run test
 ```
 
-**When you contribute, you need to add tests on the features you add.** An example can be seen in [tests/test_index.py](/tests/test_index.py).
+**When you contribute, you need to add tests on the features you add.**
 
 ## ⛏️ Built Using
 
 - [Python](https://www.python.org/) - Language
 - [FastAPI](https://fastapi.tiangolo.com/) - Backend module
 - [PostDB](https://github.com/SylteA/postDB) - Database module
-- [pytest-asyncio](https://github.com/pytest-dev/pytest-asyncio) - Test framework (asynchronous version of [pytest](https://docs.pytest.org/en/stable/))
+- [pytest](https://docs.pytest.org/en/stable/) - Testing framework
+- [pytest-asyncio](https://github.com/pytest-dev/pytest-asyncio) - Testing plugin for [pytest](https://docs.pytest.org/en/stable/)
 
 ## ✍️ Authors
 

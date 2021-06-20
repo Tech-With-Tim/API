@@ -33,6 +33,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
+          file: prod.Dockerfile
           tags: ${{ secrets.DOCKER_REPO_API }}
 
       - name: Redeploy on Server

@@ -1,5 +1,4 @@
 from launch import load_env, prepare_postgres, safe_create_tables, delete_tables
-from api import app as fastapi_app
 
 from fastapi.testclient import TestClient
 from postDB import Model
@@ -18,7 +17,9 @@ def event_loop():
 
 @pytest.fixture(scope="session")
 def app(event_loop) -> TestClient:
-    return TestClient(fastapi_app)
+    from api import app
+
+    return TestClient(app)
 
 
 @pytest.fixture(scope="session")

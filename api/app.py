@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, Request
 from utils.response import JSONResponse
+from api import versions
 import logging
 
 
@@ -40,13 +41,10 @@ class API(FastAPI):
 
 app = API()
 app.router.default_response_class = JSONResponse
+
+app.include_router(versions.v1.router)
+
 app.add_exception_handler(HTTPException, app.handle_http_exception)
-
-
-@app.get("/")
-async def index():
-    """Index endpoint used for testing."""
-    return {"status": "ok"}
 
 
 @app.exception_handler(500)

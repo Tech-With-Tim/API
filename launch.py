@@ -185,7 +185,7 @@ def _initdb(verbose: bool):
     run_async(safe_create_tables(verbose=verbose))
 
 
-@cli.command()
+@cli.command(name="dropdb")
 @click.option("-v", "--verbose", default=False, is_flag=True)
 def _dropdb(verbose: bool):
     """
@@ -229,17 +229,20 @@ def runserver(
     ):
         exit(1)  # Connecting to our postgres server failed.
 
-    if initdb:
-        run_async(safe_create_tables(verbose=verbose))
-
     config = Config("api.app:app", reload=reload, host=host, port=port, debug=debug)
     server = Server(config=config)
 
-    if reload:
-        sock = config.bind_socket()
-        ChangeReload(config, target=server.run, sockets=[sock]).run()
-    else:
-        server.run()
+    async def worker():
+        if initdb:
+            await safe_create_tables(verbose=verbose)
+
+        if reload:
+            sock = config.bind_socket()
+            ChangeReload(config, target=server.run, sockets=[sock]).run()
+        else:
+            await server.serve()
+
+    run_async(worker())
 
 
 if __name__ == "__main__":
