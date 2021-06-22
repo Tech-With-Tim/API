@@ -1,3 +1,4 @@
-from fastapi import APIRouter
+from .routers.router import router
 
-router = APIRouter(prefix="/v1")
+
+__all__ = (router,)

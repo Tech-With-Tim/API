@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException
 from utils.response import JSONResponse
 from api import versions
 import logging
@@ -12,11 +12,6 @@ class API(FastAPI):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-    async def handle_request(self, request: Request):
-        response = await super().handle_request(request)
-        log.info(f"{request.method} @ {request.base_url} -> {response.status_code}")
-        return response
 
     async def handle_http_exception(self, error: HTTPException):
         """
