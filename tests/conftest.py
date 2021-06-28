@@ -1,4 +1,5 @@
-from launch import load_env, prepare_postgres, safe_create_tables, delete_tables
+from launch import prepare_postgres, safe_create_tables, delete_tables
+from api import config
 
 from fastapi.testclient import TestClient
 from postDB import Model
@@ -24,8 +25,8 @@ def app(event_loop) -> TestClient:
 
 @pytest.fixture(scope="session")
 async def db(event_loop) -> bool:
-    env = load_env("./local.env", ("TEST_DB_URI",))
-    assert await prepare_postgres(db_uri=env["TEST_DB_URI"], loop=event_loop)
+    config.load_env("./local.env")
+    assert await prepare_postgres(db_uri=config.TEST_DB_URI, loop=event_loop)
     await safe_create_tables()
     yield Model.pool
     await delete_tables()

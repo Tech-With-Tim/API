@@ -6,6 +6,9 @@ log = logging.getLogger("Config")
 
 DB_URI: str
 SECRET_KEY: typing.Optional[str]
+TEST_DB_URI: typing.Optional[str]
+DISCORD_CLIENT_ID: typing.Optional[str]
+DISCORD_CLIENT_SECRET: typing.Optional[str]
 
 
 def load_env(path: str):
