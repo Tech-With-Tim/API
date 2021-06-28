@@ -28,13 +28,15 @@ def load_env(path: str):
         if typing.get_origin(v) is None:
             if not (val := os.environ.get(k, None)):
                 log.error(f"Required environment variable {k!r} is missing")
-                raise EnvironmentError(f"Required environment variable {k!r} is missing")
+                raise EnvironmentError(
+                    f"Required environment variable {k!r} is missing"
+                )
 
             globals()[k] = val
             log.debug(f"Loaded {k!r} from environment variables")
         elif typing.get_origin(v) is typing.Union and None in typing.get_args(v):
             if not (val := os.environ.get(k, None)):
                 log.warning(f"Optional environment variable {k!r} is missing")
- 
+
             globals()[k] = val
             log.debug(f"Loaded {k!r} from environment variables")

@@ -183,7 +183,9 @@ def runserver(
     ):
         exit(1)  # Connecting to our postgres server failed.
 
-    server_config = Config("api.app:app", reload=reload, host=host, port=port, debug=debug)
+    server_config = Config(
+        "api.app:app", reload=reload, host=host, port=port, debug=debug
+    )
     server = Server(config=server_config)
 
     async def worker():
