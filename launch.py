@@ -1,14 +1,12 @@
 from uvicorn.supervisors import ChangeReload
-from typing import Any, Coroutine, Iterable
 from uvicorn import Config, Server
+from typing import Any, Coroutine
 from postDB import Model
+from api import config
 import logging
 import asyncio
 import asyncpg
 import click
-import sys
-import os
-
 
 logging.basicConfig(level=logging.INFO)
 
@@ -21,50 +19,6 @@ else:
     loop = uvloop.new_event_loop()
 
 asyncio.set_event_loop(loop)
-
-
-def load_env(fp: str, args: Iterable[str], exit_on_missing: bool = True) -> dict:
-    """
-    Load all env values from `args`.
-
-    :param fp:              Local file to load from
-    :param args:            Arguments to load
-    :param exit_on_missing: Exit on missing env values?
-    """
-    if not (env := {arg: None for arg in args}):
-        return env  # Return if `args` is empty.
-
-    try:
-        with open(fp) as f:
-            env_file = {
-                key.strip(): arg.strip()
-                for (key, arg) in [
-                    line.strip().split("=") for line in f.readlines() if line.strip()
-                ]
-            }
-    except FileNotFoundError:
-        env_file = {}
-
-    for key in args:
-        try:
-            env[key] = os.environ[key]
-        except KeyError:
-            try:
-                env[key] = env_file[key]
-                os.environ[key] = env[key]
-            except KeyError:
-                if exit_on_missing:
-                    sys.stderr.write(
-                        "Found no `%s` var in env, exiting..." % key
-                    ), exit(1)
-
-                sys.stderr.write(
-                    "Found no `%s` var in env, setting as empty string." % key
-                )
-                env[key] = ""
-                os.environ[key] = ""
-
-    return env
 
 
 def run_async(coro: Coroutine) -> Any:
@@ -178,7 +132,7 @@ def _initdb(verbose: bool):
     :param verbose:     Print SQL statements when creating models?
     """
     if not run_async(
-        prepare_postgres(retries=6, interval=10.0, db_uri=ENV["DB_URI"], loop=loop)
+        prepare_postgres(retries=6, interval=10.0, db_uri=config.DB_URI, loop=loop)
     ):
         exit(1)  # Connecting to our postgres server failed.
 
@@ -194,7 +148,7 @@ def _dropdb(verbose: bool):
     :param verbose:     Print SQL statements when dropping models?
     """
     if not run_async(
-        prepare_postgres(retries=6, interval=10.0, db_uri=ENV["DB_URI"], loop=loop)
+        prepare_postgres(retries=6, interval=10.0, db_uri=config.DB_URI, loop=loop)
     ):
         exit(1)  # Connecting to our postgres server failed.
 
@@ -225,12 +179,12 @@ def runserver(
         logging.basicConfig(level=logging.DEBUG)
 
     if not run_async(
-        prepare_postgres(retries=6, interval=10.0, db_uri=ENV["DB_URI"], loop=loop)
+        prepare_postgres(retries=6, interval=10.0, db_uri=config.DB_URI, loop=loop)
     ):
         exit(1)  # Connecting to our postgres server failed.
 
-    config = Config("api.app:app", reload=reload, host=host, port=port, debug=debug)
-    server = Server(config=config)
+    server_config = Config("api.app:app", reload=reload, host=host, port=port, debug=debug)
+    server = Server(config=server_config)
 
     async def worker():
         if initdb:
@@ -246,9 +200,6 @@ def runserver(
 
 
 if __name__ == "__main__":
-    ENV = load_env(
-        fp="./local.env",
-        args=("SECRET_KEY", "DB_URI", "DISCORD_CLIENT_ID", "DISCORD_CLIENT_SECRET"),
-    )
+    config.load_env("./local.env")
 
     cli()
