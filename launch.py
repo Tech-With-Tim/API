@@ -202,6 +202,6 @@ def runserver(
 
 
 if __name__ == "__main__":
-    config.load_env("./local.env")
+    config.load_env()
 
     cli()

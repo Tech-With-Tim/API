@@ -11,7 +11,7 @@ DISCORD_CLIENT_ID: typing.Optional[str]
 DISCORD_CLIENT_SECRET: typing.Optional[str]
 
 
-def load_env(path: str):
+def load_env():
     for config, annotation in __annotations__.copy().items():
         if typing.get_origin(annotation) is None:
             if not (val := os.environ.get(config, None)):
@@ -22,7 +22,9 @@ def load_env(path: str):
 
             globals()[config] = val
             log.debug(f"Loaded {config!r} from environment variables")
-        elif typing.get_origin(annotation) is typing.Union and None in typing.get_args(annotation):
+        elif typing.get_origin(annotation) is typing.Union and None in typing.get_args(
+            annotation
+        ):
             if not (val := os.environ.get(config, None)):
                 log.warning(f"Optional environment variable {config!r} is missing")
 

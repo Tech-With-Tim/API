@@ -25,7 +25,7 @@ def app(event_loop) -> TestClient:
 
 @pytest.fixture(scope="session")
 async def db(event_loop) -> bool:
-    config.load_env("./local.env")
+    config.load_env()
     assert await prepare_postgres(db_uri=config.TEST_DB_URI, loop=event_loop)
     await safe_create_tables()
     yield Model.pool
