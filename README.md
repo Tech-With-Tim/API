@@ -10,15 +10,17 @@
 [![Licence](https://img.shields.io/badge/licence-MIT-blue.svg)](/LICENCE)
 [![Discord](https://discord.com/api/guilds/501090983539245061/widget.png?style=shield)](https://discord.gg/twt)
 [![Test and deploy](https://github.com/Tech-With-Tim/API/workflows/Release%20-%20Test%2C%20Build%20%26%20Redeploy/badge.svg)](https://github.com/Tech-With-Tim/API/actions?query=workflow%3A%22Release+-+Test%2C+Build+%26+Redeploy%22)
+
 <!-- TODO: Lint & Test status -->
 
 </div>
 
-API for the Tech With Tim website using [Quart](https://pgjones.gitlab.io/quart/).
+API for the Tech With Tim website using [FastAPI](https://fastapi.tiangolo.com/).
 
 ## 📝 Table of Contents
 
 <!-- - [🧐 About](#-about) -->
+
 - [🏁 Getting Started](#-getting-started)
   - [Discord application](#discord-application)
   - [Prerequisites](#prerequisites)
@@ -81,10 +83,11 @@ DISCORD_CLIENT_SECRET=
 
 And fill in the variables with the values below:
 
-- ``SECRET_KEY`` is the key used for the JWT token encoding.
-- ``DB_URI`` is the PostgreSQL database URI.
-- ``DISCORD_CLIENT_ID`` is the Discord application ID. Copy it from your Discord application page (see below).
-- ``DISCORD_CLIENT_SECRET`` is the Discord application secret. Copy it from your Discord application page (see below).
+- `POSTGRES_URI` is the PostgreSQL database URI.
+- `SECRET_KEY` is the key used for JWT token encoding.
+- `TEST_POSTGRES_URI` is the PostgreSQL database URI for tests.
+- `DISCORD_CLIENT_ID` is the Discord application ID. Copy it from your Discord application page (see below).
+- `DISCORD_CLIENT_SECRET` is the Discord application secret. Copy it from your Discord application page (see below).
 
 ![Client ID and secret](https://cdn.discordapp.com/attachments/721750194797936823/794646777840140298/unknown.png)
 
@@ -110,9 +113,9 @@ Both the API and the [frontend](https://github.com/Tech-With-Tim/Frontend) can b
 
 - Deploy the API:
 
-    ```sh
-    docker-compose up
-    ```
+  ```sh
+  docker-compose up --build api
+  ```
 
 ## ✅ Linting
 
@@ -135,17 +138,18 @@ To test the API, we use the [pytest](https://docs.pytest.org/en/stable/) framewo
 Run the tests:
 
 ```sh
-pipenv run pytest
+pipenv run test
 ```
 
-**When you contribute, you need to add tests on the features you add.** An example can be seen in [tests/test_index.py](/tests/test_index.py).
+**When you contribute, you need to add tests on the features you add.**
 
 ## ⛏️ Built Using
 
 - [Python](https://www.python.org/) - Language
-- [Quart](https://pgjones.gitlab.io/quart/) - Backend module
+- [FastAPI](https://fastapi.tiangolo.com/) - Backend framework
 - [PostDB](https://github.com/SylteA/postDB) - Database module
-- [pytest-asyncio](https://github.com/pytest-dev/pytest-asyncio) - Test framework (asynchronous version of [pytest](https://docs.pytest.org/en/stable/))
+- [pytest](https://docs.pytest.org/en/stable/) - Testing framework
+- [pytest-asyncio](https://github.com/pytest-dev/pytest-asyncio) - Testing plugin for [pytest](https://docs.pytest.org/en/stable/)
 
 ## ✍️ Authors
 

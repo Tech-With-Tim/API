@@ -19,4 +19,4 @@ RUN pipenv install --deploy --system
 ADD . /app
 
 # Run the API.
-CMD python launch.py runserver --initdb --verbose --debug
+CMD python launch.py runserver --initdb --verbose

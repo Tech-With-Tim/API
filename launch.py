@@ -1,16 +1,12 @@
-from api import app
-
-from typing import Any, Coroutine, Iterable
-from hypercorn.asyncio import serve
-from hypercorn.config import Config
+from uvicorn.supervisors import ChangeReload
+from uvicorn import Config, Server
+from typing import Any, Coroutine
 from postDB import Model
+from api import config
 import logging
 import asyncio
 import asyncpg
 import click
-import sys
-import os
-
 
 logging.basicConfig(level=logging.INFO)
 
@@ -23,50 +19,6 @@ else:
     loop = uvloop.new_event_loop()
 
 asyncio.set_event_loop(loop)
-
-
-def load_env(fp: str, args: Iterable[str], exit_on_missing: bool = True) -> dict:
-    """
-    Load all env values from `args`.
-
-    :param fp:              Local file to load from
-    :param args:            Arguments to load
-    :param exit_on_missing: Exit on missing env values?
-    """
-    if not (env := {arg: None for arg in args}):
-        return env  # Return if `args` is empty.
-
-    try:
-        with open(fp) as f:
-            env_file = {
-                key.strip(): arg.strip()
-                for (key, arg) in [
-                    line.strip().split("=") for line in f.readlines() if line.strip()
-                ]
-            }
-    except FileNotFoundError:
-        env_file = {}
-
-    for key in args:
-        try:
-            env[key] = os.environ[key]
-        except KeyError:
-            try:
-                env[key] = env_file[key]
-                os.environ[key] = env[key]
-            except KeyError:
-                if exit_on_missing:
-                    sys.stderr.write(
-                        "Found no `%s` var in env, exiting..." % key
-                    ), exit(1)
-
-                sys.stderr.write(
-                    "Found no `%s` var in env, setting as empty string." % key
-                )
-                env[key] = ""
-                os.environ[key] = ""
-
-    return env
 
 
 def run_async(coro: Coroutine) -> Any:
@@ -136,6 +88,14 @@ async def safe_create_tables(verbose: bool = False) -> None:
 
     log.info("Attempting to create %s tables." % len(models_ordered))
 
+    with open("snowflake.sql") as f:
+        query = f.read()
+
+        if verbose:
+            print(query)
+
+        await Model.pool.execute(query)
+
     for model in models_ordered:
         await model.create_table(verbose=verbose)
         log.info("Created table %s" % model.__tablename__)
@@ -154,8 +114,16 @@ async def delete_tables(verbose: bool = False):
         await model.drop_table(verbose=verbose)
         log.info("Dropped table %s" % type(model).__tablename__)
 
+    await Model.pool.execute("DROP FUNCTION IF EXISTS create_snowflake")
+    await Model.pool.execute("DROP SEQUENCE IF EXISTS global_snowflake_id_seq")
 
-@app.cli.command(name="initdb")
+
+@click.group()
+def cli():
+    pass
+
+
+@cli.command(name="initdb")
 @click.option("-v", "--verbose", default=False, is_flag=True)
 def _initdb(verbose: bool):
     """
@@ -164,36 +132,43 @@ def _initdb(verbose: bool):
     :param verbose:     Print SQL statements when creating models?
     """
     if not run_async(
-        prepare_postgres(retries=6, interval=10.0, db_uri=ENV["DB_URI"], loop=loop)
+        prepare_postgres(
+            retries=6, interval=10.0, db_uri=config.postgres_uri(), loop=loop
+        )
     ):
         exit(1)  # Connecting to our postgres server failed.
 
     run_async(safe_create_tables(verbose=verbose))
 
 
-@app.cli.command()
+@cli.command(name="dropdb")
 @click.option("-v", "--verbose", default=False, is_flag=True)
-def dropdb(verbose: bool):
+def _dropdb(verbose: bool):
     """
     Drops all tables defined in the app.
 
     :param verbose:     Print SQL statements when dropping models?
     """
     if not run_async(
-        prepare_postgres(retries=6, interval=10.0, db_uri=ENV["DB_URI"], loop=loop)
+        prepare_postgres(
+            retries=6, interval=10.0, db_uri=config.postgres_uri(), loop=loop
+        )
     ):
         exit(1)  # Connecting to our postgres server failed.
 
     run_async(delete_tables(verbose=verbose))
 
 
-@app.cli.command()
+@cli.command()
+@click.option("-p", "--port", default=5000)
 @click.option("-h", "--host", default="127.0.0.1")
-@click.option("-p", "--port", default="5000")
 @click.option("-d", "--debug", default=False, is_flag=True)
 @click.option("-i", "--initdb", default=False, is_flag=True)
+@click.option("-r", "--reload", default=False, is_flag=True)
 @click.option("-v", "--verbose", default=False, is_flag=True)
-def runserver(host: str, port: str, debug: bool, initdb: bool, verbose: bool):
+def runserver(
+    host: str, port: str, debug: bool, initdb: bool, verbose: bool, reload: bool
+):
     """
     Run the Quart app.
 
@@ -203,30 +178,35 @@ def runserver(host: str, port: str, debug: bool, initdb: bool, verbose: bool):
     :param initdb:      Create models before running API?
     :param verbose:     Set logging to DEBUG instead of INFO
     """
+    config.set_debug(debug)
 
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
 
     if not run_async(
-        prepare_postgres(retries=6, interval=10.0, db_uri=ENV["DB_URI"], loop=loop)
+        prepare_postgres(
+            retries=6, interval=10.0, db_uri=config.postgres_uri(), loop=loop
+        )
     ):
         exit(1)  # Connecting to our postgres server failed.
 
-    if initdb:
-        run_async(safe_create_tables(verbose=verbose))
+    server_config = Config(
+        "api.app:app", reload=reload, host=host, port=port, debug=debug
+    )
+    server = Server(config=server_config)
 
-    app.debug = debug
+    async def worker():
+        if initdb:
+            await safe_create_tables(verbose=verbose)
 
-    config = Config()
-    config.bind = [host + ":" + port]
-    run_async(serve(app, config))
+        if reload:
+            sock = config.bind_socket()
+            ChangeReload(config, target=server.run, sockets=[sock]).run()
+        else:
+            await server.serve()
+
+    run_async(worker())
 
 
 if __name__ == "__main__":
-    ENV = load_env(
-        fp="./local.env",
-        args=("SECRET_KEY", "DB_URI", "DISCORD_CLIENT_ID", "DISCORD_CLIENT_SECRET"),
-    )
-    app.config.from_mapping(mapping=ENV)
-
-    app.cli()
+    cli()

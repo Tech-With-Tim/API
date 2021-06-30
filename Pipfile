@@ -6,15 +6,16 @@ verify_ssl = true
 [dev-packages]
 black = "*"
 flake8 = "*"
+requests = "*"
 pre-commit = "*"
 pytest-asyncio = "*"
 
 [packages]
-quart = "*"
-quart-cors = "*"
-postdb = "*"
 pyjwt = "*"
+postdb = "*"
 aiohttp = "*"
+fastapi = "*"
+uvicorn = {extras = ["standard"], version = "*"}
 uvloop = {markers = "platform_system == 'linux'", version = "*"}
 
 [requires]
@@ -24,4 +25,5 @@ python_version = "3.8"
 allow_prereleases = true
 
 [scripts]
+test = "python -m pytest"
 lint = "pre-commit run --all-files"
