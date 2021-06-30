@@ -1,6 +1,5 @@
 version: "3.7"
 services:
-
   db:
     image: postgres:13
     ports:
@@ -30,4 +29,4 @@ services:
       SECRET_KEY: "${SECRET_KEY}"
       DISCORD_CLIENT_ID: "${DISCORD_CLIENT_ID}"
       DISCORD_CLIENT_SECRET: "${DISCORD_CLIENT_SECRET}"
-      DB_URI: postgres://API:API@db:5432/API
+      POSTGRES_URI: postgres://API:API@db:5432/API

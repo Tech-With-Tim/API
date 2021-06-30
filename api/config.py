@@ -4,29 +4,52 @@ import logging
 
 log = logging.getLogger("Config")
 
-DB_URI: str
-SECRET_KEY: typing.Optional[str]
-TEST_DB_URI: typing.Optional[str]
-DISCORD_CLIENT_ID: typing.Optional[str]
-DISCORD_CLIENT_SECRET: typing.Optional[str]
+
+def postgres_uri() -> str:
+    """Connection URI for PostgreSQL database."""
+    value = os.environ.get("POSTGRES_URI")
+
+    if value:
+        return value
+
+    raise EnvironmentError('Required environment variable "POSTGRES_URI" is missing')
 
 
-def load_env():
-    for config, annotation in __annotations__.copy().items():
-        if typing.get_origin(annotation) is None:
-            if not (val := os.environ.get(config, None)):
-                log.error(f"Required environment variable {config!r} is missing")
-                raise EnvironmentError(
-                    f"Required environment variable {config!r} is missing"
-                )
+def secret_key() -> typing.Optional[str]:
+    """Key for validating and creating JWT tokens"""
+    value = os.environ.get("SECRET_KEY", None)
 
-            globals()[config] = val
-            log.debug(f"Loaded {config!r} from environment variables")
-        elif typing.get_origin(annotation) is typing.Union and None in typing.get_args(
-            annotation
-        ):
-            if not (val := os.environ.get(config, None)):
-                log.warning(f"Optional environment variable {config!r} is missing")
+    if not value:
+        log.warning('Optional environment variable "SECRET_KEY" is missing')
 
-            globals()[config] = val
-            log.debug(f"Loaded {config!r} from environment variables")
+    return value
+
+
+def discord_client_id() -> typing.Optional[str]:
+    """The client id of the application used for authentication"""
+    value = os.environ.get("DISCORD_CLIENT_ID", 0)
+
+    if not value:
+        log.warning('Optional environment variable "DISCORD_CLIENT_ID" is missing')
+
+    return value
+
+
+def discord_client_secret() -> typing.Optional[str]:
+    """The client secret of the application used for authentication"""
+    value = os.environ.get("DISCORD_CLIENT_SECRET", "")
+
+    if not value:
+        log.warning('Optional environment variable "DISCORD_CLIENT_SECRET" is missing')
+
+    return value
+
+
+def test_db_uri() -> typing.Optional[str]:
+    """Connection URI for PostgreSQL database for testing."""
+    value = os.environ.get("TEST_DB_URI", "")
+
+    if not value:
+        log.warning('Optional environment variable "TEST_DB_URI" is missing')
+
+    return value

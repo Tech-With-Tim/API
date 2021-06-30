@@ -132,7 +132,9 @@ def _initdb(verbose: bool):
     :param verbose:     Print SQL statements when creating models?
     """
     if not run_async(
-        prepare_postgres(retries=6, interval=10.0, db_uri=config.DB_URI, loop=loop)
+        prepare_postgres(
+            retries=6, interval=10.0, db_uri=config.postgres_uri(), loop=loop
+        )
     ):
         exit(1)  # Connecting to our postgres server failed.
 
@@ -148,7 +150,9 @@ def _dropdb(verbose: bool):
     :param verbose:     Print SQL statements when dropping models?
     """
     if not run_async(
-        prepare_postgres(retries=6, interval=10.0, db_uri=config.DB_URI, loop=loop)
+        prepare_postgres(
+            retries=6, interval=10.0, db_uri=config.postgres_uri(), loop=loop
+        )
     ):
         exit(1)  # Connecting to our postgres server failed.
 
@@ -179,7 +183,9 @@ def runserver(
         logging.basicConfig(level=logging.DEBUG)
 
     if not run_async(
-        prepare_postgres(retries=6, interval=10.0, db_uri=config.DB_URI, loop=loop)
+        prepare_postgres(
+            retries=6, interval=10.0, db_uri=config.postgres_uri(), loop=loop
+        )
     ):
         exit(1)  # Connecting to our postgres server failed.
 
@@ -202,6 +208,4 @@ def runserver(
 
 
 if __name__ == "__main__":
-    config.load_env()
-
     cli()

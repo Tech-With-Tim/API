@@ -84,7 +84,7 @@ DISCORD_CLIENT_SECRET=
 And fill in the variables with the values below:
 
 - `SECRET_KEY` is the key used for JWT token encoding.
-- `DB_URI` is the PostgreSQL database URI.
+- `POSTGRES_URI` is the PostgreSQL database URI.
 - `DISCORD_CLIENT_ID` is the Discord application ID. Copy it from your Discord application page (see below).
 - `DISCORD_CLIENT_SECRET` is the Discord application secret. Copy it from your Discord application page (see below).
 
@@ -145,7 +145,7 @@ pipenv run test
 ## ⛏️ Built Using
 
 - [Python](https://www.python.org/) - Language
-- [FastAPI](https://fastapi.tiangolo.com/) - Backend module
+- [FastAPI](https://fastapi.tiangolo.com/) - Backend framework
 - [PostDB](https://github.com/SylteA/postDB) - Database module
 - [pytest](https://docs.pytest.org/en/stable/) - Testing framework
 - [pytest-asyncio](https://github.com/pytest-dev/pytest-asyncio) - Testing plugin for [pytest](https://docs.pytest.org/en/stable/)
