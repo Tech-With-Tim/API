@@ -45,9 +45,9 @@ def discord_client_secret() -> typing.Optional[str]:
     return value
 
 
-def test_db_uri() -> typing.Optional[str]:
+def test_postgres_uri() -> typing.Optional[str]:
     """Connection URI for PostgreSQL database for testing."""
-    value = os.environ.get("TEST_DB_URI", "")
+    value = os.environ.get("TEST_POSTGRES_URI", "")
 
     if not value:
         log.warning('Optional environment variable "TEST_DB_URI" is missing')
