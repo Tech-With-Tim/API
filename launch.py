@@ -178,6 +178,7 @@ def runserver(
     :param initdb:      Create models before running API?
     :param verbose:     Set logging to DEBUG instead of INFO
     """
+    config.set_debug(debug)
 
     if verbose:
         logging.basicConfig(level=logging.DEBUG)

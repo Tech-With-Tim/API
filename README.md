@@ -83,8 +83,9 @@ DISCORD_CLIENT_SECRET=
 
 And fill in the variables with the values below:
 
-- `SECRET_KEY` is the key used for JWT token encoding.
 - `POSTGRES_URI` is the PostgreSQL database URI.
+- `SECRET_KEY` is the key used for JWT token encoding.
+- `TEST_POSTGRES_URI` is the PostgreSQL database URI for tests.
 - `DISCORD_CLIENT_ID` is the Discord application ID. Copy it from your Discord application page (see below).
 - `DISCORD_CLIENT_SECRET` is the Discord application secret. Copy it from your Discord application page (see below).
 
@@ -113,7 +114,7 @@ Both the API and the [frontend](https://github.com/Tech-With-Tim/Frontend) can b
 - Deploy the API:
 
   ```sh
-  docker-compose up
+  docker-compose up --build api
   ```
 
 ## ✅ Linting
