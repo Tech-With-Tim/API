@@ -6,7 +6,6 @@ verify_ssl = true
 [dev-packages]
 black = "*"
 flake8 = "*"
-requests = "*"
 pre-commit = "*"
 pytest-asyncio = "*"
 httpx = "*"
