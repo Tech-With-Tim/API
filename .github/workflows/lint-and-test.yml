@@ -3,11 +3,10 @@ name: Lint & Test
 on:
   push:
     branches:
-      - '**'
+      - "**"
   pull_request:
     branches:
-      - '**'
-
+      - "**"
 
 jobs:
   lint-and-test:
@@ -28,7 +27,6 @@ jobs:
           - 5432:5432
         # needed because the postgres container does not provide a healthcheck
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-
 
     steps:
       - name: Checkout repository
@@ -58,13 +56,13 @@ jobs:
       # ::error file={filename},line={line},col={col}::{message}
       - name: Run flake8
         run: "flake8 \
-        --format='::error file=%(path)s,line=%(row)d,col=%(col)d::\
-        [flake8] %(code)s: %(text)s'"
+          --format='::error file=%(path)s,line=%(row)d,col=%(col)d::\
+          [flake8] %(code)s: %(text)s'"
 
       - name: Run pytest
         run: |
           pytest
         env:
-          TEST_DB_URI: postgresql://postgres:postgres@localhost:5432/api
+          TEST_POSTGRES_URI: postgresql://postgres:postgres@localhost:5432/api
           # This isn't the real SECRET_KEY but the one used for testing
           SECRET_KEY: nqk8umrpc4f968_2%jz_%r-r2o@v4!21#%)h&-s_7qm150=o@6

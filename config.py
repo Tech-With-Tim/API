@@ -58,6 +58,6 @@ def test_postgres_uri() -> typing.Optional[str]:
     value = os.environ.get("TEST_POSTGRES_URI", "")
 
     if not value:
-        log.warning('Optional environment variable "TEST_DB_URI" is missing')
+        log.warning('Optional environment variable "TEST_POSTGRES_URI" is missing')
 
     return value
