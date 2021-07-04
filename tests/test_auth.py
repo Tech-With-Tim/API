@@ -1,7 +1,7 @@
 import pytest
 from httpx import AsyncClient
 from pytest_mock import MockerFixture
-from api.versions.v1.routers.auth import get_redirect, SCOPES
+from api.versions.v1.routers.auth.helpers import get_redirect, SCOPES
 
 
 @pytest.mark.asyncio
@@ -42,7 +42,7 @@ async def test_callback_discord_error(app: AsyncClient, mocker: MockerFixture):
     async def exchange_code(**kwargs):
         return {"error": "internal server error"}, 500
 
-    mocker.patch("api.versions.v1.routers.auth.exchange_code", new=exchange_code)
+    mocker.patch("api.versions.v1.routers.auth.routes.exchange_code", new=exchange_code)
 
     res = await app.post(
         "/v1/auth/discord/callback",
@@ -57,7 +57,7 @@ async def test_callback_invalid_code(app: AsyncClient, mocker: MockerFixture):
     async def exchange_code(**kwargs):
         return {"error": 'invalid "code" in request'}, 400
 
-    mocker.patch("api.versions.v1.routers.auth.exchange_code", new=exchange_code)
+    mocker.patch("api.versions.v1.routers.auth.routes.exchange_code", new=exchange_code)
     res = await app.post(
         "/v1/auth/discord/callback",
         json={"code": "invalid", "callback": "https://twt.gg"},
@@ -88,8 +88,8 @@ async def test_callback_success(app: AsyncClient, db, mocker: MockerFixture):
             "avatar": "135fa48ba8f26417c4b9818ae2e37aa0",
         }
 
-    mocker.patch("api.versions.v1.routers.auth.get_user", new=get_user)
-    mocker.patch("api.versions.v1.routers.auth.exchange_code", new=exchange_code)
+    mocker.patch("api.versions.v1.routers.auth.routes.get_user", new=get_user)
+    mocker.patch("api.versions.v1.routers.auth.routes.exchange_code", new=exchange_code)
 
     res = await app.post(
         "/v1/auth/discord/callback",
