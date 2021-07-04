@@ -18,7 +18,7 @@ class User(Model):
         :param str username:        The users discord username.
         :param int discriminator:   The users discord discriminator.
         :param str avatar:          The users avatar hash, could be None.
-        :param str type:            The type of User this is.  USER|APP
+        :param str app:             Is this user an `App` ?
     """
 
     id = Column(types.Integer(big=True), unique=True)
@@ -27,7 +27,7 @@ class User(Model):
     username = Column(types.String(length=32), primary_key=True)
     discriminator = Column(types.String(length=4), primary_key=True)
     avatar = Column(types.String, nullable=True)
-    type = Column(types.String, default="USER")
+    app = Column(types.Boolean, default=False)
 
     @classmethod
     async def fetch(cls, id: Union[str, int]) -> Optional["User"]:
@@ -47,7 +47,7 @@ class User(Model):
         username: str,
         discriminator: str,
         avatar: str = None,
-        type: str = "USER",
+        app: bool = False,
     ) -> Optional["User"]:
         """
         Create a new User instance.
@@ -55,14 +55,14 @@ class User(Model):
         Returns `None` if a Unique Violation occurred.
         """
         query = """
-        INSERT INTO users (id, username, discriminator, avatar, type)
+        INSERT INTO users (id, username, discriminator, avatar, app)
         VALUES ($1, $2, $3, $4, $5)
         ON CONFLICT DO NOTHING
         RETURNING *;
         """
 
         record = await cls.pool.fetchrow(
-            query, int(id), username, discriminator, avatar, type
+            query, int(id), username, discriminator, avatar, app
         )
 
         if record is None:
