@@ -9,6 +9,9 @@ flake8 = "*"
 requests = "*"
 pre-commit = "*"
 pytest-asyncio = "*"
+httpx = "*"
+pytest = "*"
+pytest-mock = "*"
 
 [packages]
 pyjwt = "*"

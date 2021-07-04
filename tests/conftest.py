@@ -1,7 +1,7 @@
 from launch import prepare_postgres, safe_create_tables, delete_tables
-from api import config
+import config
 
-from fastapi.testclient import TestClient
+from httpx import AsyncClient
 from postDB import Model
 import asyncio
 import pytest
@@ -17,10 +17,12 @@ def event_loop():
 
 
 @pytest.fixture(scope="session")
-def app(event_loop) -> TestClient:
+async def app(event_loop: asyncio.AbstractEventLoop) -> AsyncClient:
     from api import app
 
-    return TestClient(app)
+    client = AsyncClient(app=app, base_url="http://127.0.0.1")
+    yield client
+    await client.aclose()
 
 
 @pytest.fixture(scope="session")

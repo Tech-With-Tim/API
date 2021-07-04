@@ -2,17 +2,15 @@ import os
 import typing
 import logging
 
-__debug = False
 log = logging.getLogger("Config")
 
 
-def debug():
-    return __debug
+def debug() -> bool:
+    return bool(os.environ.get("DEBUG", False))
 
 
-def set_debug(value):
-    global __debug
-    __debug = value
+def set_debug(value: bool):
+    os.environ["DEBUG"] = str(value)
 
 
 def postgres_uri() -> str:
