@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, HttpUrl
 
 
 class CallbackResponse(BaseModel):
@@ -9,4 +9,4 @@ class CallbackResponse(BaseModel):
 
 class CallbackBody(BaseModel):
     code: str
-    callback: str
+    callback: HttpUrl

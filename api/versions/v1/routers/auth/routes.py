@@ -4,7 +4,7 @@ import config
 
 from api.models import User, Token
 
-from fastapi.params import Param
+from pydantic import HttpUrl
 from fastapi import APIRouter, Request
 from datetime import datetime, timedelta
 from fastapi.responses import RedirectResponse
@@ -13,7 +13,6 @@ from .helpers import (
     SCOPES,
     get_user,
     get_redirect,
-    is_valid_url,
     exchange_code,
     format_scopes,
 )
@@ -33,19 +32,9 @@ router = APIRouter(prefix="/auth")
         },
     },
 )
-async def redirect_to_discord_oauth_portal(
-    request: Request, callback: str = Param(None)
-):
+async def redirect_to_discord_oauth_portal(request: Request, callback: HttpUrl = None):
     """Redirect user to correct oauth link depending on specified domain and requested scopes."""
     callback = callback or (str(request.base_url) + "v1/auth/discord/callback")
-
-    if isinstance(callback, list):
-        callback = callback[0]
-
-    if not is_valid_url(callback):
-        return utils.JSONResponse(
-            {"error": "Bad Request", "message": "Not a well formed redirect URL."}, 400
-        )
 
     return RedirectResponse(
         get_redirect(callback=callback, scopes=SCOPES), status_code=307
@@ -61,7 +50,7 @@ if config.debug():
         response_description="GET Discord OAuth Callback",
     )
     async def get_discord_oauth_callback(
-        request: Request, code: str = Param(...), callback: str = Param(None)
+        request: Request, code: str, callback: HttpUrl = None
     ):
         """
         Callback endpoint for finished discord authorization flow.
@@ -80,11 +69,6 @@ async def post_discord_oauth_callback(data: CallbackBody):
     """
     Callback endpoint for finished discord authorization flow.
     """
-    if not is_valid_url(data.callback):
-        return utils.JSONResponse(
-            {"error": "Bad Request", "message": "Not a well formed redirect URL."}, 400
-        )
-
     access_data, status_code = await exchange_code(
         code=data.code, scope=format_scopes(SCOPES), redirect_uri=data.callback
     )
@@ -100,7 +84,7 @@ async def post_discord_oauth_callback(data: CallbackBody):
                 400,
             )
 
-        if 200 < status_code >= 300:
+        if status_code < 200 or status_code >= 300:
             return utils.JSONResponse(
                 {
                     "error": "Bad Gateway",

@@ -2,7 +2,7 @@ import config
 import typing
 import aiohttp
 
-from urllib.parse import quote_plus, urlparse
+from urllib.parse import quote_plus
 
 DISCORD_ENDPOINT = "https://discord.com/api"
 SCOPES = ["identify"]
@@ -57,9 +57,3 @@ def get_redirect(callback: str, scopes: typing.List[str]) -> str:
         redirect_uri=quote_plus(callback),
         client_id=config.discord_client_id(),
     )
-
-
-def is_valid_url(string: str) -> bool:
-    """Returns boolean describing if the provided string is a url"""
-    result = urlparse(string)
-    return all((result.scheme, result.netloc))
