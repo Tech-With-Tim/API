@@ -24,13 +24,6 @@ router = APIRouter(prefix="/auth")
     "/discord/redirect",
     tags=["auth"],
     status_code=307,
-    responses={
-        307: {"description": "Successful Redirect", "content": {"text/html": {}}},
-        400: {
-            "description": "Invalid Callback url",
-            "content": {"application/json": {}},
-        },
-    },
 )
 async def redirect_to_discord_oauth_portal(request: Request, callback: HttpUrl = None):
     """Redirect user to correct oauth link depending on specified domain and requested scopes."""

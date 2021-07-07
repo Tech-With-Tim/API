@@ -22,10 +22,7 @@ async def test_redirect_default_url(app: AsyncClient):
 @pytest.mark.asyncio
 async def test_redirect_invalid_callback(app: AsyncClient):
     res = await app.get("/v1/auth/discord/redirect?callback=okand")
-    assert res.json() == {
-        "error": "Bad Request",
-        "message": "Not a well formed redirect URL.",
-    }
+    assert res.status_code == 422
 
 
 @pytest.mark.asyncio
