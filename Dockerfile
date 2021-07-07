@@ -11,9 +11,8 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install gcc -y
 
-COPY Pipfile Pipfile.lock ./
-
 RUN pip install pipenv
+COPY Pipfile Pipfile.lock ./
 RUN pipenv install --deploy --system
 
 ADD . /app
