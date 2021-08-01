@@ -163,10 +163,13 @@ def _dropdb(verbose: bool):
 @click.option("-h", "--host", default="127.0.0.1")
 @click.option("-d", "--debug", default=False, is_flag=True)
 @click.option("-i", "--initdb", default=False, is_flag=True)
+@click.option("-r", "--resetdb", default=False, is_flag=True)
 @click.option("-v", "--verbose", default=False, is_flag=True)
-def runserver(host: str, port: str, debug: bool, initdb: bool, verbose: bool):
+def runserver(
+    host: str, port: str, debug: bool, initdb: bool, resetdb: bool, verbose: bool
+):
     """
-    Run the Quart app.
+    Run the FastAPI Server.
 
     :param host:        Host to run it on.
     :param port:        Port to run it on.
@@ -191,7 +194,10 @@ def runserver(host: str, port: str, debug: bool, initdb: bool, verbose: bool):
 
     async def worker():
         if initdb:
-            await safe_create_tables(verbose=verbose)
+            run_async(safe_create_tables(verbose=verbose))
+        elif resetdb:
+            run_async(delete_tables(verbose=verbose))
+            run_async(safe_create_tables(verbose=verbose))
 
         await server.serve()
 
