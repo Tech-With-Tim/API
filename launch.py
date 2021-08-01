@@ -194,10 +194,10 @@ def runserver(
 
     async def worker():
         if initdb:
-            run_async(safe_create_tables(verbose=verbose))
+            await safe_create_tables(verbose=verbose)
         elif resetdb:
-            run_async(delete_tables(verbose=verbose))
-            run_async(safe_create_tables(verbose=verbose))
+            await delete_tables(verbose=verbose)
+            await safe_create_tables(verbose=verbose)
 
         await server.serve()
 
