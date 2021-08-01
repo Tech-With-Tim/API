@@ -40,7 +40,7 @@ async def on_shutdown():
     """Closes the app-wide ClientSession"""
     from api import http_session
 
-    if http_session.session is not None and not http_session.closed:
+    if http_session.session is not None and not http_session.session.closed:
         await http_session.session.close()
 
 
