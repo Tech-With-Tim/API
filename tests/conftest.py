@@ -20,9 +20,10 @@ def event_loop():
 async def app(event_loop: asyncio.AbstractEventLoop) -> AsyncClient:
     from api import app
 
-    client = AsyncClient(app=app, base_url="http://127.0.0.1")
-    yield client
-    await client.aclose()
+    async with AsyncClient(app=app, base_url="http://127.0.0.1:8000") as client:
+        await app.router.startup()
+        yield client
+        await app.router.shutdown()
 
 
 @pytest.fixture(scope="session")

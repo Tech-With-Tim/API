@@ -2,16 +2,16 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, HTTPException
 from utils.response import JSONResponse
+from aiohttp import ClientSession
 from api import versions
 import logging
-import config
 
 
 log = logging.getLogger()
 
 
 app = FastAPI()
-config.set_debug(app.debug)
+app.router.prefix = "/api"
 app.router.default_response_class = JSONResponse
 
 origins = ["*"]  # TODO: change origins later
@@ -23,6 +23,25 @@ app.add_middleware(
     expose_headers=["Location"],
 )
 app.include_router(versions.v1.router)
+
+
+@app.on_event("startup")
+async def on_startup():
+    """Creates a ClientSession to be used app-wide."""
+    from api import session
+
+    if session is None or session.closed:
+        session = ClientSession()
+        log.info("Set http_session.")
+
+
+@app.on_event("shutdown")
+async def on_shutdown():
+    """Closes the app-wide ClientSession"""
+    from api import session
+
+    if session is not None and not session.closed:
+        await session.close()
 
 
 @app.exception_handler(RequestValidationError)

@@ -12,7 +12,6 @@ services:
 
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      - ./postgres/init.sql:/docker-entrypoint-initdb.d/
 
   api:
     build:
@@ -22,8 +21,6 @@ services:
       - "5000:5000"
     restart: unless-stopped
     depends_on:
-      - postgres
-    links:
       - postgres
     environment:
       SECRET_KEY: "${SECRET_KEY}"
