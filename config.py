@@ -1,6 +1,6 @@
-import os
-import typing
 import logging
+import typing
+import os
 
 
 log = logging.getLogger("Config")

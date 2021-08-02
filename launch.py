@@ -1,11 +1,12 @@
-from uvicorn import Config, Server
-from typing import Any, Coroutine
-from postDB import Model
 import logging
 import asyncio
 import asyncpg
 import config
 import click
+
+from uvicorn import Config, Server
+from typing import Any, Coroutine
+from postDB import Model
 
 logging.basicConfig(level=logging.INFO)
 

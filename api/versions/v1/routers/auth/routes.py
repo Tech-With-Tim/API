@@ -2,12 +2,12 @@ import jwt
 import utils
 import config
 
-from api.models import User, Token
-
 from pydantic import HttpUrl
 from fastapi import APIRouter, Request
 from datetime import datetime, timedelta
 from fastapi.responses import RedirectResponse
+
+from api.models import User, Token
 from .models import CallbackBody, CallbackResponse
 from .helpers import (
     SCOPES,

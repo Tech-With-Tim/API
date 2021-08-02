@@ -1,8 +1,9 @@
 import config
 import typing
 
-from api.http_session import session
 from urllib.parse import quote_plus
+
+from api.http_session import session
 
 DISCORD_ENDPOINT = "https://discord.com/api"
 SCOPES = ["identify"]

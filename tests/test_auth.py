@@ -1,4 +1,5 @@
 import pytest
+
 from httpx import AsyncClient
 from pytest_mock import MockerFixture
 from api.versions.v1.routers.auth.helpers import get_redirect, SCOPES

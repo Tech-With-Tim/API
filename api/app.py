@@ -1,14 +1,14 @@
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, HTTPException
-from utils.response import JSONResponse
 from aiohttp import ClientSession
+
+from utils.response import JSONResponse
 from api import versions
+
 import logging
 
-
 log = logging.getLogger()
-
 
 app = FastAPI()
 app.router.prefix = "/api"
