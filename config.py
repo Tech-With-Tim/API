@@ -1,16 +1,18 @@
-import os
-import typing
 import logging
+import typing
+import os
 
-__debug = False
+
 log = logging.getLogger("Config")
 
+__debug = False
 
-def debug():
+
+def debug() -> bool:
     return __debug
 
 
-def set_debug(value):
+def set_debug(value: bool):
     global __debug
     __debug = value
 
@@ -60,6 +62,6 @@ def test_postgres_uri() -> typing.Optional[str]:
     value = os.environ.get("TEST_POSTGRES_URI", "")
 
     if not value:
-        log.warning('Optional environment variable "TEST_DB_URI" is missing')
+        log.warning('Optional environment variable "TEST_POSTGRES_URI" is missing')
 
     return value

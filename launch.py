@@ -1,12 +1,12 @@
-from uvicorn.supervisors import ChangeReload
-from uvicorn import Config, Server
-from typing import Any, Coroutine
-from postDB import Model
-from api import config
 import logging
 import asyncio
 import asyncpg
+import config
 import click
+
+from uvicorn import Config, Server
+from typing import Any, Coroutine
+from postDB import Model
 
 logging.basicConfig(level=logging.INFO)
 
@@ -64,7 +64,7 @@ async def prepare_postgres(
         except (ConnectionRefusedError,):
             log.warning(
                 "[!] Failed attempt #%s/%s, trying again in %ss"
-                % (i, retries - i, interval)
+                % (i, retries, interval)
             )
 
             if i == retries:
@@ -164,13 +164,13 @@ def _dropdb(verbose: bool):
 @click.option("-h", "--host", default="127.0.0.1")
 @click.option("-d", "--debug", default=False, is_flag=True)
 @click.option("-i", "--initdb", default=False, is_flag=True)
-@click.option("-r", "--reload", default=False, is_flag=True)
+@click.option("-r", "--resetdb", default=False, is_flag=True)
 @click.option("-v", "--verbose", default=False, is_flag=True)
 def runserver(
-    host: str, port: str, debug: bool, initdb: bool, verbose: bool, reload: bool
+    host: str, port: str, debug: bool, initdb: bool, resetdb: bool, verbose: bool
 ):
     """
-    Run the Quart app.
+    Run the FastAPI Server.
 
     :param host:        Host to run it on.
     :param port:        Port to run it on.
@@ -190,20 +190,17 @@ def runserver(
     ):
         exit(1)  # Connecting to our postgres server failed.
 
-    server_config = Config(
-        "api.app:app", reload=reload, host=host, port=port, debug=debug
-    )
+    server_config = Config("api.app:app", host=host, port=port, debug=debug)
     server = Server(config=server_config)
 
     async def worker():
         if initdb:
             await safe_create_tables(verbose=verbose)
+        elif resetdb:
+            await delete_tables(verbose=verbose)
+            await safe_create_tables(verbose=verbose)
 
-        if reload:
-            sock = config.bind_socket()
-            ChangeReload(config, target=server.run, sockets=[sock]).run()
-        else:
-            await server.serve()
+        await server.serve()
 
     run_async(worker())
 

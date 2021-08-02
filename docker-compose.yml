@@ -4,15 +4,14 @@ services:
     image: postgres:13
     ports:
       - "127.0.0.1:7777:5432"
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_USER: API
       POSTGRES_PASSWORD: API
       POSTGRES_DB: API
 
     volumes:
-      - /var/lib/postgresql/data
-      - ./postgres/init.sql:/docker-entrypoint-initdb.d/
+      - postgres-data:/var/lib/postgresql/data
 
   api:
     build:
@@ -20,13 +19,14 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5000:5000"
-    restart: always
+    restart: unless-stopped
     depends_on:
-      - db
-    links:
-      - db
+      - postgres
     environment:
       SECRET_KEY: "${SECRET_KEY}"
       DISCORD_CLIENT_ID: "${DISCORD_CLIENT_ID}"
       DISCORD_CLIENT_SECRET: "${DISCORD_CLIENT_SECRET}"
       POSTGRES_URI: postgres://API:API@postgres:5432/API
+
+volumes:
+  postgres-data:

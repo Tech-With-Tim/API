@@ -1,0 +1,3 @@
+[submodule "api/models"]
+	path = api/models
+	url = https://github.com/Tech-With-Tim/models
