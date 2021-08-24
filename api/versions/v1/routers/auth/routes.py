@@ -27,7 +27,7 @@ router = APIRouter(prefix="/auth")
 )
 async def redirect_to_discord_oauth_portal(request: Request, callback: HttpUrl = None):
     """Redirect user to correct oauth link depending on specified domain and requested scopes."""
-    callback = callback or (str(request.base_url) + "v1/auth/discord/callback")
+    callback = callback or (str(request.base_url) + "api/v1/auth/discord/callback")
 
     return RedirectResponse(
         get_redirect(callback=callback, scopes=SCOPES), status_code=307
@@ -48,8 +48,10 @@ if config.debug():
         """
         Callback endpoint for finished discord authorization flow.
         """
-        callback = callback or (str(request.base_url) + "v1/auth/discord/callback")
-        return await post_discord_oauth_callback(code, callback)
+        callback = callback or (str(request.base_url) + "api/v1/auth/discord/callback")
+        return await post_discord_oauth_callback(
+            CallbackBody(code=code, callback=callback)
+        )
 
 
 @router.post(
