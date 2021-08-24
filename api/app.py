@@ -28,20 +28,20 @@ app.include_router(versions.v1.router)
 @app.on_event("startup")
 async def on_startup():
     """Creates a ClientSession to be used app-wide."""
-    from api import http_session
+    from api.services import http
 
-    if http_session.session is None or http_session.session.closed:
-        http_session.session = ClientSession()
+    if http.session is None or http.session.closed:
+        http.session = ClientSession()
         log.info("Set http_session.")
 
 
 @app.on_event("shutdown")
 async def on_shutdown():
     """Closes the app-wide ClientSession"""
-    from api import http_session
+    from api.services import http
 
-    if http_session.session is not None and not http_session.session.closed:
-        await http_session.session.close()
+    if http.session is not None and not http.session.closed:
+        await http.session.close()
 
 
 @app.exception_handler(RequestValidationError)

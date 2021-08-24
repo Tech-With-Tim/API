@@ -1,9 +1,9 @@
 import config
 import typing
 
+from api.services import http
 from urllib.parse import quote_plus
 
-from api.http_session import session
 
 DISCORD_ENDPOINT = "https://discord.com/api"
 SCOPES = ["identify"]
@@ -13,7 +13,7 @@ async def exchange_code(
     *, code: str, scope: str, redirect_uri: str, grant_type: str = "authorization_code"
 ) -> typing.Tuple[dict, int]:
     """Exchange discord oauth code for access and refresh tokens."""
-    async with session.post(
+    async with http.session.post(
         "%s/v6/oauth2/token" % DISCORD_ENDPOINT,
         data=dict(
             code=code,
@@ -30,7 +30,7 @@ async def exchange_code(
 
 async def get_user(access_token: str) -> dict:
     """Coroutine to fetch User data from discord using the users `access_token`"""
-    async with session.get(
+    async with http.session.get(
         "%s/v6/users/@me" % DISCORD_ENDPOINT,
         headers={"Authorization": "Bearer %s" % access_token},
     ) as response:

@@ -15,7 +15,7 @@ async def test_redirect_default_code(app: AsyncClient):
 async def test_redirect_default_url(app: AsyncClient):
     res = await app.get("/api/v1/auth/discord/redirect", allow_redirects=False)
     assert res.headers.get("Location") == get_redirect(
-        callback="http://127.0.0.1:8000/v1/auth/discord/callback",
+        callback="http://127.0.0.1:8000/api/v1/auth/discord/callback",
         scopes=SCOPES,
     )
 
