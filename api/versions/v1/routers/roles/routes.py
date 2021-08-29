@@ -193,18 +193,18 @@ async def delete_role(id: int, token=Depends(access_token)):
         WITH deleted AS (
             DELETE FROM roles r
                 WHERE r.id = $1
-                RETURNING r.position
+                RETURNING r.id
         ),
              to_update AS (
-                 SELECT r.id
-                 FROM roles r
-                 WHERE r.position > (SELECT position FROM deleted)
-             ),
-             updated AS (
-                 UPDATE roles r SET position = r.position - 1
-                     WHERE r.id IN (SELECT id FROM to_update)
+                SELECT r.id,
+                    ROW_NUMBER() OVER (ORDER BY r.position) AS position
+                FROM roles r
+                 WHERE r.id != (SELECT id FROM deleted)
              )
-        SELECT 1;
+        UPDATE roles r SET
+            position = tu.position
+        FROM to_update tu
+        WHERE r.id = tu.id
     """
     await Role.pool.execute(query, id)
 
