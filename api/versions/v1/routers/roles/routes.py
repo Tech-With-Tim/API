@@ -117,7 +117,7 @@ async def update_role(id: int, body: UpdateRoleBody, token=Depends(access_token)
         raise HTTPException(403, "Missing Permissions")
 
     data = body.dict(exclude_unset=True)
-    if not utils.has_permission(user_permissions, data["permissions"]):
+    if not utils.has_permission(user_permissions, body.permissions):
         raise HTTPException(403, "Missing Permissions")
 
     if (
