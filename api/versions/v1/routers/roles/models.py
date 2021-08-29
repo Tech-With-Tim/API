@@ -15,13 +15,13 @@ class DetailedRoleResponse(RoleResponse):
 
 
 class NewRoleBody(BaseModel):
-    name: str = Field(object, min_length=4, max_length=64)
-    color: int = Field(None, le=0xFFFFFF, ge=0)
-    permissions: int = Field(0)
+    name: str = Field(..., min_length=4, max_length=64)
+    color: Optional[int] = Field(None, le=0xFFFFFF, ge=0)
+    permissions: Optional[int] = Field(0, ge=0)
 
 
 class UpdateRoleBody(BaseModel):
-    name: str = Field(object, min_length=4, max_length=64)
-    color: int = Field(object, le=0xFFFFFF, ge=0)
-    permissions: int = Field(object)
-    position: int = Field(object)
+    name: str = Field("", min_length=4, max_length=64)
+    color: Optional[int] = Field(None, le=0xFFFFFF, ge=0)
+    permissions: int = Field(0, ge=0)
+    position: int = Field(0, ge=0)

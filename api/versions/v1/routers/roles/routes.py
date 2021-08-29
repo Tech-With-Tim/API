@@ -89,9 +89,7 @@ async def create_role(body: NewRoleBody, token: str = Depends(access_token)):
 
 
 @router.patch("/{id}", tags=["roles"])
-async def update_role(
-    id: int, body: UpdateRoleBody, token: str = Depends(access_token)
-):
+async def update_role(id: int, body: UpdateRoleBody, token=Depends(access_token)):
     role = await Role.fetch(id)
     if not role:
         raise HTTPException(404, "Role Not Found")
@@ -118,11 +116,13 @@ async def update_role(
     ):
         raise HTTPException(403, "Missing Permissions")
 
-    data = body.dict()
+    data = body.dict(exclude_unset=True)
     if not utils.has_permission(user_permissions, data["permissions"]):
         raise HTTPException(403, "Missing Permissions")
 
-    if (position := data.pop("position")) != object and position != role.position:
+    if (
+        position := data.pop("position", None)
+    ) is not None and position != role.position:
         if position <= top_role["position"]:
             raise HTTPException(403, "Missing Permissions")
 
@@ -150,10 +150,9 @@ async def update_role(
         """
         await Role.pool.execute(query)
 
-    new_data = list(filter(lambda key: data[key] != object, data))
-    if new_data:
+    if data:
         query = "UPDATE ROLES SET "
-        query += ", ".join("%s = %d" % (key, i) for i, key in enumerate(new_data, 2))
+        query += ", ".join("%s = %d" % (key, i) for i, key in enumerate(data, 2))
         query += " WHERE id = $1"
 
         await Role.pool.execute(query, id, *data.values())
