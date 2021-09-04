@@ -1,10 +1,11 @@
 import utils
+import asyncpg
 
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException, Query
+from typing import List, Union
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 
-from api.models import Role
-from api.access_token import access_token
+from api.models import Role, UserRole
+from api.dependencies import access_token
 from api.models.permissions import ManageRoles
 from api.versions.v1.routers.roles.models import (
     NewRoleBody,
@@ -57,7 +58,7 @@ async def fetch_role(id: int):
 
 
 @router.post("", tags=["roles"], response_model=RoleResponse)
-async def create_role(body: NewRoleBody, token: str = Depends(access_token)):
+async def create_role(body: NewRoleBody, token=Depends(access_token)):
     query = """
         WITH user_roles AS (
             SELECT role_id FROM userroles WHERE user_id = $1
@@ -109,7 +110,7 @@ async def update_role(id: int, body: UpdateRoleBody, token=Depends(access_token)
     for record in records:
         user_permissions |= record["permissions"]
 
-    top_role = max(records, key=lambda record: record["position"])
+    top_role = min(records, key=lambda record: record["position"])
     if (
         not utils.has_permission(user_permissions, ManageRoles())
         or top_role["position"] >= role.position
@@ -181,7 +182,7 @@ async def delete_role(id: int, token=Depends(access_token)):
     for record in records:
         user_permissions |= record["permissions"]
 
-    top_role = max(records, key=lambda record: record["position"])
+    top_role = min(records, key=lambda record: record["position"])
     if (
         not utils.has_permission(user_permissions, ManageRoles())
         or top_role["position"] >= role.position
@@ -208,3 +209,76 @@ async def delete_role(id: int, token=Depends(access_token)):
     await Role.pool.execute(query, id)
 
     return utils.JSONResponse(status_code=204)
+
+
+@router.put("/{role_id}/{member_id}", tags=["roles"])
+async def add_member_to_role(
+    role_id: int, member_id: int, token=Depends(access_token)
+) -> Union[Response, utils.JSONResponse]:
+    role = await Role.fetch(role_id)
+    if not role:
+        raise HTTPException(404, "Role Not Found")
+
+    query = """
+        WITH user_roles AS (
+            SELECT role_id FROM userroles WHERE user_id = $1
+        )
+            SELECT position, permissions FROM roles WHERE id IN (SELECT * FROM user_roles);
+    """
+
+    records = await Role.pool.fetch(query, token["uid"])
+    if not records:
+        raise HTTPException(403, "Missing Permissions")
+
+    user_permissions = 0
+    for record in records:
+        user_permissions |= record["permissions"]
+
+    top_role = min(records, key=lambda record: record["position"])
+    if (
+        not utils.has_permission(user_permissions, ManageRoles())
+        or top_role["position"] >= role.position
+    ):
+        raise HTTPException(403, "Missing Permissions")
+
+    try:
+        await UserRole.create(member_id, role_id)
+    except asyncpg.exceptions.UniqueViolationError:
+        raise HTTPException(409, "User already has the role")
+
+    return Response(status_code=204, content="")
+
+
+@router.delete("/{role_id}/{member_id}", tags=["roles"])
+async def remove_member_from_role(
+    role_id: int, member_id: int, token=Depends(access_token)
+) -> Union[Response, utils.JSONResponse]:
+    role = await Role.fetch(role_id)
+    if not role:
+        raise HTTPException(404, "Role Not Found")
+
+    query = """
+        WITH user_roles AS (
+            SELECT role_id FROM userroles WHERE user_id = $1
+        )
+            SELECT position, permissions FROM roles WHERE id IN (SELECT * FROM user_roles);
+    """
+
+    records = await Role.pool.fetch(query, token["uid"])
+    if not records:
+        raise HTTPException(403, "Missing Permissions")
+
+    user_permissions = 0
+    for record in records:
+        user_permissions |= record["permissions"]
+
+    top_role = min(records, key=lambda record: record["position"])
+    if (
+        not utils.has_permission(user_permissions, ManageRoles())
+        or top_role["position"] >= role.position
+    ):
+        raise HTTPException(403, "Missing Permissions")
+
+    await UserRole.delete(member_id, role_id)
+
+    return Response(status_code=204, content="")
