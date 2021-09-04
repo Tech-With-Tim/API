@@ -10,7 +10,12 @@ import logging
 
 log = logging.getLogger()
 
-app = FastAPI()
+app = FastAPI(
+    title="Tech With Tim",
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+    openapi_url="/api/docs/openapi.json",
+)
 app.router.prefix = "/api"
 app.router.default_response_class = JSONResponse
 
