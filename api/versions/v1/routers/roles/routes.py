@@ -86,7 +86,7 @@ async def create_role(body: NewRoleBody, token=Depends(access_token)):
     """
     record = await Role.pool.fetchrow(query, body.name, body.color, body.permissions)
 
-    return dict(record)
+    return utils.JSONResponse(status_code=201, content=dict(record))
 
 
 @router.patch("/{id}", tags=["roles"])
