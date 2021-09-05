@@ -12,7 +12,7 @@ from api.models.permissions import BasePermission
 
 def authorization(app_only: bool = False, user_only: bool = False):
     if app_only and user_only:
-        raise ValueError("can't set both app_only and user_only to True")
+        raise ValueError("app_only and user_only are mutually exclusive")
 
     async def inner(request: Request):
         """Attempts to locate and decode JWT token."""
