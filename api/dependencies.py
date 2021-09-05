@@ -50,10 +50,18 @@ def authorization(app_only: bool = False, user_only: bool = False):
 async def has_permissions(permissions: List[Union[int, BasePermission]]):
     async def inner(token=authorization()):
         query = """
-            WITH user_roles AS (
-                SELECT role_id FROM userroles WHERE user_id = $1
+            WITH userroles AS (
+                SELECT ur.role_id
+                FROM userroles ur
+                WHERE ur.user_id = $1
             )
-                SELECT position, permissions FROM roles WHERE id IN (SELECT * FROM user_roles);
+            SELECT r.position
+                r.permissions
+            FROM roles r
+            WHERE r.id IN (
+                SELECT role_id
+                FROM userroles
+            )
         """
 
         records = await Role.pool.fetch(query, token["uid"])

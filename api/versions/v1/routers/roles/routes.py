@@ -2,7 +2,7 @@ import utils
 import asyncpg
 
 from typing import List, Union
-from fastapi import APIRouter, HTTPException, Query, Response
+from fastapi import APIRouter, HTTPException, Response
 
 from api.models import Role, UserRole
 from api.dependencies import authorization
@@ -19,18 +19,13 @@ router = APIRouter(prefix="/roles")
 
 
 @router.get("", tags=["roles"], response_model=List[RoleResponse])
-async def fetch_all_roles(
-    limit: int = Query(None),
-    offset: int = Query(None),
-):
+async def fetch_all_roles():
     query = """
-        SELECT
-            *, id::TEXT
-        FROM roles
-        LIMIT $1
-        OFFSET $2;
+        SELECT *,
+               r.id::TEXT
+          FROM roles r
     """
-    records = await Role.pool.fetch(query, limit, offset)
+    records = await Role.pool.fetch(query)
 
     return [dict(record) for record in records]
 
@@ -38,19 +33,17 @@ async def fetch_all_roles(
 @router.get("/{id}", tags=["roles"], response_model=DetailedRoleResponse)
 async def fetch_role(id: int):
     query = """
-        SELECT
-            *,
-            id::TEXT,
-            COALESCE(
-                (
-                    SELECT
-                        json_agg(user_id::TEXT)
+    SELECT *,
+        id::TEXT,
+        COALESCE(
+            (
+                SELECT json_agg(ur.user_id::TEXT)
                     FROM userroles ur
-                    WHERE ur.role_id = $1
-                ), '[]'
-            ) members
-        FROM roles r
-        WHERE r.id = $1;
+                    WHERE ur.role_id = r.id
+            ), '[]'
+        ) members
+      FROM roles r
+     WHERE r.id = $1
     """
     record = await Role.pool.fetchrow(query, id)
 
@@ -84,6 +77,7 @@ async def create_role(body: NewRoleBody, token=authorization()):
             VALUES (create_snowflake(), $1, $2, $3, (SELECT COUNT(*) FROM roles) + 1)
             RETURNING *;
     """
+
     try:
         record = await Role.pool.fetchrow(
             query, body.name, body.color, body.permissions
