@@ -389,5 +389,5 @@ async def test_update_role_positions_down(
             manage_roles_role.id,
             user.id,
         )
-        for i in roles:
-            await db.execute("DELETE FROM roles WHERE id = $1", int(role["id"]))
+        for role in roles:
+            await db.execute("DELETE FROM roles WHERE id = $1", role.id)
