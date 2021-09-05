@@ -70,10 +70,10 @@ async def fetch_role(id: int):
     tags=["roles"],
     response_model=RoleResponse,
     responses={
-        409: {"description": "Role with that name already exists"},
         201: {"description": "Role Created Successfully"},
-        403: {"description": "Missing Permissions"},
         401: {"description": "Unauthorized"},
+        403: {"description": "Missing Permissions"},
+        409: {"description": "Role with that name already exists"},
         422: {"description": "Invalid body"},
     },
     status_code=201,
@@ -129,11 +129,11 @@ async def create_role(body: NewRoleBody, token=authorization()):
     "/{id}",
     tags=["roles"],
     responses={
-        409: {"description": "Role with that name already exists"},
         204: {"description": "Role Updated Successfully"},
+        401: {"description": "Unauthorized"},
         403: {"description": "Missing Permissions"},
         404: {"description": "Role not found"},
-        401: {"description": "Unauthorized"},
+        409: {"description": "Role with that name already exists"},
         422: {"description": "Invalid body"},
     },
     status_code=204,
@@ -230,9 +230,9 @@ async def update_role(id: int, body: UpdateRoleBody, token=authorization()):
     tags=["roles"],
     responses={
         204: {"description": "Role Updated Successfully"},
+        401: {"description": "Unauthorized"},
         403: {"description": "Missing Permissions"},
         404: {"description": "Role not found"},
-        401: {"description": "Unauthorized"},
     },
     status_code=204,
 )
@@ -300,10 +300,10 @@ async def delete_role(id: int, token=authorization()):
     tags=["roles"],
     responses={
         204: {"description": "Role assigned to member"},
-        409: {"description": "User already has the role"},
-        404: {"description": "Role or member not found"},
-        403: {"description": "Missing Permissions"},
         401: {"description": "Unauthorized"},
+        403: {"description": "Missing Permissions"},
+        404: {"description": "Role or member not found"},
+        409: {"description": "User already has the role"},
     },
     status_code=204,
 )
@@ -359,9 +359,9 @@ async def add_member_to_role(
     tags=["roles"],
     responses={
         204: {"description": "Role removed from member"},
+        401: {"description": "Unauthorized"},
         403: {"description": "Missing Permissions"},
         404: {"description": "Role not found"},
-        401: {"description": "Unauthorized"},
     },
     status_code=204,
 )
