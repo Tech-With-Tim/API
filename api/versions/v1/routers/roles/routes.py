@@ -2,10 +2,10 @@ import utils
 import asyncpg
 
 from typing import List, Union
-from fastapi import APIRouter, Depends, HTTPException, Query, Response
+from fastapi import APIRouter, HTTPException, Query, Response
 
 from api.models import Role, UserRole
-from api.dependencies import access_token
+from api.dependencies import authorization
 from api.models.permissions import ManageRoles
 from api.versions.v1.routers.roles.models import (
     NewRoleBody,
@@ -58,7 +58,7 @@ async def fetch_role(id: int):
 
 
 @router.post("", tags=["roles"], response_model=RoleResponse)
-async def create_role(body: NewRoleBody, token=Depends(access_token)):
+async def create_role(body: NewRoleBody, token=authorization()):
     query = """
         WITH user_roles AS (
             SELECT role_id FROM userroles WHERE user_id = $1
@@ -95,7 +95,7 @@ async def create_role(body: NewRoleBody, token=Depends(access_token)):
 
 
 @router.patch("/{id}", tags=["roles"])
-async def update_role(id: int, body: UpdateRoleBody, token=Depends(access_token)):
+async def update_role(id: int, body: UpdateRoleBody, token=authorization()):
     role = await Role.fetch(id)
     if not role:
         raise HTTPException(404, "Role Not Found")
@@ -173,7 +173,7 @@ async def update_role(id: int, body: UpdateRoleBody, token=Depends(access_token)
 
 
 @router.delete("/{id}", tags=["roles"])
-async def delete_role(id: int, token=Depends(access_token)):
+async def delete_role(id: int, token=authorization()):
     role = await Role.fetch(id)
     if not role:
         raise HTTPException(404, "Role Not Found")
@@ -224,7 +224,7 @@ async def delete_role(id: int, token=Depends(access_token)):
 
 @router.put("/{role_id}/members/{member_id}", tags=["roles"])
 async def add_member_to_role(
-    role_id: int, member_id: int, token=Depends(access_token)
+    role_id: int, member_id: int, token=authorization()
 ) -> Union[Response, utils.JSONResponse]:
     role = await Role.fetch(role_id)
     if not role:
@@ -262,7 +262,7 @@ async def add_member_to_role(
 
 @router.delete("/{role_id}/members/{member_id}", tags=["roles"])
 async def remove_member_from_role(
-    role_id: int, member_id: int, token=Depends(access_token)
+    role_id: int, member_id: int, token=authorization()
 ) -> Union[Response, utils.JSONResponse]:
     role = await Role.fetch(role_id)
     if not role:

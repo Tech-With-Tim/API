@@ -2,36 +2,53 @@ import jwt
 import utils
 import config
 
-from typing import List, Optional, Union
+from api.models import User
+from typing import List, Union
 from fastapi import Depends, HTTPException, Request
 
 from api.models import Role
 from api.models.permissions import BasePermission
 
 
-async def access_token(request: Request) -> Optional[dict]:
-    """Attempts to locate and decode JWT token."""
-    token = request.headers.get("authorization")
+def authorization(app_only: bool = False, user_only: bool = False):
+    if app_only and user_only:
+        raise ValueError("can't set both app_only and user_only to True")
 
-    if token is None:
-        raise HTTPException(status_code=401)
+    async def inner(request: Request):
+        """Attempts to locate and decode JWT token."""
+        token = request.headers.get("authorization")
 
-    try:
-        data = jwt.decode(
-            jwt=token,
-            algorithms=["HS256"],
-            key=config.secret_key(),
-        )
-    except (jwt.PyJWTError, jwt.InvalidSignatureError):
-        raise HTTPException(status_code=401, detail="Invalid token.")
+        if token is None:
+            raise HTTPException(status_code=401)
 
-    data["uid"] = int(data["uid"])
+        try:
+            data = jwt.decode(
+                jwt=token,
+                algorithms=["HS256"],
+                key=config.secret_key(),
+            )
+        except (jwt.PyJWTError, jwt.InvalidSignatureError):
+            raise HTTPException(status_code=401, detail="Invalid token.")
 
-    return data
+        data["uid"] = int(data["uid"])
+
+        user = await User.fetch(data["uid"])
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid token.")
+
+        if app_only and not user.app:
+            raise HTTPException(status_code=403, detail="Users can't use this endpoint")
+
+        if user_only and user.app:
+            raise HTTPException(status_code=403, detail="Bots can't use this endpoint")
+
+        return data
+
+    return Depends(inner)
 
 
 async def has_permissions(permissions: List[Union[int, BasePermission]]):
-    async def inner(token=Depends(access_token)):
+    async def inner(token=authorization()):
         query = """
             WITH user_roles AS (
                 SELECT role_id FROM userroles WHERE user_id = $1
