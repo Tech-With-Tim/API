@@ -5,7 +5,7 @@ from typing import List, Union
 from fastapi import APIRouter, HTTPException, Response
 
 from api.models import Role, UserRole
-from api.dependencies import authorization
+from api.dependencies import has_permissions
 from api.models.permissions import ManageRoles
 from api.versions.v1.routers.roles.models import (
     NewRoleBody,
@@ -18,7 +18,7 @@ from api.versions.v1.routers.roles.models import (
 router = APIRouter(prefix="/roles")
 
 
-@router.get("", tags=["roles"], response_model=List[RoleResponse], status_code=200)
+@router.get("", tags=["roles"], response_model=List[RoleResponse])
 async def fetch_all_roles():
     """Fetch all roles"""
 
@@ -51,7 +51,7 @@ async def fetch_role(id: int):
                   (
                       SELECT json_agg(ur.user_id::TEXT)
                           FROM userroles ur
-                          WHERE ur.role_id = r.id
+                        WHERE ur.role_id = r.id
                   ), '[]'
                ) members
          FROM roles r
@@ -77,35 +77,13 @@ async def fetch_role(id: int):
     },
     status_code=201,
 )
-async def create_role(body: NewRoleBody, token=authorization()):
+async def create_role(body: NewRoleBody, roles=has_permissions([ManageRoles()])):
     """Create a new role"""
-
-    query = """
-        WITH userroles AS (
-            SELECT ur.role_id
-              FROM userroles ur
-             WHERE ur.user_id = $1
-         )
-        SELECT r.position,
-               r.permissions
-          FROM roles r
-         WHERE r.id IN (
-            SELECT role_id
-              FROM userroles
-        )
-    """
-
-    records = await Role.pool.fetch(query, token["uid"])
-    if not records:
-        raise HTTPException(403, "Missing Permissions")
-
     user_permissions = 0
-    for record in records:
-        user_permissions |= record["permissions"]
+    for role in roles:
+        user_permissions |= role.permissions
 
-    if not utils.has_permission(
-        user_permissions, body.permissions
-    ) or not utils.has_permission(user_permissions, ManageRoles()):
+    if not utils.has_permission(user_permissions, body.permissions):
         raise HTTPException(403, "Missing Permissions")
 
     query = """
@@ -136,41 +114,21 @@ async def create_role(body: NewRoleBody, token=authorization()):
     },
     status_code=204,
 )
-async def update_role(id: int, body: UpdateRoleBody, token=authorization()):
-    """Update role by id"""
-
-    query = """
-        WITH userroles AS (
-            SELECT ur.role_id
-              FROM userroles ur
-             WHERE ur.user_id = $1
-         )
-        SELECT r.position,
-               r.permissions
-          FROM roles r
-         WHERE r.id IN (
-            SELECT role_id
-              FROM userroles
-        )
-    """
-
-    records = await Role.pool.fetch(query, token["uid"])
-    if not records:
-        raise HTTPException(403, "Missing Permissions")
-
-    user_permissions = 0
-    for record in records:
-        user_permissions |= record["permissions"]
-
-    if not utils.has_permission(user_permissions, ManageRoles()):
-        raise HTTPException(403, "Missing Permissions")
-
+async def update_role(
+    id: int,
+    body: UpdateRoleBody,
+    roles=has_permissions([ManageRoles()]),
+):
     role = await Role.fetch(id)
     if not role:
         raise HTTPException(404, "Role Not Found")
 
-    top_role = min(records, key=lambda record: record["position"])
-    if top_role["position"] >= role.position:
+    user_permissions = 0
+    for r in roles:
+        user_permissions |= r.permissions
+
+    top_role = min(roles, key=lambda role: role.position)
+    if top_role.position >= role.position:
         raise HTTPException(403, "Missing Permissions")
 
     data = body.dict(exclude_unset=True)
@@ -186,7 +144,7 @@ async def update_role(id: int, body: UpdateRoleBody, token=authorization()):
     if (
         position := data.pop("position", None)
     ) is not None and position != role.position:
-        if position <= top_role["position"]:
+        if position <= top_role.position:
             raise HTTPException(403, "Missing Permissions")
 
         if position > role.position:
@@ -234,41 +192,13 @@ async def update_role(id: int, body: UpdateRoleBody, token=authorization()):
     },
     status_code=204,
 )
-async def delete_role(id: int, token=authorization()):
-    """Delete role by id"""
-
-    query = """
-        WITH userroles AS (
-            SELECT ur.role_id
-              FROM userroles ur
-             WHERE ur.user_id = $1
-         )
-        SELECT r.position,
-               r.permissions
-          FROM roles r
-         WHERE r.id IN (
-            SELECT role_id
-              FROM userroles
-        )
-    """
-
-    records = await Role.pool.fetch(query, token["uid"])
-    if not records:
-        raise HTTPException(403, "Missing Permissions")
-
-    user_permissions = 0
-    for record in records:
-        user_permissions |= record["permissions"]
-
-    if not utils.has_permission(user_permissions, ManageRoles()):
-        raise HTTPException(403, "Missing Permissions")
-
+async def delete_role(id: int, roles=has_permissions([ManageRoles()])):
     role = await Role.fetch(id)
     if not role:
         raise HTTPException(404, "Role Not Found")
 
-    top_role = min(records, key=lambda record: record["position"])
-    if top_role["position"] >= role.position:
+    top_role = min(roles, key=lambda role: role.position)
+    if top_role.position >= role.position:
         raise HTTPException(403, "Missing Permissions")
 
     query = """
@@ -306,40 +236,14 @@ async def delete_role(id: int, token=authorization()):
     status_code=204,
 )
 async def add_member_to_role(
-    role_id: int, member_id: int, token=authorization()
+    role_id: int, member_id: int, roles=has_permissions([ManageRoles()])
 ) -> Union[Response, utils.JSONResponse]:
-    query = """
-        WITH userroles AS (
-            SELECT ur.role_id
-              FROM userroles ur
-             WHERE ur.user_id = $1
-         )
-        SELECT r.position,
-               r.permissions
-          FROM roles r
-         WHERE r.id IN (
-            SELECT role_id
-              FROM userroles
-        )
-    """
-
-    records = await Role.pool.fetch(query, token["uid"])
-    if not records:
-        raise HTTPException(403, "Missing Permissions")
-
-    user_permissions = 0
-    for record in records:
-        user_permissions |= record["permissions"]
-
-    if not utils.has_permission(user_permissions, ManageRoles()):
-        raise HTTPException(403, "Missing Permissions")
-
     role = await Role.fetch(role_id)
     if not role:
         raise HTTPException(404, "Role Not Found")
 
-    top_role = min(records, key=lambda record: record["position"])
-    if top_role["position"] >= role.position:
+    top_role = min(roles, key=lambda role: role.position)
+    if top_role.position >= role.position:
         raise HTTPException(403, "Missing Permissions")
 
     try:
@@ -364,40 +268,14 @@ async def add_member_to_role(
     status_code=204,
 )
 async def remove_member_from_role(
-    role_id: int, member_id: int, token=authorization()
+    role_id: int, member_id: int, roles=has_permissions([ManageRoles()])
 ) -> Union[Response, utils.JSONResponse]:
-    query = """
-        WITH userroles AS (
-            SELECT ur.role_id
-              FROM userroles ur
-             WHERE ur.user_id = $1
-         )
-        SELECT r.position,
-               r.permissions
-          FROM roles r
-         WHERE r.id IN (
-            SELECT role_id
-              FROM userroles
-        )
-    """
-
-    records = await Role.pool.fetch(query, token["uid"])
-    if not records:
-        raise HTTPException(403, "Missing Permissions")
-
-    user_permissions = 0
-    for record in records:
-        user_permissions |= record["permissions"]
-
-    if not utils.has_permission(user_permissions, ManageRoles()):
-        raise HTTPException(403, "Missing Permissions")
-
     role = await Role.fetch(role_id)
     if not role:
         raise HTTPException(404, "Role Not Found")
 
-    top_role = min(records, key=lambda record: record["position"])
-    if top_role["position"] >= role.position:
+    top_role = min(roles, key=lambda role: role.position)
+    if top_role.position >= role.position:
         raise HTTPException(403, "Missing Permissions")
 
     await UserRole.delete(member_id, role_id)

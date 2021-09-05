@@ -50,20 +50,14 @@ def authorization(app_only: bool = False, user_only: bool = False):
 def has_permissions(permissions: List[Union[int, BasePermission]]):
     async def inner(token=authorization()):
         query = """
-            WITH userroles AS (
+            SELECT *
+              FROM roles r
+             WHERE r.id IN (
                 SELECT ur.role_id
                   FROM userroles ur
                  WHERE ur.user_id = $1
-             )
-            SELECT r.position,
-                   r.permissions
-              FROM roles r
-             WHERE r.id IN (
-                SELECT role_id
-                  FROM userroles
             )
         """
-
         records = await Role.pool.fetch(query, token["uid"])
         if not records:
             raise HTTPException(403, "Missing Permissions")
@@ -72,6 +66,9 @@ def has_permissions(permissions: List[Union[int, BasePermission]]):
         for record in records:
             user_permissions |= record["permissions"]
 
-        return utils.has_permissions(user_permissions, permissions)
+        if not utils.has_permissions(user_permissions, permissions):
+            raise HTTPException(403, "Missing Permissions")
+
+        return [Role(**record) for record in records]
 
     return Depends(inner)
