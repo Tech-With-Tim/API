@@ -84,10 +84,10 @@ async def test_callback_success(app: AsyncClient, db, mocker: MockerFixture):
 
     async def get_user(**kwargs):
         return {
-            "username": "M7MD",
-            "discriminator": "1701",
-            "id": 601173582516584602,
-            "avatar": "135fa48ba8f26417c4b9818ae2e37aa0",
+            "id": 1,
+            "username": "Test2",
+            "avatar": "avatar",
+            "discriminator": "0001",
         }
 
     mocker.patch("api.versions.v1.routers.auth.routes.get_user", new=get_user)
@@ -99,3 +99,5 @@ async def test_callback_success(app: AsyncClient, db, mocker: MockerFixture):
     )
 
     assert res.status_code == 200
+
+    await db.execute("DELETE FROM users WHERE id = 1")

@@ -1,10 +1,13 @@
-from launch import prepare_postgres, safe_create_tables, delete_tables
+import jwt
 import config
-
-from httpx import AsyncClient
-from postDB import Model
-import asyncio
 import pytest
+import asyncio
+
+from postDB import Model
+from httpx import AsyncClient
+
+from api.models import User
+from launch import prepare_postgres, safe_create_tables, delete_tables
 
 
 @pytest.fixture(scope="session")
@@ -32,6 +35,20 @@ async def db(event_loop) -> bool:
     await safe_create_tables()
     yield Model.pool
     await delete_tables()
+
+
+@pytest.fixture
+async def user(db):
+    yield await User.create(0, "Test", "0001")
+    await db.execute("""DELETE FROM users WHERE username = 'Test'""")
+
+
+@pytest.fixture
+async def token(user, db):
+    yield jwt.encode(
+        {"uid": user.id},
+        key=config.secret_key(),
+    )
 
 
 def pytest_addoption(parser):
