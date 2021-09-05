@@ -47,7 +47,7 @@ def authorization(app_only: bool = False, user_only: bool = False):
     return Depends(inner)
 
 
-async def has_permissions(permissions: List[Union[int, BasePermission]]):
+def has_permissions(permissions: List[Union[int, BasePermission]]):
     async def inner(token=authorization()):
         query = """
             WITH userroles AS (
