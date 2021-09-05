@@ -45,17 +45,17 @@ async def fetch_role(id: int):
     """Fetch a role by its id"""
 
     query = """
-    SELECT *,
-        id::TEXT,
-        COALESCE(
-            (
-                SELECT json_agg(ur.user_id::TEXT)
-                    FROM userroles ur
-                    WHERE ur.role_id = r.id
-            ), '[]'
-        ) members
-      FROM roles r
-     WHERE r.id = $1
+        SELECT *,
+               id::TEXT,
+               COALESCE(
+                  (
+                      SELECT json_agg(ur.user_id::TEXT)
+                          FROM userroles ur
+                          WHERE ur.role_id = r.id
+                  ), '[]'
+               ) members
+         FROM roles r
+        WHERE r.id = $1
     """
     record = await Role.pool.fetchrow(query, id)
 
@@ -82,10 +82,18 @@ async def create_role(body: NewRoleBody, token=authorization()):
     """Create a new role"""
 
     query = """
-        WITH user_roles AS (
-            SELECT role_id FROM userroles WHERE user_id = $1
+        WITH userroles AS (
+            SELECT ur.role_id
+              FROM userroles ur
+             WHERE ur.user_id = $1
+         )
+        SELECT r.position
+               r.permissions
+          FROM roles r
+         WHERE r.id IN (
+            SELECT role_id
+              FROM userroles
         )
-            SELECT permissions FROM roles WHERE id IN (SELECT * FROM user_roles);
     """
 
     records = await Role.pool.fetch(query, token["uid"])
@@ -134,10 +142,18 @@ async def update_role(id: int, body: UpdateRoleBody, token=authorization()):
     """Update role by id"""
 
     query = """
-        WITH user_roles AS (
-            SELECT role_id FROM userroles WHERE user_id = $1
+        WITH userroles AS (
+            SELECT ur.role_id
+              FROM userroles ur
+             WHERE ur.user_id = $1
+         )
+        SELECT r.position
+               r.permissions
+          FROM roles r
+         WHERE r.id IN (
+            SELECT role_id
+              FROM userroles
         )
-            SELECT position, permissions FROM roles WHERE id IN (SELECT * FROM user_roles);
     """
 
     records = await Role.pool.fetch(query, token["uid"])
@@ -224,10 +240,18 @@ async def delete_role(id: int, token=authorization()):
     """Delete role by id"""
 
     query = """
-        WITH user_roles AS (
-            SELECT role_id FROM userroles WHERE user_id = $1
+        WITH userroles AS (
+            SELECT ur.role_id
+              FROM userroles ur
+             WHERE ur.user_id = $1
+         )
+        SELECT r.position
+               r.permissions
+          FROM roles r
+         WHERE r.id IN (
+            SELECT role_id
+              FROM userroles
         )
-            SELECT position, permissions FROM roles WHERE id IN (SELECT * FROM user_roles);
     """
 
     records = await Role.pool.fetch(query, token["uid"])
@@ -287,10 +311,18 @@ async def add_member_to_role(
     role_id: int, member_id: int, token=authorization()
 ) -> Union[Response, utils.JSONResponse]:
     query = """
-        WITH user_roles AS (
-            SELECT role_id FROM userroles WHERE user_id = $1
+        WITH userroles AS (
+            SELECT ur.role_id
+              FROM userroles ur
+             WHERE ur.user_id = $1
+         )
+        SELECT r.position
+               r.permissions
+          FROM roles r
+         WHERE r.id IN (
+            SELECT role_id
+              FROM userroles
         )
-            SELECT position, permissions FROM roles WHERE id IN (SELECT * FROM user_roles);
     """
 
     records = await Role.pool.fetch(query, token["uid"])
@@ -337,10 +369,18 @@ async def remove_member_from_role(
     role_id: int, member_id: int, token=authorization()
 ) -> Union[Response, utils.JSONResponse]:
     query = """
-        WITH user_roles AS (
-            SELECT role_id FROM userroles WHERE user_id = $1
+        WITH userroles AS (
+            SELECT ur.role_id
+              FROM userroles ur
+             WHERE ur.user_id = $1
+         )
+        SELECT r.position
+               r.permissions
+          FROM roles r
+         WHERE r.id IN (
+            SELECT role_id
+              FROM userroles
         )
-            SELECT position, permissions FROM roles WHERE id IN (SELECT * FROM user_roles);
     """
 
     records = await Role.pool.fetch(query, token["uid"])
