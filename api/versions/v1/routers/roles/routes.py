@@ -87,7 +87,7 @@ async def create_role(body: NewRoleBody, token=authorization()):
               FROM userroles ur
              WHERE ur.user_id = $1
          )
-        SELECT r.position
+        SELECT r.position,
                r.permissions
           FROM roles r
          WHERE r.id IN (
@@ -147,7 +147,7 @@ async def update_role(id: int, body: UpdateRoleBody, token=authorization()):
               FROM userroles ur
              WHERE ur.user_id = $1
          )
-        SELECT r.position
+        SELECT r.position,
                r.permissions
           FROM roles r
          WHERE r.id IN (
@@ -245,7 +245,7 @@ async def delete_role(id: int, token=authorization()):
               FROM userroles ur
              WHERE ur.user_id = $1
          )
-        SELECT r.position
+        SELECT r.position,
                r.permissions
           FROM roles r
          WHERE r.id IN (
@@ -316,7 +316,7 @@ async def add_member_to_role(
               FROM userroles ur
              WHERE ur.user_id = $1
          )
-        SELECT r.position
+        SELECT r.position,
                r.permissions
           FROM roles r
          WHERE r.id IN (
@@ -374,7 +374,7 @@ async def remove_member_from_role(
               FROM userroles ur
              WHERE ur.user_id = $1
          )
-        SELECT r.position
+        SELECT r.position,
                r.permissions
           FROM roles r
          WHERE r.id IN (

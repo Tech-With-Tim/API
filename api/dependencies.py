@@ -55,7 +55,7 @@ def has_permissions(permissions: List[Union[int, BasePermission]]):
                   FROM userroles ur
                  WHERE ur.user_id = $1
              )
-            SELECT r.position
+            SELECT r.position,
                    r.permissions
               FROM roles r
              WHERE r.id IN (
