@@ -84,7 +84,12 @@ async def create_role(body: NewRoleBody, token=Depends(access_token)):
             VALUES (create_snowflake(), $1, $2, $3, (SELECT COUNT(*) FROM roles) + 1)
             RETURNING *;
     """
-    record = await Role.pool.fetchrow(query, body.name, body.color, body.permissions)
+    try:
+        record = await Role.pool.fetchrow(
+            query, body.name, body.color, body.permissions
+        )
+    except asyncpg.exceptions.UniqueViolationError:
+        raise HTTPException(409, "Role with that name already exists")
 
     return utils.JSONResponse(status_code=201, content=dict(record))
 
@@ -121,6 +126,12 @@ async def update_role(id: int, body: UpdateRoleBody, token=Depends(access_token)
     if not utils.has_permission(user_permissions, body.permissions):
         raise HTTPException(403, "Missing Permissions")
 
+    if name := data.get("name", None):
+        record = await Role.pool.fetchrow("SELECT * FROM roles WHERE name = $1", name)
+
+        if record:
+            raise HTTPException(409, "Role with that name already exists")
+
     if (
         position := data.pop("position", None)
     ) is not None and position != role.position:
@@ -153,7 +164,7 @@ async def update_role(id: int, body: UpdateRoleBody, token=Depends(access_token)
 
     if data:
         query = "UPDATE ROLES SET "
-        query += ", ".join("%s = %d" % (key, i) for i, key in enumerate(data, 2))
+        query += ", ".join("%s = $%d" % (key, i) for i, key in enumerate(data, 2))
         query += " WHERE id = $1"
 
         await Role.pool.execute(query, id, *data.values())
@@ -211,7 +222,7 @@ async def delete_role(id: int, token=Depends(access_token)):
     return utils.JSONResponse(status_code=204)
 
 
-@router.put("/{role_id}/{member_id}", tags=["roles"])
+@router.put("/{role_id}/members/{member_id}", tags=["roles"])
 async def add_member_to_role(
     role_id: int, member_id: int, token=Depends(access_token)
 ) -> Union[Response, utils.JSONResponse]:
@@ -249,7 +260,7 @@ async def add_member_to_role(
     return Response(status_code=204, content="")
 
 
-@router.delete("/{role_id}/{member_id}", tags=["roles"])
+@router.delete("/{role_id}/members/{member_id}", tags=["roles"])
 async def remove_member_from_role(
     role_id: int, member_id: int, token=Depends(access_token)
 ) -> Union[Response, utils.JSONResponse]:

@@ -15,7 +15,7 @@ class DetailedRoleResponse(RoleResponse):
 
 
 class NewRoleBody(BaseModel):
-    name: str = Field(..., min_length=4, max_length=64)
+    name: str = Field(..., min_length=4, max_length=32)
     color: Optional[int] = Field(None, le=0xFFFFFF, ge=0)
     permissions: Optional[int] = Field(0, ge=0)
 
