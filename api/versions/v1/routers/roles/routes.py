@@ -74,7 +74,6 @@ async def fetch_role(id: int):
         401: {"description": "Unauthorized"},
         403: {"description": "Missing Permissions"},
         409: {"description": "Role with that name already exists"},
-        422: {"description": "Invalid body"},
     },
     status_code=201,
 )
@@ -134,7 +133,6 @@ async def create_role(body: NewRoleBody, token=authorization()):
         403: {"description": "Missing Permissions"},
         404: {"description": "Role not found"},
         409: {"description": "Role with that name already exists"},
-        422: {"description": "Invalid body"},
     },
     status_code=204,
 )
