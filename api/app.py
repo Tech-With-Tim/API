@@ -15,6 +15,9 @@ app = FastAPI(
     docs_url="/api/docs",
     redoc_url="/api/redoc",
     openapi_url="/api/docs/openapi.json",
+    openapi_tags=[
+        {"name": "roles", "description": "Manage roles"},
+    ],
 )
 app.router.prefix = "/api"
 app.router.default_response_class = JSONResponse

@@ -18,8 +18,10 @@ from api.versions.v1.routers.roles.models import (
 router = APIRouter(prefix="/roles")
 
 
-@router.get("", tags=["roles"], response_model=List[RoleResponse])
+@router.get("", tags=["roles"], response_model=List[RoleResponse], status_code=200)
 async def fetch_all_roles():
+    """Fetch all roles"""
+
     query = """
         SELECT *,
                r.id::TEXT
@@ -30,8 +32,18 @@ async def fetch_all_roles():
     return [dict(record) for record in records]
 
 
-@router.get("/{id}", tags=["roles"], response_model=DetailedRoleResponse)
+@router.get(
+    "/{id}",
+    tags=["roles"],
+    response_model=DetailedRoleResponse,
+    status_code=200,
+    responses={
+        404: {"description": "Role not found"},
+    },
+)
 async def fetch_role(id: int):
+    """Fetch a role by its id"""
+
     query = """
     SELECT *,
         id::TEXT,
@@ -47,11 +59,28 @@ async def fetch_role(id: int):
     """
     record = await Role.pool.fetchrow(query, id)
 
+    if not record:
+        raise HTTPException(404, "Role not found")
+
     return dict(record)
 
 
-@router.post("", tags=["roles"], response_model=RoleResponse)
+@router.post(
+    "",
+    tags=["roles"],
+    response_model=RoleResponse,
+    responses={
+        409: {"description": "Role with that name already exists"},
+        201: {"description": "Role Created Successfully"},
+        403: {"description": "Missing Permissions"},
+        401: {"description": "Unauthorized"},
+        422: {"description": "Invalid body"},
+    },
+    status_code=201,
+)
 async def create_role(body: NewRoleBody, token=authorization()):
+    """Create a new role"""
+
     query = """
         WITH user_roles AS (
             SELECT role_id FROM userroles WHERE user_id = $1
@@ -88,8 +117,22 @@ async def create_role(body: NewRoleBody, token=authorization()):
     return utils.JSONResponse(status_code=201, content=dict(record))
 
 
-@router.patch("/{id}", tags=["roles"])
+@router.patch(
+    "/{id}",
+    tags=["roles"],
+    responses={
+        409: {"description": "Role with that name already exists"},
+        204: {"description": "Role Updated Successfully"},
+        403: {"description": "Missing Permissions"},
+        404: {"description": "Role not found"},
+        401: {"description": "Unauthorized"},
+        422: {"description": "Invalid body"},
+    },
+    status_code=204,
+)
 async def update_role(id: int, body: UpdateRoleBody, token=authorization()):
+    """Update role by id"""
+
     query = """
         WITH user_roles AS (
             SELECT role_id FROM userroles WHERE user_id = $1
@@ -163,11 +206,22 @@ async def update_role(id: int, body: UpdateRoleBody, token=authorization()):
 
         await Role.pool.execute(query, id, *data.values())
 
-    return utils.JSONResponse(status_code=204)
+    return Response(status_code=204, content="")
 
 
-@router.delete("/{id}", tags=["roles"])
+@router.delete(
+    "/{id}",
+    tags=["roles"],
+    responses={
+        204: {"description": "Role Updated Successfully"},
+        403: {"description": "Missing Permissions"},
+        404: {"description": "Role not found"},
+        401: {"description": "Unauthorized"},
+    },
+    status_code=204,
+)
 async def delete_role(id: int, token=authorization()):
+    """Delete role by id"""
 
     query = """
         WITH user_roles AS (
@@ -214,10 +268,21 @@ async def delete_role(id: int, token=authorization()):
     """
     await Role.pool.execute(query, id)
 
-    return utils.JSONResponse(status_code=204)
+    return Response(status_code=204, content="")
 
 
-@router.put("/{role_id}/members/{member_id}", tags=["roles"])
+@router.put(
+    "/{role_id}/members/{member_id}",
+    tags=["roles"],
+    responses={
+        204: {"description": "Role assigned to member"},
+        409: {"description": "User already has the role"},
+        404: {"description": "Role or member not found"},
+        403: {"description": "Missing Permissions"},
+        401: {"description": "Unauthorized"},
+    },
+    status_code=204,
+)
 async def add_member_to_role(
     role_id: int, member_id: int, token=authorization()
 ) -> Union[Response, utils.JSONResponse]:
@@ -251,11 +316,23 @@ async def add_member_to_role(
         await UserRole.create(member_id, role_id)
     except asyncpg.exceptions.UniqueViolationError:
         raise HTTPException(409, "User already has the role")
+    except asyncpg.exceptions.ForeignKeyViolationError:
+        raise HTTPException(404, "Member not found")
 
     return Response(status_code=204, content="")
 
 
-@router.delete("/{role_id}/members/{member_id}", tags=["roles"])
+@router.delete(
+    "/{role_id}/members/{member_id}",
+    tags=["roles"],
+    responses={
+        204: {"description": "Role removed from member"},
+        403: {"description": "Missing Permissions"},
+        404: {"description": "Role not found"},
+        401: {"description": "Unauthorized"},
+    },
+    status_code=204,
+)
 async def remove_member_from_role(
     role_id: int, member_id: int, token=authorization()
 ) -> Union[Response, utils.JSONResponse]:
