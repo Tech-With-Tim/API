@@ -37,13 +37,13 @@ async def db(event_loop) -> bool:
     await delete_tables()
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 async def user(db):
     yield await User.create(0, "Test", "0001")
     await db.execute("""DELETE FROM users WHERE username = 'Test'""")
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 async def token(user, db):
     yield jwt.encode(
         {"uid": user.id},
