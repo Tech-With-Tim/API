@@ -27,7 +27,7 @@ def authorization(app_only: bool = False, user_only: bool = False):
                 algorithms=["HS256"],
                 key=config.secret_key(),
             )
-        except (jwt.PyJWTError, jwt.InvalidSignatureError):
+        except jwt.PyJWTError:
             raise HTTPException(status_code=401, detail="Invalid token.")
 
         data["uid"] = int(data["uid"])
@@ -42,13 +42,13 @@ def authorization(app_only: bool = False, user_only: bool = False):
         if user_only and user.app:
             raise HTTPException(status_code=403, detail="Bots can't use this endpoint")
 
-        return data
+        return user
 
     return Depends(inner)
 
 
 def has_permissions(permissions: List[Union[int, BasePermission]]):
-    async def inner(token=authorization()):
+    async def inner(user=authorization()):
         query = """
             SELECT *
               FROM roles r
@@ -58,7 +58,7 @@ def has_permissions(permissions: List[Union[int, BasePermission]]):
                  WHERE ur.user_id = $1
             )
         """
-        records = await Role.pool.fetch(query, token["uid"])
+        records = await Role.pool.fetch(query, user.id)
         if not records:
             raise HTTPException(403, "Missing Permissions")
 

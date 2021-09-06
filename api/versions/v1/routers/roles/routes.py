@@ -36,7 +36,6 @@ async def fetch_all_roles():
     "/{id}",
     tags=["roles"],
     response_model=DetailedRoleResponse,
-    status_code=200,
     responses={
         404: {"description": "Role not found"},
     },
@@ -50,8 +49,8 @@ async def fetch_role(id: int):
                COALESCE(
                   (
                       SELECT json_agg(ur.user_id::TEXT)
-                          FROM userroles ur
-                        WHERE ur.role_id = r.id
+                       FROM userroles ur
+                      WHERE ur.role_id = r.id
                   ), '[]'
                ) members
          FROM roles r
@@ -78,7 +77,7 @@ async def fetch_role(id: int):
     status_code=201,
 )
 async def create_role(body: NewRoleBody, roles=has_permissions([ManageRoles()])):
-    """Create a new role"""
+    # Check if the user has administrator permission or all the permissions provided in the role
     user_permissions = 0
     for role in roles:
         user_permissions |= role.permissions
@@ -123,6 +122,7 @@ async def update_role(
     if not role:
         raise HTTPException(404, "Role Not Found")
 
+    # Check if the user has administrator permission or all the permissions provided in the role
     user_permissions = 0
     for r in roles:
         user_permissions |= r.permissions
