@@ -161,7 +161,7 @@ def _dropdb(verbose: bool):
 
 @cli.command()
 @click.option("-p", "--port", default=5000)
-@click.option("-h", "--host", default="127.0.0.1")
+@click.option("-h", "--host", default="0.0.0.0")
 @click.option("-d", "--debug", default=False, is_flag=True)
 @click.option("-i", "--initdb", default=False, is_flag=True)
 @click.option("-r", "--resetdb", default=False, is_flag=True)
