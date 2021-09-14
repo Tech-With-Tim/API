@@ -48,10 +48,12 @@ async def on_startup():
 @app.on_event("shutdown")
 async def on_shutdown():
     """Closes the app-wide ClientSession"""
-    from api.services import http
+    from api.services import http, piston
 
     if http.session is not None and not http.session.closed:
         await http.session.close()
+
+    await piston.close()
 
 
 @app.exception_handler(RequestValidationError)

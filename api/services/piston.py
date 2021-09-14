@@ -19,6 +19,11 @@ def init():
         log.info("Set Piston client.")
 
 
+async def close():
+    if client is not None and not client.closed:
+        await client.close()
+
+
 class PistonClient:
     base_url: str = "https://emkc.org/api/v2/piston/"
 
@@ -28,6 +33,9 @@ class PistonClient:
     @property
     def closed(self) -> bool:
         return self._session.closed
+
+    async def close(self):
+        await self._session.close()
 
     async def _make_request(self, method: str, endpoint: str, data: Any) -> Any:
         async with self._session.request(
