@@ -36,11 +36,13 @@ app.include_router(versions.v1.router)
 @app.on_event("startup")
 async def on_startup():
     """Creates a ClientSession to be used app-wide."""
-    from api.services import http
+    from api.services import http, piston
 
     if http.session is None or http.session.closed:
         http.session = ClientSession()
-        log.info("Set http_session.")
+        log.info("Set HTTP session.")
+
+    piston.init()
 
 
 @app.on_event("shutdown")
