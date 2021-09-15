@@ -1,6 +1,5 @@
 import logging
-from typing import Optional, Any, List, Dict
-
+from typing import Any, Dict, List, Optional
 
 from aiohttp import ClientSession
 

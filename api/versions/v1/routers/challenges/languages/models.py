@@ -1,5 +1,6 @@
 from typing import Optional
-from pydantic import BaseModel, HttpUrl
+
+from pydantic import BaseModel, Field, HttpUrl
 
 
 class ChallengeLanguageResponse(BaseModel):
@@ -12,7 +13,7 @@ class ChallengeLanguageResponse(BaseModel):
 
 
 class NewChallengeLanguageBody(BaseModel):
-    name: str
+    name: str = Field(..., min_length=4, max_length=32)
     download_url: Optional[HttpUrl] = None
     disabled: bool = False
     piston_lang: str
@@ -20,7 +21,7 @@ class NewChallengeLanguageBody(BaseModel):
 
 
 class UpdateChallengeLanguageBody(BaseModel):
-    name: str = ""
+    name: str = Field("", min_length=4, max_length=32)
     download_url: Optional[HttpUrl] = None
     disabled: bool = False
     piston_lang: str = ""
