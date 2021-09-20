@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional
 
 from aiohttp import ClientSession
 
-__all__ = ("client", "init", "PistonClient", "Runtime")
+__all__ = ("client", "init", "close", "PistonClient", "Runtime")
 
 client: Optional["PistonClient"] = None
 
@@ -36,7 +36,7 @@ class PistonClient:
     async def close(self):
         await self._session.close()
 
-    async def _make_request(self, method: str, endpoint: str, data: Any) -> Any:
+    async def _make_request(self, method: str, endpoint: str, data: Any = None) -> Any:
         async with self._session.request(
             method, self.base_url + endpoint, json=data
         ) as response:
