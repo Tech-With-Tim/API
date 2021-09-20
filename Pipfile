@@ -15,7 +15,7 @@ pytest-mock = "*"
 [packages]
 pyjwt = "*"
 postdb = "*"
-aiohttp = "*"
+aiohttp = "~=3.7"
 fastapi = "*"
 uvicorn = {extras = ["standard"], version = "*"}
 uvloop = {markers = "platform_system == 'linux'", version = "*"}
