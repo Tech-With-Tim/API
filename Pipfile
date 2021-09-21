@@ -18,6 +18,7 @@ postdb = "*"
 aiohttp = "*"
 fastapi = "*"
 aioredis = "*"
+typing_extensions = "*"
 uvicorn = {extras = ["standard"], version = "*"}
 uvloop = {markers = "platform_system == 'linux'", version = "*"}
 
