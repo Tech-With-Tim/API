@@ -65,3 +65,23 @@ def test_postgres_uri() -> typing.Optional[str]:
         log.warning('Optional environment variable "TEST_POSTGRES_URI" is missing')
 
     return value
+
+
+def redis_uri() -> typing.Optional[str]:
+    """Connection URI for Redis server."""
+    value = os.environ.get("REDIS_URI")
+
+    if not value:
+        log.warning('Optional environment variable "REDIS_URI" is missing')
+
+    return value
+
+
+def test_redis_uri() -> typing.Optional[str]:
+    """Connection URI for Redis testing server."""
+    value = os.environ.get("TEST_REDIS_URI")
+
+    if not value:
+        log.warning('Optional environment variable "TEST_REDIS_URI" is missing')
+
+    return value

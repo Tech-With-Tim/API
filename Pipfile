@@ -17,6 +17,7 @@ pyjwt = "*"
 postdb = "*"
 aiohttp = "*"
 fastapi = "*"
+aioredis = "*"
 uvicorn = {extras = ["standard"], version = "*"}
 uvloop = {markers = "platform_system == 'linux'", version = "*"}
 
