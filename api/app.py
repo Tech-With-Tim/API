@@ -58,14 +58,6 @@ async def on_startup():
             )
 
 
-@app.get("/test")
-async def dispatch_event():
-    from api.services import redis
-
-    n = await redis.dispatch("test", "Hello World")
-    return f"Received by {n} clients."
-
-
 @app.on_event("shutdown")
 async def on_shutdown():
     """Closes the app-wide ClientSession"""
