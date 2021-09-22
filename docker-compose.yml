@@ -1,4 +1,4 @@
-version: "3.7"
+version: "3.9"
 
 services:
   redis:
@@ -8,6 +8,8 @@ services:
     restart: unless-stopped
     volumes:
       - redis-data:/data
+    networks:
+      - default
 
   postgres:
     image: postgres:13
@@ -20,7 +22,8 @@ services:
       POSTGRES_DB: twt
     volumes:
       - postgres-data:/var/lib/postgresql/data
-
+    networks:
+      - default
   api:
     build:
       context: .
@@ -30,12 +33,20 @@ services:
     restart: unless-stopped
     depends_on:
       - postgres
+      - redis
     environment:
       SECRET_KEY: "${SECRET_KEY}"
       DISCORD_CLIENT_ID: "${DISCORD_CLIENT_ID}"
       DISCORD_CLIENT_SECRET: "${DISCORD_CLIENT_SECRET}"
       POSTGRES_URI: postgres://twt:twt@postgres:5432/twt
+      REDIS_URI: redis://redis
+    networks:
+      - default
 
 volumes:
   postgres-data:
   redis-data:
+
+networks:
+  default:
+    name: twt

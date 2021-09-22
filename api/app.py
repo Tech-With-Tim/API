@@ -11,7 +11,7 @@ from api import versions
 import config
 
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Tech With Tim",
@@ -50,6 +50,11 @@ async def on_startup():
             redis.pool = Redis.from_url(redis_uri)
         else:
             redis.pool = FakeRedis()
+            log.warning(
+                "\n"
+                "  > Created FakeRedis server, using a real redis server is suggested.\n"
+                "  > You can launch a local one using `docker compose up redis` and providing the url in env."
+            )
 
 
 @app.on_event("shutdown")
