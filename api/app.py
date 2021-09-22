@@ -43,11 +43,12 @@ async def on_startup():
 
     if http.session is None or http.session.closed:
         http.session = ClientSession()
-        log.info("Set http_session.")
+        log.info("Created HTTP ClientSession.")
 
     if redis.pool is None or redis.pool.connection is None:
         if (redis_uri := config.redis_uri()) is not None:
             redis.pool = Redis.from_url(redis_uri)
+            log.info("Connected to redis server: " + str(redis.pool))
         else:
             redis.pool = FakeRedis()
             log.warning(
@@ -55,6 +56,14 @@ async def on_startup():
                 "  > Created FakeRedis server, using a real redis server is suggested.\n"
                 "  > You can launch a local one using `docker compose up redis` and providing the url in env."
             )
+
+
+@app.get("/test")
+async def dispatch_event():
+    from api.services import redis
+
+    n = await redis.dispatch("test", "Hello World")
+    return f"Received by {n} clients."
 
 
 @app.on_event("shutdown")

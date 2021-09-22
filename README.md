@@ -99,7 +99,7 @@ Run the API and initialise the database:
 #### Make sure submodules are up to date.
 > If you have not initialized submodules use this command:\
 > `git submodule update --init`
-> 
+>
 > To update submodules:\
 > `git submodule foreach git pull`
 
