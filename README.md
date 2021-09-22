@@ -119,11 +119,6 @@ Both the API and the [frontend](https://github.com/Tech-With-Tim/Frontend) can b
 
 - Then make sure you have `docker` and `docker-compose` installed, if not read [this for docker](https://docs.docker.com/engine/install/) and [this for docker compose](https://docs.docker.com/compose/install/).
 
-- If you have not already, create a local network called `twt`
-```bash
-docker network create twt
-```
-
 - Deploy the API:
 
   ```sh
