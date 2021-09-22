@@ -1,15 +1,23 @@
 version: "3.7"
+
 services:
+  redis:
+    image: redis:6.2
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+
   postgres:
     image: postgres:13
     ports:
-      - "127.0.0.1:7777:5432"
+      - "7777:5432"
     restart: unless-stopped
     environment:
-      POSTGRES_USER: API
-      POSTGRES_PASSWORD: API
-      POSTGRES_DB: API
-
+      POSTGRES_USER: twt
+      POSTGRES_PASSWORD: twt
+      POSTGRES_DB: twt
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
@@ -26,7 +34,8 @@ services:
       SECRET_KEY: "${SECRET_KEY}"
       DISCORD_CLIENT_ID: "${DISCORD_CLIENT_ID}"
       DISCORD_CLIENT_SECRET: "${DISCORD_CLIENT_SECRET}"
-      POSTGRES_URI: postgres://API:API@postgres:5432/API
+      POSTGRES_URI: postgres://twt:twt@postgres:5432/twt
 
 volumes:
   postgres-data:
+  redis-data:
