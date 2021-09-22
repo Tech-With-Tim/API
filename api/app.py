@@ -1,8 +1,9 @@
 from fastapi.exceptions import RequestValidationError
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fakeredis.aioredis import FakeRedis
 from aiohttp import ClientSession
-import aioredis
+from aioredis import Redis
 import logging
 
 from utils.response import JSONResponse
@@ -46,7 +47,9 @@ async def on_startup():
 
     if redis.pool is None or redis.pool.connection is None:
         if (redis_uri := config.redis_uri()) is not None:
-            redis.pool = aioredis.from_url(redis_uri)
+            redis.pool = Redis.from_url(redis_uri)
+        else:
+            redis.pool = FakeRedis()
 
 
 @app.on_event("shutdown")

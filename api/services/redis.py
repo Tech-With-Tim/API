@@ -1,7 +1,7 @@
 from aioredis import Redis
-from typing import Optional
+from typing import Optional, Union
+from fakeredis.aioredis import FakeRedis
 
-
-pool: Optional[Redis] = None
+pool: Optional[Union[FakeRedis, Redis]] = None
 
 __all__ = (pool,)
