@@ -75,6 +75,7 @@ pipenv install --dev
 Start by writing this in a file named `.env`:
 
 ```prolog
+REDIS_URI=
 SECRET_KEY=
 POSTGRES_URI=
 DISCORD_CLIENT_ID=
@@ -86,6 +87,7 @@ And fill in the variables with the values below:
 - `REDIS_URI` is the Redis server URI.
 - `POSTGRES_URI` is the PostgreSQL database URI.
 - `SECRET_KEY` is the key used for JWT token encoding.
+- `TEST_REDIS_URU` is the Connection URI for Redis testing server.
 - `TEST_POSTGRES_URI` is the PostgreSQL database URI for tests.
 - `DISCORD_CLIENT_ID` is the Discord application ID. Copy it from your Discord application page (see below).
 - `DISCORD_CLIENT_SECRET` is the Discord application secret. Copy it from your Discord application page (see below).
