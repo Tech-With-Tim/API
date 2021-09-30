@@ -124,12 +124,7 @@ async def update_language(
 ):
     """Update a weekly challenge language."""
 
-    query = """
-        SELECT *,
-               l.id::TEXT
-        FROM challengelanguages l
-        WHERE l.id = $1
-    """
+    query = "SELECT * FROM challengelanguages WHERE id = $1"
     record = await ChallengeLanguage.pool.fetchrow(query, id)
 
     if not record:
