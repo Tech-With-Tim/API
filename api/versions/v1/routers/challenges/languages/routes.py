@@ -172,12 +172,7 @@ async def delete_language(
     id: int, _=has_permissions([ManageWeeklyChallengeLanguages()])
 ):
     """Delete a weekly challenge language, if it hasn't been used in any challenges."""
-    query = """
-        SELECT *,
-               l.id::TEXT
-        FROM challengelanguages l
-        WHERE l.id = $1
-    """
+    query = "SELECT * FROM challengelanguages WHERE id = $1"
     record = await ChallengeLanguage.pool.fetchrow(query, id)
 
     if not record:
