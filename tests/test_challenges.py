@@ -2,7 +2,7 @@ import pytest
 
 from httpx import AsyncClient
 
-from api.models import Role, UserRole
+from api.models import Role, UserRole, ChallengeLanguage
 from api.models.permissions import ManageWeeklyChallengeLanguages
 from api.services import piston as piston_service
 
@@ -31,6 +31,20 @@ async def piston():
     await piston_service.close()
 
 
+async def complete_piston_data(piston: piston_service.PistonClient, data: dict):
+    if (
+        data.get("piston_lang") == "TO COMPLETE"
+        or data.get("piston_lang_ver") == "TO COMPLETE"
+    ):
+        runtime = (await piston.get_runtimes())[0]
+
+        if data.get("piston_lang") == "TO COMPLETE":
+            data["piston_lang"] = runtime.language
+
+        if data.get("piston_lang_ver") == "TO COMPLETE":
+            data["piston_lang_ver"] = runtime.version
+
+
 @pytest.mark.db
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
@@ -50,7 +64,7 @@ async def piston():
                 "name": "....",
                 "piston_lang": "....",
                 "piston_lang_ver": "....",
-                "download_url": "this isn't an url",
+                "download_url": "not an url",
             },
             422,
         ),
@@ -90,10 +104,8 @@ async def test_challenge_languages_create(
     data,
     status,
 ):
-    if data.get("piston_lang") == "TO COMPLETE":
-        runtime = (await piston.get_runtimes())[0]
-        data["piston_lang"] = runtime.language
-        data["piston_lang_ver"] = runtime.version
+    await complete_piston_data(piston, data)
+
     try:
         await UserRole.create(user.id, manage_challenge_languages_role.id)
         res = await app.post(
@@ -102,6 +114,7 @@ async def test_challenge_languages_create(
             headers={"Authorization": token},
         )
         assert res.status_code == status
+
     finally:
         await UserRole.delete(user.id, manage_challenge_languages_role.id)
         if status == 409:
@@ -117,3 +130,140 @@ async def test_fetch_all_challenge_languages(app: AsyncClient):
 
     assert res.status_code == 200
     assert type(res.json()) == list
+
+
+@pytest.mark.db
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("request_data", "new_data", "status"),
+    [
+        (
+            {},
+            {
+                "name": "test",
+                "download_url": "https://example.com/download",
+                "disabled": False,
+                "piston_lang": "testlang",
+                "piston_lang_ver": "1.2.3",
+            },
+            204,
+        ),
+        (
+            {"name": ""},
+            {
+                "name": "test",
+                "download_url": "https://example.com/download",
+                "disabled": False,
+                "piston_lang": "testlang",
+                "piston_lang_ver": "1.2.3",
+            },
+            422,
+        ),
+        (
+            {"download_url": "not an url"},
+            {
+                "name": "test",
+                "download_url": "https://example.com/download",
+                "disabled": False,
+                "piston_lang": "testlang",
+                "piston_lang_ver": "1.2.3",
+            },
+            422,
+        ),
+        (
+            {"disabled": "not a boolean"},
+            {
+                "name": "test",
+                "download_url": "https://example.com/download",
+                "disabled": False,
+                "piston_lang": "testlang",
+                "piston_lang_ver": "1.2.3",
+            },
+            422,
+        ),
+        (
+            {
+                "piston_lang": "doesntexist",
+                "piston_lang_ver": "0.0.0",
+            },
+            {
+                "name": "test",
+                "download_url": "https://example.com/download",
+                "disabled": False,
+                "piston_lang": "testlang",
+                "piston_lang_ver": "1.2.3",
+            },
+            404,
+        ),
+        (
+            {
+                "name": "new name",
+                "download_url": "https://test.com/download",
+                "piston_lang": "TO COMPLETE",  # completed inside the test bcs the wrapper is async
+                "piston_lang_ver": "TO COMPLETE",
+            },
+            {
+                "name": "new name",
+                "download_url": "https://test.com/download",
+                "disabled": False,
+                "piston_lang": "TO COMPLETE",  # completed inside the test bcs the wrapper is async
+                "piston_lang_ver": "TO COMPLETE",
+            },
+            204,
+        ),
+    ],
+)
+async def test_challenge_language_update(
+    app: AsyncClient,
+    db,
+    user,
+    token,
+    manage_challenge_languages_role,
+    piston: piston_service.PistonClient,
+    request_data,
+    new_data,
+    status,
+):
+    await complete_piston_data(piston, request_data)
+    await complete_piston_data(piston, new_data)
+
+    try:
+        await UserRole.create(user.id, manage_challenge_languages_role.id)
+
+        query = """
+            INSERT INTO challengelanguages (id, name, download_url, disabled, piston_lang, piston_lang_ver)
+                VALUES (create_snowflake(), $1, $2, $3, $4, $5)
+                RETURNING *;
+        """
+        language = ChallengeLanguage(
+            **await db.fetchrow(
+                query,
+                "test",
+                "https://example.com/download",
+                False,
+                "testlang",
+                "1.2.3",
+            )
+        )
+
+        res = await app.patch(
+            f"/api/v1/challenges/languages/{language.id}",
+            json=request_data,
+            headers={"Authorization": token},
+        )
+
+        assert res.status_code == status
+
+        language = ChallengeLanguage(
+            **await db.fetchrow(
+                "SELECT * FROM challengelanguages WHERE id = $1", language.id
+            )
+        )
+
+        data = language.as_dict()
+        data.pop("id")
+
+        assert data == new_data
+    finally:
+        await UserRole.delete(user.id, manage_challenge_languages_role.id)
+        await db.execute("DELETE FROM challengelanguages WHERE id = $1", language.id)
