@@ -1,14 +1,17 @@
 from fastapi.exceptions import RequestValidationError
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, HTTPException
+from fakeredis.aioredis import FakeRedis
 from aiohttp import ClientSession
+from aioredis import Redis
+import logging
 
 from utils.response import JSONResponse
 from api import versions
+import config
 
-import logging
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Tech With Tim",
@@ -36,11 +39,23 @@ app.include_router(versions.v1.router)
 @app.on_event("startup")
 async def on_startup():
     """Creates a ClientSession to be used app-wide."""
-    from api.services import http, piston
+    from api.services import redis, http, piston
 
     if http.session is None or http.session.closed:
         http.session = ClientSession()
-        log.info("Set HTTP session.")
+        log.info("Created HTTP ClientSession.")
+
+    if redis.pool is None or redis.pool.connection is None:
+        if (redis_uri := config.redis_uri()) is not None:
+            redis.pool = Redis.from_url(redis_uri)
+            log.info("Connected to redis server: " + str(redis.pool))
+        else:
+            redis.pool = FakeRedis()
+            log.warning(
+                "\n"
+                "  > Created FakeRedis server, using a real redis server is suggested.\n"
+                "  > You can launch a local one using `docker compose up redis` and providing the url in env."
+            )
 
     piston.init()
 
@@ -48,23 +63,26 @@ async def on_startup():
 @app.on_event("shutdown")
 async def on_shutdown():
     """Closes the app-wide ClientSession"""
-    from api.services import http, piston
+    from api.services import redis, http, piston
 
     if http.session is not None and not http.session.closed:
         await http.session.close()
+
+    if redis.pool is not None:
+        await redis.pool.close()
 
     await piston.close()
 
 
 @app.exception_handler(RequestValidationError)
-async def validation_handler(request, err: RequestValidationError):
+async def validation_handler(_: Request, err: RequestValidationError):
     return JSONResponse(
         status_code=422, content={"error": "Invalid data", "data": err.errors()}
     )
 
 
 @app.exception_handler(500)
-async def error_500(request, error: HTTPException):
+async def error_500(_: Request, error: HTTPException):
     """
     TODO: Handle the error with our own error handling system.
     """

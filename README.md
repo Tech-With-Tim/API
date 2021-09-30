@@ -72,19 +72,22 @@ pipenv install --dev
 
 ### Environment variables
 
-Set the environment variables. Start by writing this in a file named `local.env`:
+Start by writing this in a file named `.env`:
 
 ```prolog
-SECRET_KEY=some_random_characters_here
-DB_URI=postgresql://user:password@db:5432/twt
+REDIS_URI=
+SECRET_KEY=
+POSTGRES_URI=
 DISCORD_CLIENT_ID=
 DISCORD_CLIENT_SECRET=
 ```
 
 And fill in the variables with the values below:
 
+- `REDIS_URI` is the Redis server URI.
 - `POSTGRES_URI` is the PostgreSQL database URI.
 - `SECRET_KEY` is the key used for JWT token encoding.
+- `TEST_REDIS_URU` is the Connection URI for Redis testing server.
 - `TEST_POSTGRES_URI` is the PostgreSQL database URI for tests.
 - `DISCORD_CLIENT_ID` is the Discord application ID. Copy it from your Discord application page (see below).
 - `DISCORD_CLIENT_SECRET` is the Discord application secret. Copy it from your Discord application page (see below).
@@ -94,6 +97,13 @@ And fill in the variables with the values below:
 ### Running
 
 Run the API and initialise the database:
+
+#### Make sure submodules are up to date.
+> If you have not initialized submodules use this command:\
+> `git submodule update --init`
+>
+> To update submodules:\
+> `git submodule foreach git pull`
 
 ```sh
 pipenv run python launch.py runserver --initdb
