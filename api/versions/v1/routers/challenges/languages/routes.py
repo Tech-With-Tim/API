@@ -75,11 +75,9 @@ async def fetch_language(id: int):
     },
     status_code=201,
     response_class=utils.JSONResponse,
+    dependencies=[has_permissions([ManageWeeklyChallengeLanguages()])],
 )
-async def create_language(
-    body: NewChallengeLanguageBody,
-    _=has_permissions([ManageWeeklyChallengeLanguages()]),
-):
+async def create_language(body: NewChallengeLanguageBody):
     """Create a weekly challenge language."""
 
     await check_piston_language_version(body.piston_lang, body.piston_lang_ver)
@@ -116,12 +114,9 @@ async def create_language(
         409: {"description": "Language with that name already exists"},
     },
     status_code=204,
+    dependencies=[has_permissions([ManageWeeklyChallengeLanguages()])],
 )
-async def update_language(
-    id: int,
-    body: UpdateChallengeLanguageBody,
-    _=has_permissions([ManageWeeklyChallengeLanguages()]),
-):
+async def update_language(id: int, body: UpdateChallengeLanguageBody):
     """Update a weekly challenge language."""
 
     query = "SELECT * FROM challengelanguages WHERE id = $1"
@@ -167,10 +162,9 @@ async def update_language(
         404: {"description": "Language not found"},
     },
     status_code=204,
+    dependencies=[has_permissions([ManageWeeklyChallengeLanguages()])],
 )
-async def delete_language(
-    id: int, _=has_permissions([ManageWeeklyChallengeLanguages()])
-):
+async def delete_language(id: int):
     """Delete a weekly challenge language, if it hasn't been used in any challenges."""
     query = "SELECT * FROM challengelanguages WHERE id = $1"
     record = await ChallengeLanguage.pool.fetchrow(query, id)
@@ -181,7 +175,7 @@ async def delete_language(
     # language = ChallengeLanguage(**record)
 
     query = """
-        SELECT * FROM challenges WHERE $1 = ANY(language_ids)
+        SELECT * FROM challenges WHERE $1 IN language_ids
     """
     records = await ChallengeLanguage.pool.fetch(query, id)
     if records:

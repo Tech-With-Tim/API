@@ -9,7 +9,7 @@ async def check_piston_language_version(language: str, version: str):
     Raises an :class:`fastapi.HTTPException` otherwise with a 404 status code.
     """
 
-    runtimes = await piston.client.get_runtime(language)
+    runtimes = await piston.get_runtime(language)
     if not runtimes:
         raise HTTPException(404, "Piston language not found")
 
