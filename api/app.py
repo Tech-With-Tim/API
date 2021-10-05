@@ -39,7 +39,7 @@ app.include_router(versions.v1.router)
 @app.on_event("startup")
 async def on_startup():
     """Creates a ClientSession to be used app-wide."""
-    from api.services import redis, http, piston
+    from api.services import redis, http
 
     if http.session is None or http.session.closed:
         http.session = ClientSession()
@@ -57,21 +57,17 @@ async def on_startup():
                 "  > You can launch a local one using `docker compose up redis` and providing the url in env."
             )
 
-    piston.init()
-
 
 @app.on_event("shutdown")
 async def on_shutdown():
     """Closes the app-wide ClientSession"""
-    from api.services import redis, http, piston
+    from api.services import redis, http
 
     if http.session is not None and not http.session.closed:
         await http.session.close()
 
     if redis.pool is not None:
         await redis.pool.close()
-
-    await piston.close()
 
 
 @app.exception_handler(RequestValidationError)

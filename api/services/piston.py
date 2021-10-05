@@ -1,79 +1,61 @@
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
-from aiohttp import ClientSession
+import config
+from api.services import http
 
-__all__ = ("client", "init", "close", "PistonClient", "Runtime")
 
-client: Optional["PistonClient"] = None
+__all__ = ("get_runtimes", "get_runtimes_dict", "get_runtime", "Runtime")
 
 log = logging.getLogger()
 
-
-def init():
-    global client
-
-    if client is None or client.closed:
-        client = PistonClient()
-        log.info("Set Piston client.")
+_base_url: str = config.piston_url()
 
 
-async def close():
-    if client is not None and not client.closed:
-        await client.close()
+async def _make_request(method: str, endpoint: str, data: Any = None) -> Any:
+    async with http.session.request(
+        method,
+        _base_url + endpoint,
+        json=data,
+        raise_for_status=True,
+    ) as response:
+        return await response.json()
 
 
-class PistonClient:
-    base_url: str = "https://emkc.org/api/v2/piston/"
+async def get_runtimes() -> List["Runtime"]:
+    """Get a list of all available runtimes."""
+    runtimes = await _make_request("GET", "runtimes")
+    return [Runtime(runtime) for runtime in runtimes]
 
-    def __init__(self):
-        self._session: ClientSession = ClientSession(raise_for_status=True)
 
-    @property
-    def closed(self) -> bool:
-        return self._session.closed
+async def get_runtimes_dict() -> Dict[str, List["Runtime"]]:
+    """Get a dictionary of language names and aliases mapped to a list of
+    all the runtimes with that name or alias.
+    """
 
-    async def close(self):
-        await self._session.close()
+    runtimes = await get_runtimes()
+    runtimes_dict = {}
 
-    async def _make_request(self, method: str, endpoint: str, data: Any = None) -> Any:
-        async with self._session.request(
-            method, self.base_url + endpoint, json=data
-        ) as response:
-            return await response.json()
+    for runtime in runtimes:
+        if runtime.language in runtimes_dict:
+            runtimes_dict[runtime.language].append(runtime)
+        else:
+            runtimes_dict[runtime.language] = [runtime]
 
-    async def get_runtimes(self) -> List["Runtime"]:
-        """Get a list of all available runtimes."""
-        runtimes = await self._make_request("GET", "runtimes")
-        return [Runtime(runtime) for runtime in runtimes]
-
-    async def get_runtimes_dict(self) -> Dict[str, List["Runtime"]]:
-        """Get a dictionary of language names and aliases mapped to a list of
-        all the runtimes with that name or alias.
-        """
-
-        runtimes = await self.get_runtimes()
-        runtimes_dict = {}
-
-        for runtime in runtimes:
-            if runtime.language in runtimes_dict:
-                runtimes_dict[runtime.language].append(runtime)
+        for alias in runtime.aliases:
+            if alias in runtimes_dict:
+                runtimes_dict[alias].append(runtime)
             else:
-                runtimes_dict[runtime.language] = [runtime]
+                runtimes_dict[alias] = [runtime]
 
-            for alias in runtime.aliases:
-                if alias in runtimes_dict:
-                    runtimes_dict[alias].append(runtime)
-                else:
-                    runtimes_dict[alias] = [runtime]
+    return runtimes_dict
 
-        return runtimes_dict
 
-    async def get_runtime(self, language: str) -> List["Runtime"]:
-        """Get a runtime with a language or an alias."""
+async def get_runtime(language: str) -> List["Runtime"]:
+    """Get a runtime with a language or an alias."""
 
-        runtimes_dict = await self.get_runtimes_dict()
-        return runtimes_dict.get(language, [])
+    runtimes_dict = await get_runtimes_dict()
+    return runtimes_dict.get(language, [])
 
 
 class Runtime:
