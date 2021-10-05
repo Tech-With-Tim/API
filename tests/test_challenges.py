@@ -4,7 +4,7 @@ from httpx import AsyncClient
 
 from api.models import Role, UserRole, ChallengeLanguage
 from api.models.permissions import ManageWeeklyChallengeLanguages
-from api.services import piston as piston_service
+from api.services import piston
 
 
 @pytest.fixture
@@ -24,14 +24,8 @@ async def manage_challenge_languages_role(db):
     await db.execute("DELETE FROM roles WHERE id = $1;", record["id"])
 
 
-@pytest.fixture(scope="session")
-async def piston():
-    piston_service.init()
-    yield piston_service.client
-    await piston_service.close()
-
-
-async def complete_piston_data(piston: piston_service.PistonClient, data: dict):
+async def complete_piston_data(data: dict):
+    """Replace "TO COMPLETE" data with actual data from the Piston API"""
     if (
         data.get("piston_lang") == "TO COMPLETE"
         or data.get("piston_lang_ver") == "TO COMPLETE"
@@ -100,11 +94,10 @@ async def test_challenge_languages_create(
     user,
     token,
     manage_challenge_languages_role,
-    piston: piston_service.PistonClient,
     data,
     status,
 ):
-    await complete_piston_data(piston, data)
+    await complete_piston_data(data)
 
     try:
         await UserRole.create(user.id, manage_challenge_languages_role.id)
@@ -219,13 +212,12 @@ async def test_challenge_language_update(
     user,
     token,
     manage_challenge_languages_role,
-    piston: piston_service.PistonClient,
     request_data,
     new_data,
     status,
 ):
-    await complete_piston_data(piston, request_data)
-    await complete_piston_data(piston, new_data)
+    await complete_piston_data(request_data)
+    await complete_piston_data(new_data)
 
     try:
         await UserRole.create(user.id, manage_challenge_languages_role.id)
@@ -267,3 +259,6 @@ async def test_challenge_language_update(
     finally:
         await UserRole.delete(user.id, manage_challenge_languages_role.id)
         await db.execute("DELETE FROM challengelanguages WHERE id = $1", language.id)
+
+
+# TODO test DELETE /challenges/languages/{id}
