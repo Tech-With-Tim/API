@@ -9,7 +9,7 @@ __all__ = ("get_runtimes", "get_runtimes_dict", "get_runtime", "Runtime")
 
 log = logging.getLogger()
 
-_base_url: str = config.piston_url()
+_base_url: str = config.piston_url().rstrip("/") + "/"  # make sure there's a / at the end
 
 
 async def _make_request(method: str, endpoint: str, data: Any = None) -> Any:
