@@ -24,8 +24,8 @@ async def manage_challenges_role(db):
         "Challenges Manager",
         0x0,
         CreateWeeklyChallenge().value
-        + EditWeeklyChallenge().value
-        + DeleteWeeklyChallenge().value,
+        | EditWeeklyChallenge().value
+        | DeleteWeeklyChallenge().value,
     )
     yield Role(**record)
     await db.execute("DELETE FROM roles WHERE id = $1;", record["id"])
