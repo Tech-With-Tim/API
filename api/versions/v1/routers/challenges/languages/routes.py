@@ -175,12 +175,14 @@ async def delete_language(id: int):
     # language = ChallengeLanguage(**record)
 
     query = """
-        SELECT * FROM challenges WHERE $1 IN language_ids
+        SELECT * FROM challenges WHERE $1 = ANY(language_ids)
     """
     records = await ChallengeLanguage.pool.fetch(query, id)
     if records:
         raise HTTPException(403, "Language used in a challenge")
 
-    await ChallengeLanguage.pool.execute("DELETE FROM challengelanguages WHERE id = $1")
+    await ChallengeLanguage.pool.execute(
+        "DELETE FROM challengelanguages WHERE id = $1", id
+    )
 
     return Response(status_code=204, content="")
