@@ -17,12 +17,12 @@ class DetailedRoleResponse(RoleResponse):
 
 class NewRoleBody(BaseModel):
     name: str = Field(..., min_length=4, max_length=32)
-    color: Optional[Color] = Field(None, le=0xFFFFFF, ge=0)
+    color: Optional[Color] = None
     permissions: Optional[int] = Field(0, ge=0)
 
 
 class UpdateRoleBody(BaseModel):
     name: str = Field("", min_length=4, max_length=32)
-    color: Optional[Color] = Field(None, le=0xFFFFFF, ge=0)
+    color: Optional[Color] = None
     permissions: int = Field(0, ge=0)
     position: int = Field(0, ge=0)
