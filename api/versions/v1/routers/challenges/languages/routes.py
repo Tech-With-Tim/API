@@ -110,7 +110,7 @@ async def create_language(body: NewChallengeLanguageBody):
         204: {"description": "Language Updated Successfully"},
         401: {"description": "Unauthorized"},
         403: {"description": "Missing Permissions"},
-        404: {"description": "Language, piston language or version not found"},
+        404: {"description": "Piston language or version not found"},
         409: {"description": "Language with that name already exists"},
     },
     status_code=204,
@@ -128,14 +128,6 @@ async def update_language(id: int, body: UpdateChallengeLanguageBody):
     language = ChallengeLanguage(**record)
     data = body.dict(exclude_unset=True)
 
-    if name := data.get("name", None):
-        record = await ChallengeLanguage.pool.fetchrow(
-            "SELECT * FROM challengelanguages WHERE name = $1", name
-        )
-
-        if record:
-            raise HTTPException(409, "Language with that name already exists")
-
     if "piston_lang" in data or "piston_lang_ver" in data:
         await check_piston_language_version(
             data.get("piston_lang", language.piston_lang),
@@ -147,7 +139,10 @@ async def update_language(id: int, body: UpdateChallengeLanguageBody):
         query += ", ".join(f"{key} = ${i}" for i, key in enumerate(data, 2))
         query += " WHERE id = $1"
 
-        await ChallengeLanguage.pool.execute(query, id, *data.values())
+        try:
+            await ChallengeLanguage.pool.execute(query, id, *data.values())
+        except asyncpg.exceptions.UniqueViolationError:
+            raise HTTPException(409, "Language with that name already exists")
 
     return Response(status_code=204, content="")
 
