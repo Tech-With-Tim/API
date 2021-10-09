@@ -87,11 +87,6 @@ def test_redis_uri() -> typing.Optional[str]:
     return value
 
 
-def piston_url() -> typing.Optional[str]:
+def piston_url() -> str:
     """URL of the Piston API."""
-    value = os.environ.get("PISTON_URL", "https://emkc.org/api/v2/piston/")
-
-    if not value:
-        log.warning('Optional environment variable "PISTON_URL" is missing')
-
-    return value
+    return os.environ.get("PISTON_URL", "https://emkc.org/api/v2/piston/")
