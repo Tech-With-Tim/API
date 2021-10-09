@@ -29,8 +29,8 @@ async def fetch_all_languages():
     query = """
         SELECT *,
                l.id::TEXT
-        FROM challengelanguages l
-        ORDER BY name
+          FROM challengelanguages l
+         ORDER BY name
     """
     records = await ChallengeLanguage.pool.fetch(query)
 
@@ -51,8 +51,8 @@ async def fetch_language(id: int):
     query = """
         SELECT *,
                l.id::TEXT
-        FROM challengelanguages l
-        WHERE l.id = $1
+          FROM challengelanguages l
+         WHERE l.id = $1
     """
     record = await ChallengeLanguage.pool.fetchrow(query, id)
 
