@@ -391,3 +391,4 @@ async def test_update_role_positions_down(
         )
         for role in roles:
             await db.execute("DELETE FROM roles WHERE id = $1", role.id)
+
