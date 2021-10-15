@@ -26,3 +26,4 @@ class UpdateRoleBody(BaseModel):
     color: Optional[Color] = None
     permissions: int = Field(0, ge=0)
     position: int = Field(0, ge=0)
+
