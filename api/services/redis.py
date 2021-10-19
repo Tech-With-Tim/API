@@ -6,6 +6,8 @@ import logging
 import json
 
 
+__all__ = ("pool",)
+
 log = logging.getLogger(__name__)
 
 
@@ -22,6 +24,3 @@ async def dispatch(channel: ChannelT, message: Union[EncodableT, list, dict]) ->
 
 
 pool: Optional[Union[FakeRedis, Redis]] = None
-
-
-__all__ = (pool,)

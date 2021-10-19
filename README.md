@@ -72,6 +72,8 @@ pipenv install --dev
 
 ### Environment variables
 
+#### Required
+
 Start by writing this in a file named `.env`:
 
 ```prolog
@@ -85,14 +87,21 @@ DISCORD_CLIENT_SECRET=
 And fill in the variables with the values below:
 
 - `REDIS_URI` is the Redis server URI.
-- `POSTGRES_URI` is the PostgreSQL database URI.
 - `SECRET_KEY` is the key used for JWT token encoding.
-- `TEST_REDIS_URU` is the Connection URI for Redis testing server.
-- `TEST_POSTGRES_URI` is the PostgreSQL database URI for tests.
+- `POSTGRES_URI` is the PostgreSQL database URI.
 - `DISCORD_CLIENT_ID` is the Discord application ID. Copy it from your Discord application page (see below).
 - `DISCORD_CLIENT_SECRET` is the Discord application secret. Copy it from your Discord application page (see below).
 
 ![Client ID and secret](https://cdn.discordapp.com/attachments/721750194797936823/794646777840140298/unknown.png)
+
+#### Optional
+
+For testing you need to add these environment variables:
+
+- `TEST_REDIS_URI` is the Connection URI for Redis testing server.
+- `TEST_POSTGRES_URI` is the PostgreSQL database URI for tests.
+
+If you are self hosting the Piston API, you need to set the `PISTON_URL` environment variable.
 
 ### Running
 

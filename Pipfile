@@ -15,7 +15,7 @@ pytest-asyncio = "*"
 [packages]
 pyjwt = "*"
 postdb = "*"
-aiohttp = "*"
+aiohttp = "~=3.7"
 fastapi = "*"
 aioredis = "*"
 fakeredis = "*"
