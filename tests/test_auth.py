@@ -32,9 +32,9 @@ async def test_redirect_invalid_callback(app: AsyncClient, callback, status):
 
 @pytest.mark.asyncio
 async def test_redirect_valid_callback_url(app: AsyncClient):
-    res = await app.get("/api/v1/auth/discord/redirect?callback=https://twt.gg")
+    res = await app.get("/api/v1/auth/discord/redirect?callback=https://twtcodejam.net")
     assert str(res.url) == get_redirect(
-        callback="https://twt.gg",
+        callback="https://twtcodejam.net",
         scopes=SCOPES,
     )
 
@@ -48,7 +48,7 @@ async def test_callback_discord_error(app: AsyncClient, mocker: MockerFixture):
 
     res = await app.post(
         "/api/v1/auth/discord/callback",
-        json={"code": "okand", "callback": "https://twt.gg"},
+        json={"code": "okand", "callback": "https://twtcodejam.net"},
     )
 
     assert res.status_code == 502
@@ -62,7 +62,7 @@ async def test_callback_invalid_code(app: AsyncClient, mocker: MockerFixture):
     mocker.patch("api.versions.v1.routers.auth.routes.exchange_code", new=exchange_code)
     res = await app.post(
         "/api/v1/auth/discord/callback",
-        json={"code": "okand", "callback": "https://twt.gg"},
+        json={"code": "okand", "callback": "https://twtcodejam.net"},
     )
 
     assert res.json() == {
@@ -95,7 +95,7 @@ async def test_callback_success(app: AsyncClient, db, mocker: MockerFixture):
 
     res = await app.post(
         "/api/v1/auth/discord/callback",
-        json={"code": "okand", "callback": "https://twt.gg"},
+        json={"code": "okand", "callback": "https://twtcodejam.net"},
     )
 
     assert res.status_code == 200

@@ -65,3 +65,36 @@ def test_postgres_uri() -> typing.Optional[str]:
         log.warning('Optional environment variable "TEST_POSTGRES_URI" is missing')
 
     return value
+
+
+def redis_uri() -> typing.Optional[str]:
+    """Connection URI for Redis server."""
+    value = os.environ.get("REDIS_URI")
+
+    if not value:
+        log.warning('Optional environment variable "REDIS_URI" is missing')
+
+    return value
+
+
+def test_redis_uri() -> typing.Optional[str]:
+    """Connection URI for Redis testing server."""
+    value = os.environ.get("TEST_REDIS_URI")
+
+    if not value:
+        log.warning('Optional environment variable "TEST_REDIS_URI" is missing')
+
+    return value
+
+
+def piston_url() -> str:
+    """URL of the Piston API."""
+    default = "https://emkc.org/api/v2/piston/"
+    value = os.environ.get("PISTON_URL")
+
+    if not value:
+        log.info(
+            f'Optional environment variable "PISTON_URL" is missing, defaults to {default}'
+        )
+
+    return value or default
