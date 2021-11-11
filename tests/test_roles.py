@@ -27,7 +27,7 @@ async def manage_roles_role(db):
         ({}, 422),
         ({"name": ""}, 422),
         ({"permissions": -1}, 422),
-        ({"name": "test1", "color": "0x000000"}, 422),
+        ({"name": "test1", "color": "0xffffff"}, 422),
         ({"name": "test1", "color": "-0x000001"}, 422),
         ({"name": "test2", "color": "0x000000", "permissions": 8}, 403),
         ({"name": "test2", "color": "0x000000", "permissions": 0}, 201),
