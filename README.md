@@ -72,28 +72,47 @@ pipenv install --dev
 
 ### Environment variables
 
-Set the environment variables. Start by writing this in a file named `local.env`:
+#### Required
+
+Start by writing this in a file named `.env`:
 
 ```prolog
-SECRET_KEY=some_random_characters_here
-DB_URI=postgresql://user:password@db:5432/twt
+REDIS_URI=
+SECRET_KEY=
+POSTGRES_URI=
 DISCORD_CLIENT_ID=
 DISCORD_CLIENT_SECRET=
 ```
 
 And fill in the variables with the values below:
 
-- `POSTGRES_URI` is the PostgreSQL database URI.
+- `REDIS_URI` is the Redis server URI.
 - `SECRET_KEY` is the key used for JWT token encoding.
-- `TEST_POSTGRES_URI` is the PostgreSQL database URI for tests.
+- `POSTGRES_URI` is the PostgreSQL database URI.
 - `DISCORD_CLIENT_ID` is the Discord application ID. Copy it from your Discord application page (see below).
 - `DISCORD_CLIENT_SECRET` is the Discord application secret. Copy it from your Discord application page (see below).
 
 ![Client ID and secret](https://cdn.discordapp.com/attachments/721750194797936823/794646777840140298/unknown.png)
 
+#### Optional
+
+For testing you need to add these environment variables:
+
+- `TEST_REDIS_URI` is the Connection URI for Redis testing server.
+- `TEST_POSTGRES_URI` is the PostgreSQL database URI for tests.
+
+If you are self hosting the Piston API, you need to set the `PISTON_URL` environment variable.
+
 ### Running
 
 Run the API and initialise the database:
+
+#### Make sure submodules are up to date.
+> If you have not initialized submodules use this command:\
+> `git submodule update --init`
+>
+> To update submodules:\
+> `git submodule foreach git pull`
 
 ```sh
 pipenv run python launch.py runserver --initdb
