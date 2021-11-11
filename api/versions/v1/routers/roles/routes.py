@@ -93,7 +93,7 @@ async def create_role(body: NewRoleBody, roles=has_permissions([ManageRoles()]))
 
     try:
         record = await Role.pool.fetchrow(
-            query, body.name, body.color, body.permissions
+            query, body.name, int(body.color.as_hex()[1:], 16), body.permissions
         )
     except asyncpg.exceptions.UniqueViolationError:
         raise HTTPException(409, "Role with that name already exists")
