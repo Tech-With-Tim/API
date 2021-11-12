@@ -61,7 +61,10 @@ async def fetch_role(id: int):
     if not record:
         raise HTTPException(404, "Role not found")
 
-    return dict(record)
+    record = dict(record)
+    if record["color"]:
+        record["color"] = int(record["color"].as_hex()[1:], 16)
+    return record
 
 
 @router.post(
@@ -118,8 +121,9 @@ async def update_role(
     body: UpdateRoleBody,
     roles=has_permissions([ManageRoles()]),
 ):
+    if body.color:
+        body.color = int(body.color.as_hex()[1:], 16)
 
-    body.color = int(body.color.as_hex()[1:], 16)
     role = await Role.fetch(id)
     if not role:
         raise HTTPException(404, "Role Not Found")
@@ -174,7 +178,7 @@ async def update_role(
         await Role.pool.execute(query)
 
     if data:
-        query = "UPDATE ROLES SET "
+        query = "UPDATE ROLESre SET "
         query += ", ".join("%s = $%d" % (key, i) for i, key in enumerate(data, 2))
         query += " WHERE id = $1"
 
