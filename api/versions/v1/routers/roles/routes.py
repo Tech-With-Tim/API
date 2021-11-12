@@ -178,7 +178,7 @@ async def update_role(
         await Role.pool.execute(query)
 
     if data:
-        query = "UPDATE ROLESre SET "
+        query = "UPDATE ROLES SET "
         query += ", ".join("%s = $%d" % (key, i) for i, key in enumerate(data, 2))
         query += " WHERE id = $1"
 
