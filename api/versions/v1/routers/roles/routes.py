@@ -118,6 +118,8 @@ async def update_role(
     body: UpdateRoleBody,
     roles=has_permissions([ManageRoles()]),
 ):
+
+    body.color = int(body.color.as_hex()[1:], 16)
     role = await Role.fetch(id)
     if not role:
         raise HTTPException(404, "Role Not Found")

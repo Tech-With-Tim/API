@@ -13,7 +13,7 @@ async def manage_roles_role(db):
             RETURNING *;
     """
     record = await Role.pool.fetchrow(
-        query, "Roles Manager", "0x000", ManageRoles().value
+        query, "Roles Manager", 0x000, ManageRoles().value
     )
     yield Role(**record)
     await db.execute("DELETE FROM roles WHERE id = $1;", record["id"])
@@ -32,6 +32,8 @@ async def manage_roles_role(db):
         ({"name": "test2", "color": "0x000000", "permissions": 8}, 403),
         ({"name": "test2", "color": "0x000000", "permissions": 0}, 201),
         ({"name": "test2", "color": "0x000000", "permissions": 0}, 409),
+        ({"name": "test3", "color": "black", "permissions": 0}, 201),
+        ({"name": "test4", "color": "#bafc03", "permissions": 0}, 201),
     ],
 )
 async def test_role_create(
@@ -91,6 +93,11 @@ async def test_fetch_all_roles(app: AsyncClient):
         (
             {"color": "0x005", "permissions": 8},
             {"name": "test update", "permissions": 0, "color": "0x000"},
+            403,
+        ),
+        (
+            {"color": "black", "permissions": 8},
+            {"name": "test update", "permissions": 0, "color": "#bafc03"},
             403,
         ),
         (
