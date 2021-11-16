@@ -136,6 +136,7 @@ async def test_role_update(
         data = role.as_dict()
         data.pop("id")
         data.pop("position")
+        print(data.color)
 
         assert data == new_data
     finally:
