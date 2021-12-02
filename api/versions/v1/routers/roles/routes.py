@@ -61,7 +61,9 @@ async def fetch_role(id: int):
     if not record:
         raise HTTPException(404, "Role not found")
 
-    return dict(record)
+    record = dict(record)
+
+    return record
 
 
 @router.post(
@@ -93,7 +95,7 @@ async def create_role(body: NewRoleBody, roles=has_permissions([ManageRoles()]))
 
     try:
         record = await Role.pool.fetchrow(
-            query, body.name, body.color, body.permissions
+            query, body.name, int(body.color.as_hex()[1:], 16), body.permissions
         )
     except asyncpg.exceptions.UniqueViolationError:
         raise HTTPException(409, "Role with that name already exists")
@@ -118,6 +120,9 @@ async def update_role(
     body: UpdateRoleBody,
     roles=has_permissions([ManageRoles()]),
 ):
+    if body.color:
+        body.color = int(body.color.as_hex()[1:], 16)
+
     role = await Role.fetch(id)
     if not role:
         raise HTTPException(404, "Role Not Found")

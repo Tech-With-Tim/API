@@ -1,5 +1,4 @@
 import pytest
-
 from httpx import AsyncClient
 
 from api.models import Role, UserRole
@@ -13,7 +12,9 @@ async def manage_roles_role(db):
             VALUES (create_snowflake(), $1, $2, $3, (SELECT COUNT(*) FROM roles) + 1)
             RETURNING *;
     """
-    record = await Role.pool.fetchrow(query, "Roles Manager", 0x0, ManageRoles().value)
+    record = await Role.pool.fetchrow(
+        query, "Roles Manager", 0x000, ManageRoles().value
+    )
     yield Role(**record)
     await db.execute("DELETE FROM roles WHERE id = $1;", record["id"])
 
@@ -26,11 +27,13 @@ async def manage_roles_role(db):
         ({}, 422),
         ({"name": ""}, 422),
         ({"permissions": -1}, 422),
-        ({"name": "test1", "color": 0xFFFFFFF}, 422),
-        ({"name": "test1", "color": -0x000001}, 422),
-        ({"name": "test2", "color": 0x000000, "permissions": 8}, 403),
-        ({"name": "test2", "color": 0x000000, "permissions": 0}, 201),
-        ({"name": "test2", "color": 0x000000, "permissions": 0}, 409),
+        ({"name": "test1", "color": "0xffffff"}, 422),
+        ({"name": "test1", "color": "-0x000001"}, 422),
+        ({"name": "test2", "color": "0x000000", "permissions": 8}, 403),
+        ({"name": "test2", "color": "0x000000", "permissions": 0}, 201),
+        ({"name": "test2", "color": "0x000000", "permissions": 0}, 409),
+        ({"name": "test3", "color": "black", "permissions": 0}, 201),
+        ({"name": "test4", "color": "#bafc03", "permissions": 0}, 201),
     ],
 )
 async def test_role_create(
@@ -66,31 +69,44 @@ async def test_fetch_all_roles(app: AsyncClient):
 @pytest.mark.parametrize(
     ("request_data", "new_data", "status"),
     [
-        ({}, {"name": "test update", "permissions": 0, "color": 0}, 204),
-        ({"name": ""}, {"name": "test update", "permissions": 0, "color": 0}, 422),
+        ({}, {"name": "test update", "permissions": 0, "color": "0x000"}, 204),
+        (
+            {"name": ""},
+            {"name": "test update", "permissions": 0, "color": "0x000"},
+            422,
+        ),
         (
             {"permissions": -1},
-            {"name": "test update", "permissions": 0, "color": 0},
+            {"name": "test update", "permissions": 0, "color": "0x000"},
             422,
         ),
         (
-            {"color": 0xFFFFFFF},
-            {"name": "test update", "permissions": 0, "color": 0},
+            {"color": "0xffffff"},
+            {"name": "test update", "permissions": 0, "color": "0x000"},
             422,
         ),
         (
-            {"color": -0x000001},
-            {"name": "test update", "permissions": 0, "color": 0},
+            {"color": "-0x000001"},
+            {"name": "test update", "permissions": 0, "color": "0x000"},
             422,
         ),
         (
-            {"color": 0x5, "permissions": 8},
-            {"name": "test update", "permissions": 0, "color": 0x0},
+            {"color": "0x005", "permissions": 8},
+            {"name": "test update", "permissions": 0, "color": "0x000"},
             403,
         ),
         (
-            {"color": 0x5, "permissions": ManageRoles().value},
-            {"name": "test update", "permissions": ManageRoles().value, "color": 0x5},
+            {"color": "black", "permissions": 8},
+            {"name": "test update", "permissions": 0, "color": "#bafc03"},
+            403,
+        ),
+        (
+            {"color": "0x005", "permissions": ManageRoles().value},
+            {
+                "name": "test update",
+                "permissions": ManageRoles().value,
+                "color": "0x005",
+            },
             204,
         ),
     ],
