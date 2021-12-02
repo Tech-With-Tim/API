@@ -62,8 +62,7 @@ async def fetch_role(id: int):
         raise HTTPException(404, "Role not found")
 
     record = dict(record)
-    if record["color"]:
-        record["color"] = int(record["color"].as_hex()[1:], 16)
+
     return record
 
 
