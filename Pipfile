@@ -5,7 +5,7 @@ verify_ssl = true
 
 [dev-packages]
 black = "*"
-httpx = "~=0.19"
+httpx = "~=0.23"
 pytest = "*"
 flake8 = "*"
 pre-commit = "*"
